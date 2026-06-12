@@ -12,6 +12,9 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <style>
     :root, [data-theme="light"] {
       color-scheme: light;
@@ -32,11 +35,13 @@
       --font: "Noto Sans SC", "Plus Jakarta Sans", system-ui, sans-serif;
       --heading: "Plus Jakarta Sans", "Noto Sans SC", sans-serif;
       --mono: "JetBrains Mono", ui-monospace, monospace;
-      --cell-size: 20px;
-      --cell-gap: 4px;
-      --cell-size-attn: 32px;
-      --cell-gap-attn: 6px;
+      --cell-size: 24px;
+      --cell-gap: 5px;
+      --cell-size-attn: 38px;
+      --cell-gap-attn: 7px;
+      --viz-diagram-max-scale: 1.12;
       --layout-max: 1480px;
+      --explain-col: 420px;
 
       --c-input: #2563eb;
       --c-query: #9333ea;
@@ -246,17 +251,110 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s;
-      padding: 0.4rem 0.75rem;
+      padding: 0.4rem 0.65rem 0.4rem 0.5rem;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
+    .chapter-pill-num {
+      flex-shrink: 0;
+      width: 1.45rem;
+      height: 1.45rem;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.72rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .chapter-pill-label { line-height: 1.2; }
     .chapter-pill:hover { border-color: var(--primary-border); color: var(--primary-text); }
-    .chapter-pill.active {
+    .chapter-pill.active { box-shadow: 0 0 0 2px var(--chapter-glow, var(--success-glow)); }
+    .chapter-pill.done .chapter-pill-num { opacity: 0.9; }
+    .chapter-pill[data-chapter-theme="overview"].active,
+    .chapter-pill[data-chapter-theme="overview"].done {
+      border-color: var(--primary-border);
+      background: var(--primary-soft);
+      color: var(--primary-text);
+      --chapter-glow: rgba(79, 70, 229, 0.2);
+    }
+    .chapter-pill[data-chapter-theme="overview"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="overview"].done .chapter-pill-num {
+      background: var(--primary-soft);
+      border-color: var(--primary-border);
+      color: var(--primary-text);
+    }
+    .chapter-pill[data-chapter-theme="la"].active,
+    .chapter-pill[data-chapter-theme="la"].done {
+      border-color: rgba(37, 99, 235, 0.4);
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--c-input);
+      --chapter-glow: rgba(59, 130, 246, 0.22);
+    }
+    .chapter-pill[data-chapter-theme="la"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="la"].done .chapter-pill-num {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(37, 99, 235, 0.35);
+      color: var(--c-input);
+    }
+    .chapter-pill[data-chapter-theme="embed"].active,
+    .chapter-pill[data-chapter-theme="embed"].done {
+      border-color: rgba(8, 145, 178, 0.4);
+      background: rgba(8, 145, 178, 0.1);
+      color: var(--c-key);
+      --chapter-glow: rgba(8, 145, 178, 0.2);
+    }
+    .chapter-pill[data-chapter-theme="embed"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="embed"].done .chapter-pill-num {
+      background: rgba(8, 145, 178, 0.15);
+      border-color: rgba(8, 145, 178, 0.35);
+      color: var(--c-key);
+    }
+    .chapter-pill[data-chapter-theme="attn"].active,
+    .chapter-pill[data-chapter-theme="attn"].done {
+      border-color: rgba(147, 51, 234, 0.4);
+      background: rgba(147, 51, 234, 0.1);
+      color: var(--c-query);
+      --chapter-glow: rgba(147, 51, 234, 0.2);
+    }
+    .chapter-pill[data-chapter-theme="attn"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="attn"].done .chapter-pill-num {
+      background: rgba(147, 51, 234, 0.15);
+      border-color: rgba(147, 51, 234, 0.35);
+      color: var(--c-query);
+    }
+    .chapter-pill[data-chapter-theme="block"].active,
+    .chapter-pill[data-chapter-theme="block"].done {
+      border-color: rgba(202, 138, 4, 0.45);
+      background: rgba(234, 179, 8, 0.12);
+      color: var(--c-ffn);
+      --chapter-glow: rgba(234, 179, 8, 0.22);
+    }
+    .chapter-pill[data-chapter-theme="block"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="block"].done .chapter-pill-num {
+      background: rgba(234, 179, 8, 0.18);
+      border-color: rgba(202, 138, 4, 0.4);
+      color: var(--c-ffn);
+    }
+    .chapter-pill[data-chapter-theme="kv"].active,
+    .chapter-pill[data-chapter-theme="kv"].done {
       border-color: var(--success-border);
       background: var(--success-bg);
       color: var(--success);
-      box-shadow: 0 0 0 2px var(--success-glow);
+      --chapter-glow: var(--success-glow);
     }
-    .chapter-pill.done { color: var(--success); opacity: 0.85; }
+    .chapter-pill[data-chapter-theme="kv"].active .chapter-pill-num,
+    .chapter-pill[data-chapter-theme="kv"].done .chapter-pill-num {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success);
+    }
     @media (max-width: 720px) {
       .doc-title { display: none; }
       .chapter-pill { font-size: 0.74rem; padding: 0.35rem 0.6rem; }
@@ -333,16 +431,22 @@
     .layout {
       flex: 1;
       min-height: 0;
-      max-width: var(--layout-max);
+      max-width: none;
       width: 100%;
-      margin: 0 auto;
-      padding: 0.5rem 0.85rem 0;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
     @media (min-width: 1024px) {
-      .layout { padding: 0.65rem 1.25rem 0; }
+      :root { --explain-col: 480px; }
+    }
+    @media (min-width: 1280px) {
+      :root { --explain-col: 520px; }
+    }
+    @media (min-width: 1600px) {
+      :root { --explain-col: 560px; }
     }
 
     .panel {
@@ -363,7 +467,9 @@
       min-height: auto;
       height: auto;
       overflow: visible;
-      padding-bottom: 0.75rem;
+      width: 100%;
+      padding: 0 0 0.5rem;
+      box-sizing: border-box;
     }
     #panel-overview .panel-head { display: none; }
 
@@ -392,32 +498,40 @@
     }
     .panel-tip svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 0.1rem; color: var(--primary-text); }
 
-    /* ── 全局概览页：纵向一屏铺满 ── */
+    /* ── 全局概览页：纵向分区，全宽铺满 ── */
     .overview-shell {
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: clamp(0.45rem, 1.1vh, 0.7rem);
+      gap: 0;
       overflow: visible;
+      width: 100%;
+    }
+    .overview-mid {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
     }
     .overview-intro {
       flex-shrink: 0;
-      padding: 0.55rem 0.85rem;
-      border-radius: 12px;
+      padding: 1.15rem 1.65rem;
+      border-radius: 0;
       background: var(--bg-panel);
-      border: 1px solid var(--border);
+      border: none;
+      border-bottom: 1px solid var(--border);
     }
     .overview-intro h2 {
       font-family: var(--heading);
-      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-size: clamp(1.2rem, 2.3vw, 1.55rem);
       font-weight: 800;
       margin: 0 0 0.25rem;
       line-height: 1.3;
     }
     .overview-intro p {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       color: var(--muted);
       line-height: 1.45;
     }
@@ -425,16 +539,20 @@
 
     .overview-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.55rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
       margin: 0;
       flex-shrink: 0;
+      padding: 1rem 1.65rem;
+      box-sizing: border-box;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
     }
     .overview-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 0.7rem 0.85rem;
+      padding: 1rem 1.15rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -446,23 +564,23 @@
       box-shadow: var(--card-hover-shadow);
     }
     .overview-card-icon {
-      width: 2.25rem; height: 2.25rem;
-      border-radius: 9px;
+      width: 2.6rem; height: 2.6rem;
+      border-radius: 10px;
       display: grid; place-items: center;
-      margin-bottom: 0.45rem;
+      margin-bottom: 0.55rem;
       flex-shrink: 0;
     }
-    .overview-card-icon svg { width: 18px; height: 18px; }
+    .overview-card-icon svg { width: 22px; height: 22px; }
     .overview-card h3 {
       font-family: var(--heading);
-      font-size: 0.85rem;
+      font-size: 0.98rem;
       font-weight: 700;
       margin: 0 0 0.2rem;
       line-height: 1.3;
     }
     .overview-card p {
       margin: 0;
-      font-size: 0.74rem;
+      font-size: 0.86rem;
       color: var(--muted);
       line-height: 1.4;
     }
@@ -470,89 +588,99 @@
     .big-picture {
       flex: 0 0 auto;
       background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      padding: 1.15rem 1.65rem 1.25rem;
       margin: 0;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       overflow: visible;
+      box-sizing: border-box;
     }
     .big-picture h3 {
       font-family: var(--heading);
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      margin: 0 0 0.55rem;
+      margin: 0 0 0.65rem;
       text-align: center;
       flex-shrink: 0;
     }
     .flow-pipeline {
       display: flex;
       align-items: stretch;
-      justify-content: center;
-      gap: 0;
-      overflow: hidden;
-      padding: 0;
+      justify-content: stretch;
+      gap: 0.5rem;
+      width: 100%;
+      overflow: visible;
+      padding: 0.15rem 0;
+      box-sizing: border-box;
     }
     .flow-stage {
       flex: 1 1 0;
       min-width: 0;
-      max-width: 140px;
+      max-width: none;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       position: relative;
+      padding: 0 0.25rem;
     }
     .flow-stage:not(:last-child)::after {
       content: '';
       position: absolute;
-      right: -8px;
-      top: 1.5rem;
-      width: 16px;
+      right: 0;
+      top: clamp(1.55rem, 3.4vw, 1.85rem);
+      width: 0.45rem;
       height: 2px;
-      background: linear-gradient(90deg, rgba(99,102,241,0.5), rgba(34,197,94,0.5));
+      transform: translateX(50%);
+      background: linear-gradient(90deg, rgba(99,102,241,0.55), rgba(34,197,94,0.55));
+      pointer-events: none;
     }
     .flow-stage-icon {
-      width: 2.75rem; height: 2.75rem;
-      border-radius: 11px;
+      width: clamp(3.1rem, 4.6vw, 3.75rem);
+      height: clamp(3.1rem, 4.6vw, 3.75rem);
+      border-radius: 12px;
       display: grid; place-items: center;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.55rem;
       border: 1px solid var(--border);
     }
-    .flow-stage-icon svg { width: 22px; height: 22px; }
+    .flow-stage-icon svg { width: clamp(24px, 2.6vw, 30px); height: clamp(24px, 2.6vw, 30px); }
     .flow-stage-title {
-      font-size: 0.8rem;
+      font-size: clamp(0.9rem, 1.25vw, 1.05rem);
       font-weight: 700;
-      margin-bottom: 0.12rem;
+      margin-bottom: 0.2rem;
     }
     .flow-stage-desc {
-      font-size: 0.68rem;
+      font-size: clamp(0.76rem, 1.1vw, 0.88rem);
       color: var(--muted);
       line-height: 1.35;
-      padding: 0 0.1rem;
+      padding: 0 0.15rem;
     }
 
     .overview-formula {
       flex-shrink: 0;
       margin: 0;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
+      padding: 1.15rem 1.65rem;
+      border-radius: 0;
       background: linear-gradient(135deg, var(--primary-soft), var(--success-bg));
-      border: 1px solid var(--primary-border);
+      border: none;
+      border-bottom: 1px solid var(--primary-border);
       text-align: center;
+      box-sizing: border-box;
     }
     .of-label {
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       color: var(--primary-text);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
     }
     .of-main {
       font-family: var(--mono);
-      font-size: clamp(0.82rem, 1.5vh, 1rem);
+      font-size: clamp(0.95rem, 1.7vh, 1.15rem);
       font-weight: 600;
       color: var(--fg);
       line-height: 1.5;
@@ -567,20 +695,20 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.35rem 0.65rem;
-      margin-top: 0.4rem;
-      font-size: 0.68rem;
+      gap: 0.4rem 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
       color: var(--muted);
     }
     .of-steps span {
-      padding: 0.15rem 0.45rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 6px;
       background: var(--bg-panel);
       border: 1px solid var(--border);
     }
     .of-legend {
-      margin-top: 0.55rem;
-      font-size: 0.72rem;
+      margin-top: 0.65rem;
+      font-size: 0.82rem;
       color: var(--muted);
       text-align: center;
       line-height: 1.5;
@@ -591,21 +719,23 @@
       display: flex;
       flex-direction: column;
       background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem 0.95rem 0.85rem;
-      gap: 0.55rem;
+      border: none;
+      border-top: 1px solid var(--border);
+      border-radius: 0;
+      padding: 1.15rem 1.65rem 1.4rem;
+      gap: 0.75rem;
+      box-sizing: border-box;
     }
     .overview-glossary h3 {
       font-family: var(--heading);
-      font-size: 0.88rem;
+      font-size: 1rem;
       font-weight: 700;
       margin: 0;
       color: var(--fg);
       text-align: left;
     }
     .glossary-hint-bar {
-      font-size: 0.74rem;
+      font-size: 0.85rem;
       color: var(--muted);
       margin: 0;
       line-height: 1.45;
@@ -622,7 +752,7 @@
     }
     .glossary-group-label {
       font-family: var(--heading);
-      font-size: 0.68rem;
+      font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -632,7 +762,7 @@
     .glossary-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.45rem;
+      gap: 0.5rem;
       align-items: flex-start;
     }
     .glossary-term {
@@ -641,8 +771,8 @@
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
-      gap: 0.35rem;
-      padding: 0.42rem 0.72rem;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 999px;
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -688,12 +818,12 @@
     .glossary-term.gt-yellow:hover, .glossary-term.gt-yellow.is-active { border-color: rgba(202,138,4,0.35); }
     .gt-name {
       font-family: var(--heading);
-      font-size: 0.8rem;
+      font-size: 0.92rem;
       font-weight: 700;
       line-height: 1.2;
     }
     .gt-zh {
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       color: var(--muted);
       line-height: 1.2;
       font-weight: 500;
@@ -710,7 +840,7 @@
       max-width: 100%;
     }
     .glossary-term.gt-wide .gt-name {
-      font-size: 0.76rem;
+      font-size: 0.88rem;
     }
     .gt-blue .gt-name { color: #2563eb; }
     .gt-purple .gt-name { color: #9333ea; }
@@ -725,12 +855,12 @@
 
     .glossary-detail {
       flex-shrink: 0;
-      margin-top: 0.15rem;
-      padding: 0.75rem 0.9rem;
+      margin-top: 0.2rem;
+      padding: 0.85rem 1rem;
       border-radius: 10px;
       background: var(--bg-elevated);
       border: 1px solid var(--border);
-      min-height: 4.75rem;
+      min-height: 5.25rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -750,13 +880,13 @@
     }
     .gd-title {
       font-family: var(--heading);
-      font-size: 0.88rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--fg);
       margin: 0;
     }
     .gd-chapter {
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--success);
       background: var(--bg-panel);
@@ -770,14 +900,14 @@
     .gd-chapter:hover { background: var(--success-bg); }
     .gd-body {
       margin: 0;
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       color: var(--muted);
       line-height: 1.55;
     }
     .gd-body strong { color: var(--fg); font-weight: 600; }
     .gd-example {
       margin: 0;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       color: var(--primary-text);
       font-family: var(--mono);
       line-height: 1.45;
@@ -788,40 +918,88 @@
     }
     .gd-placeholder {
       margin: 0;
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       color: var(--muted);
       text-align: center;
       line-height: 1.5;
     }
 
+    @media (min-width: 1024px) {
+      .overview-mid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+        align-items: stretch;
+      }
+      .overview-mid .big-picture {
+        border-right: 1px solid var(--border);
+        border-bottom: none;
+      }
+      .overview-mid .overview-formula {
+        border-bottom: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100%;
+      }
+    }
+    @media (min-width: 1100px) {
+      .glossary-scroll {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem 1.5rem;
+        align-items: start;
+      }
+      .glossary-group + .glossary-group {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
+    }
     @media (max-width: 768px) {
+      .overview-intro,
+      .big-picture,
+      .overview-formula,
+      .overview-grid,
+      .overview-glossary { padding-left: 1rem; padding-right: 1rem; }
       .overview-grid { grid-template-columns: 1fr; }
-      .flow-pipeline { overflow-x: auto; justify-content: flex-start; }
-      .flow-stage { flex: 0 0 100px; max-width: none; }
+      .flow-pipeline {
+        overflow-x: auto;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        padding-bottom: 0.35rem;
+      }
+      .flow-stage { flex: 0 0 6.25rem; min-width: 6.25rem; }
       .glossary-chips { gap: 0.4rem; }
       .glossary-term { padding: 0.38rem 0.62rem; }
     }
     @media (max-height: 720px) {
-      .overview-intro { padding: 0.45rem 0.65rem; }
-      .overview-intro h2 { font-size: 1rem; }
-      .overview-card { padding: 0.5rem 0.65rem; }
-      .overview-card p { font-size: 0.68rem; }
-      .flow-stage-icon { width: 2.35rem; height: 2.35rem; }
-      .flow-stage-desc { font-size: 0.62rem; }
-      .overview-formula { margin-top: 0.4rem; padding: 0.45rem 0.6rem; }
-      .of-main { font-size: 0.72rem; }
-      .of-steps { font-size: 0.62rem; gap: 0.25rem 0.4rem; }
-      .glossary-term { padding: 0.34rem 0.58rem; }
-      .gt-name { font-size: 0.74rem; }
-      .gt-zh { font-size: 0.68rem; }
-      .glossary-detail { min-height: 3.75rem; padding: 0.5rem 0.65rem; }
-      .gd-body { font-size: 0.72rem; }
+      .overview-intro { padding: 0.65rem 0.85rem; }
+      .overview-intro h2 { font-size: 1.1rem; }
+      .overview-card { padding: 0.65rem 0.8rem; }
+      .overview-card p { font-size: 0.78rem; }
+      .flow-stage-icon { width: 2.65rem; height: 2.65rem; }
+      .flow-stage-desc { font-size: 0.72rem; }
+      .overview-formula { margin-top: 0.45rem; padding: 0.6rem 0.75rem; }
+      .of-main { font-size: 0.82rem; }
+      .of-steps { font-size: 0.72rem; gap: 0.3rem 0.5rem; }
+      .glossary-term { padding: 0.42rem 0.68rem; }
+      .gt-name { font-size: 0.84rem; }
+      .gt-zh { font-size: 0.76rem; }
+      .glossary-detail { min-height: 4.25rem; padding: 0.6rem 0.75rem; }
+      .gd-body { font-size: 0.8rem; }
     }
 
-    /* ── 一屏一步：左图解 50% · 右说明 50% ── */
+    /* ── 一屏一步：全屏宽 · 左说明固定宽 · 右图解铺满 ── */
+    .panel:not(#panel-overview) {
+      flex: 1;
+      min-height: 0;
+    }
+
     .lesson-wrap {
       flex: 1;
       min-height: 0;
+      width: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -830,12 +1008,14 @@
     .flow-canvas {
       flex: 1;
       min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      border: none;
+      border-top: 1px solid var(--border);
+      border-radius: 0;
     }
 
     .step-strip { display: none !important; }
@@ -843,16 +1023,17 @@
     .flow-stage-body {
       flex: 1;
       min-height: 0;
+      height: 100%;
       overflow: hidden;
-      padding: 0.5rem 0.65rem;
+      padding: 0;
       font-size: 1.05rem;
     }
 
     .explain-anchor {
       display: none;
       height: 100%;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.65rem;
+      grid-template-columns: var(--explain-col) minmax(0, 1fr);
+      gap: 0;
       padding: 0;
       margin: 0;
     }
@@ -860,9 +1041,27 @@
       display: grid;
     }
 
-    /* 左：图解区 50% */
-    .anchor-body {
+    /* 左：说明区 · 固定宽度贴左 */
+    .explain-slot {
       order: 1;
+      flex-shrink: 0;
+      width: var(--explain-col);
+      max-width: var(--explain-col);
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      box-shadow: inset 4px 0 0 var(--chapter-accent, transparent);
+    }
+    #panel-overview .explain-slot { box-shadow: none; }
+
+    /* 右：图解区 · 铺满剩余宽度 */
+    .anchor-body {
+      order: 2;
       min-width: 0;
       min-height: 0;
       width: 100%;
@@ -872,9 +1071,9 @@
       justify-content: center;
       align-items: center;
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.5rem 0.6rem;
+      border: none;
+      border-radius: 0;
+      padding: 0.35rem 0.25rem 0.35rem 0.35rem;
       overflow: hidden;
       container-type: size;
       container-name: diagram-pane;
@@ -901,57 +1100,102 @@
       margin: 0 auto;
     }
 
-    /* 右：说明区 50% */
-    .explain-slot {
-      order: 2;
-      min-width: 0;
-      min-height: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
     .explain-box {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem 0.9rem;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0.9rem 1.05rem 0.9rem 1.05rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      line-height: 1.55;
+      gap: 0.65rem;
+      line-height: 1.62;
     }
 
     @media (max-width: 900px) {
       .explain-anchor.is-active {
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: minmax(0, 38vh) minmax(0, 1fr);
+      }
+      .explain-slot {
+        width: 100%;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .anchor-body {
+        padding: 0.45rem 0.5rem;
       }
     }
 
     .explain-step-num { display: none; }
+    .explain-chapter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      align-self: flex-start;
+      padding: 0.28rem 0.65rem 0.28rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.2;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--muted);
+    }
+    .explain-chapter-badge .ecb-num {
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--chapter-badge-bg, var(--bg-card));
+      border: 1px solid var(--chapter-badge-border, var(--border));
+      color: var(--chapter-accent, var(--fg));
+    }
+    .explain-chapter-badge .ecb-label { color: var(--chapter-accent, var(--fg)); }
+    .explain-chapter-badge .ecb-step {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 0.1rem;
+      padding-left: 0.45rem;
+      border-left: 1px solid var(--border);
+    }
+    .ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
+    .ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
+    #panel-la { --chapter-accent: var(--c-input); }
+    #panel-embed { --chapter-accent: var(--c-key); }
+    #panel-attn { --chapter-accent: var(--c-query); }
+    #panel-block { --chapter-accent: var(--c-ffn); }
+    #panel-kv { --chapter-accent: var(--success); }
     .explain-title {
       font-family: var(--heading);
-      font-size: 1.15rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      line-height: 1.35;
+      line-height: 1.38;
       margin: 0;
     }
     .explain-plain {
       margin: 0;
-      font-size: 1rem;
+      font-size: 1.12rem;
       font-weight: 600;
       color: var(--plain-fg);
-      line-height: 1.45;
-      padding: 0.45rem 0.65rem;
+      line-height: 1.5;
+      padding: 0.55rem 0.75rem;
       border-radius: 8px;
       background: var(--plain-bg);
-      border-left: 3px solid var(--primary);
+      border-left: 3px solid var(--chapter-accent, var(--primary));
     }
     #panel-attn .anchor-body {
       min-height: 0;
@@ -974,8 +1218,8 @@
     }
     /* Attention 矮屏略缩小，避免溢出 */
     @media (max-height: 720px) {
-      :root { --cell-size-attn: 26px; --cell-gap-attn: 4px; }
-      #panel-attn .heatmap .hc { font-size: 0.62rem; }
+      :root { --cell-size-attn: 30px; --cell-gap-attn: 5px; --viz-diagram-max-scale: 1.05; }
+      #panel-attn .heatmap .hc { font-size: 0.68rem; }
     }
     .anchor-body .stack-block {
       width: 100%;
@@ -986,17 +1230,17 @@
 
     .explain-analogy {
       margin: 0;
-      padding: 0.55rem 0.7rem;
+      padding: 0.65rem 0.85rem;
       border-radius: 8px;
       background: var(--analogy-bg);
       border: 1px solid var(--analogy-border);
-      font-size: 0.82rem;
+      font-size: 0.94rem;
       color: var(--analogy-fg);
-      line-height: 1.55;
+      line-height: 1.58;
     }
     .explain-analogy b {
       display: block;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--analogy-label);
@@ -1004,37 +1248,37 @@
       font-weight: 700;
     }
     .explain-body {
-      font-size: 0.85rem;
+      font-size: 0.96rem;
       color: var(--muted);
       margin: 0;
-      line-height: 1.6;
+      line-height: 1.65;
     }
     .explain-body strong { color: var(--fg); font-weight: 600; }
     .explain-bullets {
       margin: 0;
-      padding: 0.25rem 0 0.25rem 1rem;
-      font-size: 0.82rem;
+      padding: 0.3rem 0 0.3rem 1.1rem;
+      font-size: 0.94rem;
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.72;
     }
     .explain-bullets li { margin: 0.45rem 0; }
     .explain-bullets li::marker { color: var(--success); }
     .explain-dims {
-      padding: 0.75rem 1rem;
+      padding: 0.85rem 1.1rem;
       border-radius: 10px;
       background: var(--bg-elevated);
       border: 1px dashed var(--border);
       font-family: var(--mono);
-      font-size: 0.84rem;
+      font-size: 0.95rem;
       color: var(--fg);
-      line-height: 1.65;
+      line-height: 1.68;
     }
-    .explain-dims b { color: var(--muted); font-weight: 600; display: block; margin-bottom: 0.35rem; font-family: var(--font); font-size: 0.75rem; letter-spacing: 0.04em; }
+    .explain-dims b { color: var(--muted); font-weight: 600; display: block; margin-bottom: 0.4rem; font-family: var(--font); font-size: 0.85rem; letter-spacing: 0.04em; }
     .dim-tag {
       display: inline-block;
       font-family: var(--mono);
-      font-size: 0.82rem;
-      padding: 0.2rem 0.55rem;
+      font-size: 0.92rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 6px;
       background: var(--bg-elevated);
       color: var(--fg);
@@ -1042,16 +1286,16 @@
       margin: 0.15rem 0.2rem 0.15rem 0;
     }
     .la-note {
-      padding: 0.65rem 0.85rem;
+      padding: 0.75rem 0.95rem;
       border-radius: 12px;
       background: var(--la-bg);
       border: 1px solid var(--la-border);
-      font-size: 0.92rem;
+      font-size: 1.02rem;
       color: var(--la-fg);
-      line-height: 1.7;
+      line-height: 1.72;
     }
     .la-heading {
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       color: var(--success);
@@ -1059,16 +1303,10 @@
     }
     .la-note .la-body { padding: 0; }
 
-    /* ── 流转画布 ── */
+    /* ── 流转画布（圆角/贴边见上方 lesson-wrap 规则）── */
     .flow-canvas {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
       gap: 0;
       position: relative;
-      overflow-x: auto;
     }
     .canvas-zone-label { display: none; }
     .canvas-zone-label.lit { opacity: 1; color: var(--success); }
@@ -1078,7 +1316,7 @@
       align-items: center;
       justify-content: flex-start;
       gap: 1.35rem;
-      min-height: 130px;
+      min-height: 150px;
       padding: 0.5rem 0;
       position: relative;
     }
@@ -1146,7 +1384,7 @@
     }
     #panel-attn .matrix.matrix-values .cell {
       font-family: var(--mono);
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--matrix-cell-fg);
       display: grid;
@@ -1160,8 +1398,19 @@
       font-size: 0.92rem;
     }
     #panel-attn .fc-op {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
     }
+    #panel-attn .viz-mtx-inline .matrix {
+      gap: 4px;
+      padding: 0;
+    }
+    #panel-attn .viz-mtx-inline .matrix .cell {
+      width: 17px;
+      height: 17px;
+      border-radius: 2px;
+      font-size: 0;
+    }
+    #panel-attn .viz-op { font-size: 1.85rem; }
     .matrix-label {
       font-family: var(--mono);
       font-size: 1rem;
@@ -1433,7 +1682,7 @@
     /* 词与词注意力弧线（嵌入当前步骤图解区） */
     .attn-token-viz {
       width: 100%;
-      max-width: 420px;
+      max-width: 480px;
       margin-top: 0.35rem;
       padding-top: 0.35rem;
       border-top: 1px dashed var(--border);
@@ -1455,8 +1704,8 @@
     }
     .atv-wrap {
       position: relative;
-      height: 88px;
-      max-width: 460px;
+      height: 100px;
+      max-width: 520px;
       margin: 0 auto;
     }
     .atv-svg {
@@ -1608,10 +1857,10 @@
       transform-origin: center center;
     }
     @media (max-height: 720px) {
-      #panel-block .block-diagram { transform: scale(0.92); }
+      #panel-block .block-diagram { transform: scale(0.97); }
     }
     .block-diagram {
-      width: min(100%, 480px);
+      width: min(100%, 560px);
       display: flex;
       flex-direction: column;
       gap: 0.85rem;
@@ -1642,7 +1891,7 @@
     }
     .stack-layout {
       display: grid;
-      grid-template-columns: 72px 1fr;
+      grid-template-columns: 80px 1fr;
       gap: 1rem;
       align-items: stretch;
     }
@@ -1820,7 +2069,7 @@
     #panel-attn .heatmap .hc {
       width: var(--cell-size-attn);
       height: var(--cell-size-attn);
-      font-size: 0.68rem;
+      font-size: 0.76rem;
       border-radius: 4px;
     }
     #panel-attn .heat-tokens {
@@ -1869,8 +2118,8 @@
       padding: 0.5rem 0.65rem;
       border-radius: 12px;
     }
-    #panel-attn .afm-wrap { min-height: 120px; }
-    #panel-attn .afm-grid { min-height: 120px; gap: 0.5rem; }
+    #panel-attn .afm-wrap { min-height: 140px; }
+    #panel-attn .afm-grid { min-height: 140px; gap: 0.55rem; }
     #panel-attn .attn-token-viz { margin-top: 0.5rem; padding-top: 0.5rem; }
     #panel-attn .atv-wrap { height: 90px; }
     .afm-fold > summary {
@@ -1896,28 +2145,56 @@
       border-top: 1px solid var(--border);
     }
     .step-controls-inner {
-      width: min(960px, 100%);
-      display: grid;
-      grid-template-columns: auto 1fr auto auto;
+      width: 100%;
+      max-width: none;
+      padding: 0 1.25rem;
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
       align-items: center;
-      gap: 0.65rem 0.85rem;
+      justify-content: center;
+      gap: 0.85rem;
     }
+    #btn-prev { order: 1; flex-shrink: 0; }
     .step-center {
+      order: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.35rem;
       min-width: 0;
+      max-width: min(520px, 56vw);
+    }
+    #btn-next { order: 3; flex-shrink: 0; }
+    #btn-play {
+      order: 4;
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      flex-shrink: 0;
     }
     @media (max-width: 640px) {
       .step-controls-inner {
-        grid-template-columns: 1fr 1fr;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 0.5rem;
+        padding-bottom: 0.35rem;
       }
-      .step-center { grid-column: 1 / -1; order: -1; }
-      #btn-prev { justify-self: start; }
-      #btn-next { justify-self: end; }
-      #btn-play { grid-column: 1 / -1; width: 100%; }
+      .step-center {
+        order: 1;
+        max-width: 100%;
+        width: 100%;
+      }
+      #btn-prev { order: 2; }
+      #btn-next { order: 3; }
+      #btn-play {
+        position: static;
+        transform: none;
+        order: 4;
+        width: 100%;
+        margin-top: 0.15rem;
+      }
     }
     .step-meta {
       display: flex;
@@ -1965,9 +2242,559 @@
       background: var(--border); border: none; cursor: pointer; padding: 0;
       transition: all 0.3s;
     }
-    .step-dot.active { width: 28px; border-radius: 5px; background: var(--c-cache); }
-    .step-dot.done { background: var(--success-border); }
+    .step-dot.active { width: 28px; border-radius: 5px; background: var(--chapter-accent, var(--c-cache)); }
+    .step-dot.done { background: var(--chapter-accent, var(--success-border)); opacity: 0.55; }
+    [data-chapter="panel-overview"] { --chapter-accent: var(--primary); }
+    [data-chapter="panel-la"] { --chapter-accent: var(--c-input); }
+    [data-chapter="panel-embed"] { --chapter-accent: var(--c-key); }
+    [data-chapter="panel-attn"] { --chapter-accent: var(--c-query); }
+    [data-chapter="panel-block"] { --chapter-accent: var(--c-ffn); }
+    [data-chapter="panel-kv"] { --chapter-accent: var(--success); }
     .step-counter { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); min-width: 4.5rem; text-align: center; }
+
+    /* ── KV Cache 章节：参考 kv_cache_demo 可视化 ── */
+    #panel-kv .anchor-body {
+      padding: 0.35rem 0.45rem;
+      background: var(--bg-panel);
+    }
+  #panel-kv .diagram-scaler { align-items: center; }
+
+    .kv-flow1 {
+      position: relative;
+      width: 1120px;
+      height: 300px;
+      margin: 0 auto;
+    }
+    .kv-flow1 .flines {
+      position: absolute;
+      left: 0; top: 0;
+      width: 1120px; height: 300px;
+      overflow: visible;
+      z-index: 1;
+    }
+    .kv-flow1 .fbox {
+      position: absolute;
+      z-index: 2;
+      background: var(--bg-card);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+    .kv-flow1 .fbox.pre { border: 1.5px solid var(--c-key); }
+    .kv-flow1 .fbox.dec { border: 1.5px solid var(--c-value); }
+    .kv-flow1 .fchip {
+      position: absolute;
+      z-index: 2;
+      width: 76px; height: 46px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .kv-flow1 .fchip.pp { background: rgba(56,189,248,0.35); color: var(--fg); }
+    .kv-flow1 .fchip.gg { background: var(--c-value); color: #1a1a1a; }
+  [data-theme="light"] .kv-flow1 .fchip.gg { color: #fff; }
+    .kv-flow1 .fcanopy {
+      position: absolute;
+      z-index: 3;
+      background: var(--bg-panel);
+      text-align: center;
+      padding: 3px 8px;
+    }
+    .kv-flow1 .fcanopy .ctitle {
+      font-size: 17px;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+    .kv-flow1 .fcanopy .csub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+    .kv-flow1 .fcanopy.pre .ctitle { color: var(--c-key); }
+    .kv-flow1 .fcanopy.dec .ctitle { color: var(--c-value); }
+    .kv-flow1 .frail-label {
+      position: absolute;
+      z-index: 3;
+      background: var(--bg-panel);
+      font-size: 14px;
+      color: var(--c-value);
+      text-align: center;
+    }
+    .kv-flow1 .fblabel {
+      position: absolute;
+      z-index: 2;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .kv-flow1 .fblabel.pp { color: var(--c-key); }
+    .kv-flow1 .fblabel.gg { color: var(--c-value); }
+    .kv-flow1 .fellip {
+      position: absolute;
+      z-index: 2;
+      font-size: 24px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .kv-banner {
+      margin-top: 14px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 0.92rem;
+      color: var(--fg);
+      text-align: center;
+      max-width: 1120px;
+    }
+    .kv-banner b { color: var(--success); font-weight: 700; }
+    .kv-speedup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-top: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      flex-wrap: wrap;
+      max-width: 1120px;
+    }
+    .kv-speedup .cmpx-tag {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .kv-speedup .cmpx-no {
+      color: #f87171;
+      font-family: var(--mono);
+      font-weight: 800;
+      font-size: 1.35rem;
+    }
+    .kv-speedup .cmpx-yes {
+      color: var(--success);
+      font-family: var(--mono);
+      font-weight: 800;
+      font-size: 1.35rem;
+    }
+    .kv-speedup .cmpx-arr { color: var(--muted); font-size: 1.2rem; font-weight: 700; }
+    .kv-speedup .cmpx-mult {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 0.82rem;
+      background: var(--success-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .kv-speedup .cmpx-legend {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .kvf {
+      position: relative;
+      width: 1180px;
+      height: 730px;
+      margin: 0 auto;
+      font-family: var(--font);
+    }
+    .kvf-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .kvf-mtx {
+      position: absolute;
+      padding: 4px;
+      border-radius: 5px;
+      border: 1.5px solid;
+      z-index: 2;
+      display: inline-block;
+      line-height: 0;
+      transition: opacity 0.35s, filter 0.35s;
+    }
+    .kvf-mtx > .kv-grid { display: grid; gap: 2px; }
+    .kvf-mtx > .kv-grid .cell {
+      width: 12px; height: 12px;
+      border-radius: 2px;
+    }
+    .kvf-mtx > .glabel {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 4px;
+      line-height: 1;
+      font-family: var(--mono);
+    }
+    .kvf-mtx.m-input { border-color: var(--c-input); background: rgba(59,130,246,0.1); }
+    .kvf-mtx.m-input .glabel { color: var(--c-input); }
+    .kvf-mtx.m-wq, .kvf-mtx.m-rq { border-color: var(--c-query); background: rgba(147,51,234,0.1); }
+    .kvf-mtx.m-wq .glabel, .kvf-mtx.m-rq .glabel { color: var(--c-query); }
+    .kvf-mtx.m-wk, .kvf-mtx.m-rk { border-color: var(--c-key); background: rgba(8,145,178,0.1); }
+    .kvf-mtx.m-wk .glabel, .kvf-mtx.m-rk .glabel { color: var(--c-key); }
+    .kvf-mtx.m-wv, .kvf-mtx.m-rv { border-color: var(--c-value); background: rgba(234,88,12,0.1); }
+    .kvf-mtx.m-wv .glabel, .kvf-mtx.m-rv .glabel { color: var(--c-value); }
+    .kvf-mtx.m-Krow { border-color: var(--c-key); background: rgba(8,145,178,0.1); }
+    .kvf-mtx.m-Krow .glabel { color: var(--c-key); }
+    .kvf-mtx.m-Vrow { border-color: var(--c-value); background: rgba(234,88,12,0.1); }
+    .kvf-mtx.m-Vrow .glabel { color: var(--c-value); }
+    .kvf .cell.c-q { background: var(--c-query); }
+    .kvf .cell.c-k { background: var(--c-key); }
+    .kvf .cell.c-v { background: var(--c-value); }
+    .kvf-mtx .cell.c-newk {
+      background: #bdebff;
+      box-shadow: 0 0 0 2px var(--c-key), 0 0 8px rgba(56,189,248,0.55);
+    }
+    .kvf-mtx .cell.c-new {
+      background: #ffe066;
+      box-shadow: 0 0 0 2px var(--c-value), 0 0 8px rgba(255,224,102,0.7);
+    }
+    .kvf-node {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.15;
+      font-family: var(--mono);
+      z-index: 2;
+      transition: opacity 0.35s, filter 0.35s;
+    }
+    .kvf-attn {
+      border-color: var(--border);
+      background: var(--bg-card);
+      color: var(--fg);
+      font-size: 14px;
+      padding: 0 10px;
+    }
+    .kvf-attn .katex { font-size: 1.15em; color: var(--fg); }
+    .kvf-op {
+      position: absolute;
+      color: var(--muted);
+      font-weight: 700;
+      font-family: var(--mono);
+      line-height: 1;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.35s;
+    }
+    .kvf-sec {
+      position: absolute;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: 0.5px;
+      z-index: 2;
+      transition: opacity 0.35s;
+    }
+    .kvf-cache {
+      position: absolute;
+      background: var(--success-bg);
+      border: 1.5px solid var(--success-border);
+      border-radius: 12px;
+      z-index: 1;
+      box-shadow: 0 0 16px var(--success-glow);
+      transition: opacity 0.35s, filter 0.35s;
+    }
+    .kvc-label {
+      position: absolute;
+      color: var(--success);
+      font-weight: 800;
+      font-size: 14px;
+      z-index: 4;
+      line-height: 1;
+    }
+    .kvf-loop {
+      position: absolute;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: transparent;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 0.35s;
+    }
+    .kvf-loop-tag {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      font-family: var(--mono);
+      z-index: 2;
+    }
+    .kvf-lbl {
+      position: absolute;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      z-index: 2;
+    }
+    .kvf-dim { opacity: 0.22; filter: grayscale(0.35); }
+    .kvf-hi { opacity: 1 !important; filter: none !important; }
+    .kvf-hi.kvf-mtx, .kvf-hi.kvf-node, .kvf-hi.kvf-cache { box-shadow: 0 0 0 2px var(--success-glow); }
+    .kvf-path { transition: opacity 0.35s; }
+    .kvf-path.kvf-dim { opacity: 0.15; }
+
+    /* ── 前几章：与 KV Cache 统一的 viz 风格 ── */
+    .viz-panel {
+      width: 100%;
+      max-width: 100%;
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .viz-flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem 1.1rem;
+      flex-wrap: wrap;
+    }
+    .viz-chip-row {
+      display: flex;
+      gap: 0.55rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .viz-chip {
+      min-width: 3.75rem;
+      padding: 0.7rem 1.1rem;
+      border-radius: 8px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .viz-chip-input {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1.5px solid var(--c-key);
+      color: var(--fg);
+    }
+    .viz-chip-predict {
+      background: transparent;
+      border: 1.5px dashed var(--muted);
+      color: var(--muted);
+    }
+    .viz-caption {
+      margin: 0.7rem 0 0;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .viz-mtx-inline {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1.5px solid;
+      line-height: 0;
+      transition: box-shadow 0.35s;
+    }
+    .viz-mtx-inline .glabel {
+      display: block;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1;
+      font-family: var(--mono);
+    }
+    .viz-mtx-inline.m-input { border-color: var(--c-input); background: rgba(59, 130, 246, 0.1); }
+    .viz-mtx-inline.m-input .glabel { color: var(--c-input); }
+    .viz-mtx-inline.m-query { border-color: var(--c-query); background: rgba(147, 51, 234, 0.1); }
+    .viz-mtx-inline.m-query .glabel { color: var(--c-query); }
+    .viz-mtx-inline.m-key { border-color: var(--c-key); background: rgba(8, 145, 178, 0.1); }
+    .viz-mtx-inline.m-key .glabel { color: var(--c-key); }
+    .viz-mtx-inline.m-value { border-color: var(--c-value); background: rgba(234, 88, 12, 0.1); }
+    .viz-mtx-inline.m-value .glabel { color: var(--c-value); }
+    .viz-mtx-inline.m-cache { border-color: var(--success-border); background: var(--success-bg); }
+    .viz-mtx-inline.m-cache .glabel { color: var(--success); }
+    .viz-mtx-inline.m-norm { border-color: var(--c-norm); background: rgba(219, 39, 119, 0.08); }
+    .viz-mtx-inline.m-norm .glabel { color: var(--c-norm); }
+    .viz-mtx-inline .matrix { gap: 4px; }
+    .viz-mtx-inline .matrix .cell {
+      width: 17px;
+      height: 17px;
+      border-radius: 2px;
+    }
+    .viz-dim {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+    .viz-op {
+      font-family: var(--mono);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .viz-rules {
+      padding: 1rem 1.25rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+    .viz-rules strong { color: var(--fg); }
+    .viz-attn-demo {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1rem 1.1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .viz-attn-demo-cap {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      line-height: 1.45;
+    }
+    .viz-attn-demo-cap b { color: var(--c-value); font-weight: 700; }
+    .viz-attn-demo-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.65rem;
+      flex-wrap: nowrap;
+    }
+    .viz-attn-arcs {
+      width: 100%;
+      max-width: 580px;
+      height: 72px;
+      display: block;
+    }
+    .viz-attn-tokens {
+      display: flex;
+      gap: 0.45rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .viz-attn-result {
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      background: var(--c-value);
+      color: #1a1a1a;
+      align-self: flex-end;
+    }
+    [data-theme="light"] .viz-attn-result { color: #fff; }
+    .viz-formula-box {
+      margin-top: 0.85rem;
+      padding: 0.85rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .viz-formula-box .katex { font-size: 1.15em; color: var(--fg); }
+    .viz-embed-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .viz-embed-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .viz-embed-arrow {
+      font-size: 1.65rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    #panel-la .fc-row,
+    #panel-embed .fc-row,
+    #panel-attn .anchor-body > .fc-row {
+      justify-content: center;
+      gap: 0.85rem 1rem;
+      min-height: auto;
+      padding: 0;
+      width: 100%;
+    }
+    #panel-la .fc-node,
+    #panel-embed .fc-node,
+    #panel-attn .fc-node {
+      box-shadow: none;
+    }
+    #panel-la .fc-node.active .viz-mtx-inline,
+    #panel-embed .fc-node.active .viz-mtx-inline,
+    #panel-attn .fc-node.active .viz-mtx-inline {
+      box-shadow: 0 0 14px var(--success-glow);
+    }
+    #panel-attn .heatmap-wrap {
+      padding: 0.65rem 0.75rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    #panel-attn .fc-box {
+      border-radius: 10px;
+      border-width: 1.5px;
+      font-size: 1.05rem;
+      padding: 0.75rem 1.15rem;
+    }
+    #panel-block .block-diagram {
+      width: min(100%, 600px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      box-sizing: border-box;
+    }
+    #panel-block .stack-block {
+      border-radius: 10px;
+      border-width: 1.5px;
+      font-family: var(--mono);
+      font-size: 0.92rem;
+    }
+    #panel-block .stack-block.active {
+      box-shadow: 0 0 16px var(--success-glow);
+    }
 
     footer { display: none; }
   </style>
@@ -1981,13 +2808,13 @@
         <p class="doc-subtitle">零基础 · 一屏一步</p>
       </div>
     </div>
-    <nav class="chapter-pills" id="chapter-pills" aria-label="章节导航">
-      <button class="chapter-pill active" type="button" data-panel="panel-overview">全局地图</button>
-      <button class="chapter-pill" type="button" data-panel="panel-la">矩阵入门</button>
-      <button class="chapter-pill" type="button" data-panel="panel-embed">词变数字</button>
-      <button class="chapter-pill" type="button" data-panel="panel-attn">Attention</button>
-      <button class="chapter-pill" type="button" data-panel="panel-block">一层积木</button>
-      <button class="chapter-pill" type="button" data-panel="panel-kv">KV Cache</button>
+    <nav class="chapter-pills" id="chapter-pills" aria-label="章节导航（6 模块）">
+      <button class="chapter-pill active" type="button" data-panel="panel-overview" data-chapter-theme="overview" title="⓪ 全局地图"><span class="chapter-pill-num">⓪</span><span class="chapter-pill-label">全局地图</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-la" data-chapter-theme="la" title="① 矩阵入门"><span class="chapter-pill-num">①</span><span class="chapter-pill-label">矩阵入门</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-embed" data-chapter-theme="embed" title="② 词变数字"><span class="chapter-pill-num">②</span><span class="chapter-pill-label">词变数字</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-attn" data-chapter-theme="attn" title="③ Attention"><span class="chapter-pill-num">③</span><span class="chapter-pill-label">Attention</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-block" data-chapter-theme="block" title="④ 一层积木"><span class="chapter-pill-num">④</span><span class="chapter-pill-label">一层积木</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-kv" data-chapter-theme="kv" title="⑤ KV Cache"><span class="chapter-pill-num">⑤</span><span class="chapter-pill-label">KV Cache</span></button>
     </nav>
     <div class="header-actions">
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色/深色主题">
@@ -2009,6 +2836,7 @@
           <p>文字 → 矩阵 → Attention → 叠层 → 预测下一词。GPT、BERT 等大模型都基于此。</p>
         </header>
 
+        <div class="overview-mid">
         <div class="big-picture">
           <h3>一句话在模型里怎么流动？</h3>
           <div class="flow-pipeline">
@@ -2063,6 +2891,7 @@
             <span>打分 → 归一化 → 混合 V</span>
           </div>
           <p class="of-legend">W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>：可学习的投影矩阵 · d<sub>k</sub>：单头 Key 维度 · softmax：把分数变成权重（和为 1）</p>
+        </div>
         </div>
 
         <div class="overview-grid">
@@ -2157,45 +2986,84 @@
         <div class="flow-canvas" id="canvas-la">
           <div class="explain-anchor" data-explain-step="0">
             <div class="explain-slot"></div>
-            <div class="anchor-body"><div class="fc-row">
-              <div class="fc-node" data-step="0">
-                <div class="token-row"><span class="token">词₁</span><span class="token">词₂</span><span class="token">词₃</span></div>
-                <span class="matrix-label">一句话 = 一排词</span>
+            <div class="anchor-body">
+              <div class="viz-panel">
+                <div class="viz-chip-row">
+                  <span class="viz-chip viz-chip-input">我</span>
+                  <span class="viz-chip viz-chip-input">爱</span>
+                  <span class="viz-chip viz-chip-input">学习</span>
+                </div>
+                <p class="viz-caption">一句话 = 从左到右一排 Token · 顺序不能乱</p>
               </div>
-            </div></div>
+            </div>
           </div>
           <div class="explain-anchor" data-explain-step="1">
             <div class="explain-slot"></div>
-            <div class="anchor-body"><div class="fc-row">
-              <div class="fc-op" data-step="1">→</div>
-              <div class="fc-node" data-step="1">
-                <div class="matrix c-input" data-r="3" data-c="6"></div>
-                <span class="matrix-label">矩阵 X</span>
-                <span class="dim-hint">3 行 × 6 列</span>
+            <div class="anchor-body">
+              <div class="viz-panel">
+                <div class="viz-flow-row">
+                  <div class="viz-embed-step">
+                    <div class="viz-chip-row">
+                      <span class="viz-chip viz-chip-input">我</span>
+                      <span class="viz-chip viz-chip-input">爱</span>
+                      <span class="viz-chip viz-chip-input">学习</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="1">→</span>
+                  <div class="fc-node" data-step="1">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">矩阵 X</span>
+                      <div class="matrix c-input" data-r="3" data-c="6"></div>
+                      <span class="viz-dim">3 行 × 6 列 · 每行一词</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div></div>
+            </div>
           </div>
           <div class="explain-anchor" data-explain-step="2">
             <div class="explain-slot"></div>
-            <div class="anchor-body"><div class="fc-row">
-              <div class="fc-node" data-step="2"><div class="matrix c-input" data-r="3" data-c="6"></div><span class="matrix-label">X</span><span class="dim-hint">3×6</span></div>
-              <div class="fc-op" data-step="2">×</div>
-              <div class="fc-node" data-step="2"><div class="matrix c-query" data-r="6" data-c="4"></div><span class="matrix-label">W</span><span class="dim-hint">6×4</span></div>
-              <div class="fc-op" data-step="2">=</div>
-              <div class="fc-node" data-step="2"><div class="matrix c-cache" data-r="3" data-c="4"></div><span class="matrix-label">结果</span><span class="dim-hint">3×4 ✓</span></div>
-            </div></div>
+            <div class="anchor-body">
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-input" data-r="3" data-c="6"></div>
+                      <span class="viz-dim">3×6</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="2">×</span>
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-query">
+                      <span class="glabel">W</span>
+                      <div class="matrix c-query" data-r="6" data-c="4"></div>
+                      <span class="viz-dim">6×4</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="2">=</span>
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-cache">
+                      <span class="glabel">结果</span>
+                      <div class="matrix c-cache" data-r="3" data-c="4"></div>
+                      <span class="viz-dim">3×4 ✓</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="explain-anchor" data-explain-step="3">
             <div class="explain-slot"></div>
-            <div class="anchor-body"><div class="fc-row">
-              <div class="fc-node" data-step="3" style="max-width:100%">
-                <div style="font-size:1.1rem;line-height:2;color:var(--muted);text-align:left;padding:0.25rem 0">
-                  <div>① 左矩阵<strong style="color:var(--fg)">列数</strong> = 右矩阵<strong style="color:var(--fg)">行数</strong></div>
-                  <div>② 结果 = <span class="dim-tag">左行 × 右列</span></div>
-                  <div>③ 全文套路：<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d'</span> = <span class="dim-tag">seq×d'</span></div>
+            <div class="anchor-body">
+              <div class="viz-panel">
+                <div class="viz-rules fc-node" data-step="3">
+                  <div>① 左矩阵<strong>列数</strong> = 右矩阵<strong>行数</strong></div>
+                  <div>② 结果形状 = <span class="dim-tag">左行 × 右列</span></div>
+                  <div>③ Transformer 套路：<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d'</span> = <span class="dim-tag">seq×d'</span></div>
                 </div>
               </div>
-            </div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2216,21 +3084,34 @@
           <div class="explain-anchor" data-explain-step="0">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="0">文本</div>
-              <div class="fc-row"><div class="fc-node" data-step="0">
-                <div class="token-row"><span class="token">我</span><span class="token">爱</span><span class="token">学习</span></div>
-              </div></div>
+              <div class="viz-panel">
+                <div class="viz-chip-row">
+                  <span class="viz-chip viz-chip-input">我</span>
+                  <span class="viz-chip viz-chip-input">爱</span>
+                  <span class="viz-chip viz-chip-input">学习</span>
+                </div>
+                <p class="viz-caption">原始文本 · 模型不能直接读汉字</p>
+              </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="1">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="1">查表成向量</div>
-              <div class="fc-row">
-                <div class="fc-op" data-step="1">→</div>
-                <div class="fc-node" data-step="1">
-                  <div class="matrix c-input" data-r="3" data-c="8"></div>
-                  <span class="matrix-label">Embedding</span><span class="dim-hint">3×d</span>
+              <div class="viz-panel">
+                <div class="viz-embed-flow">
+                  <div class="viz-chip-row">
+                    <span class="viz-chip viz-chip-input">我</span>
+                    <span class="viz-chip viz-chip-input">爱</span>
+                    <span class="viz-chip viz-chip-input">学习</span>
+                  </div>
+                  <span class="viz-embed-arrow fc-op" data-step="1">→</span>
+                  <div class="fc-node" data-step="1">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">Embedding</span>
+                      <div class="matrix c-input" data-r="3" data-c="8"></div>
+                      <span class="viz-dim">3×d · 查表得向量</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2238,23 +3119,39 @@
           <div class="explain-anchor" data-explain-step="2">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="2">加位置</div>
-              <div class="fc-row">
-                <div class="fc-node" data-step="2"><div class="matrix c-input" data-r="3" data-c="8"></div><span class="matrix-label">Embedding</span></div>
-                <div class="fc-op" data-step="2">+</div>
-                <div class="fc-node" data-step="2"><div class="matrix c-norm" data-r="3" data-c="8"></div><span class="matrix-label">PE</span><span class="dim-hint">同形状相加</span></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">Embedding</span>
+                      <div class="matrix c-input" data-r="3" data-c="8"></div>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="2">+</span>
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-norm">
+                      <span class="glabel">PE</span>
+                      <div class="matrix c-norm" data-r="3" data-c="8"></div>
+                      <span class="viz-dim">位置编码 · 同形状</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="3">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="3">送入 Attention</div>
-              <div class="fc-row">
-                <div class="fc-op" data-step="3">=</div>
-                <div class="fc-node" data-step="3">
-                  <div class="matrix c-cache" data-r="3" data-c="8"></div>
-                  <span class="matrix-label">X</span><span class="dim-hint">3×d</span>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <span class="viz-op fc-op" data-step="3">=</span>
+                  <div class="fc-node" data-step="3">
+                    <div class="viz-mtx-inline m-cache">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-cache" data-r="3" data-c="8"></div>
+                      <span class="viz-dim">3×d · 送入 Attention</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2278,64 +3175,164 @@
           <div class="explain-anchor" data-explain-step="0">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="0">区域 A · 起点</div>
-              <div class="fc-row"><div class="fc-node" data-step="0">
-                <div class="matrix c-input" data-mx="X"></div>
-                <span class="matrix-label">X</span><span class="dim-hint">4×4 · 我/爱/学习/。</span>
-              </div></div>
+              <div class="viz-panel">
+                <div class="viz-attn-demo">
+                  <div class="viz-attn-demo-cap">预测「？」的下一个 token 时，<b>注意力会回头落在哪些词上</b></div>
+                  <svg class="viz-attn-arcs" viewBox="0 0 520 64" preserveAspectRatio="none">
+                    <defs>
+                      <marker id="viz-atn-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="var(--c-value)"/>
+                      </marker>
+                    </defs>
+                    <path d="M478,62 C478,4 40,4 40,56" fill="none" stroke="var(--c-value)" stroke-width="1.5" opacity="0.35" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M478,62 C478,4 128,4 128,56" fill="none" stroke="var(--c-value)" stroke-width="3.2" opacity="0.88" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M478,62 C478,4 216,4 216,56" fill="none" stroke="var(--c-value)" stroke-width="3.8" opacity="0.92" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M478,62 C478,4 304,4 304,56" fill="none" stroke="var(--c-value)" stroke-width="3.4" opacity="0.85" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M478,62 C478,4 392,4 392,56" fill="none" stroke="var(--c-value)" stroke-width="1.5" opacity="0.3" marker-end="url(#viz-atn-arr)"/>
+                  </svg>
+                  <div class="viz-attn-tokens">
+                    <span class="viz-chip viz-chip-input">我</span>
+                    <span class="viz-chip viz-chip-input">爱</span>
+                    <span class="viz-chip viz-chip-input">学习</span>
+                    <span class="viz-chip viz-chip-predict">？</span>
+                  </div>
+                </div>
+                <div class="viz-flow-row" style="margin-top:0.85rem">
+                  <div class="fc-node" data-step="0">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-input" data-mx="X"></div>
+                      <span class="viz-dim">4×4 · 我/爱/学习/。</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="1">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
-                <div class="fc-op" data-step="1">×</div>
-                <div class="fc-node" data-step="1"><div class="matrix c-query" data-mx="WQ"></div><span class="matrix-label">W<sub>Q</sub></span><span class="dim-hint">4×4 I</span></div>
-                <div class="fc-op" data-step="1">=</div>
-                <div class="fc-node" data-step="1"><div class="matrix c-query" data-mx="Q"></div><span class="matrix-label">Q</span><span class="dim-hint">4×4</span></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="0">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-input" data-mx="X"></div>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="1">×</span>
+                  <div class="fc-node" data-step="1">
+                    <div class="viz-mtx-inline m-query">
+                      <span class="glabel">W<sub>Q</sub></span>
+                      <div class="matrix c-query" data-mx="WQ"></div>
+                      <span class="viz-dim">4×4</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="1">=</span>
+                  <div class="fc-node" data-step="1">
+                    <div class="viz-mtx-inline m-query">
+                      <span class="glabel">Q</span>
+                      <div class="matrix c-query" data-mx="Q"></div>
+                      <span class="viz-dim">4×4 · Query</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="2">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
-                <div class="fc-op" data-step="2">×</div>
-                <div class="fc-node" data-step="2"><div class="matrix c-key" data-mx="WK"></div><span class="matrix-label">W<sub>K</sub></span><span class="dim-hint">4×4 I</span></div>
-                <div class="fc-op" data-step="2">=</div>
-                <div class="fc-node" data-step="2"><div class="matrix c-key" data-mx="K"></div><span class="matrix-label">K</span><span class="dim-hint">4×4</span></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="0">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-input" data-mx="X"></div>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="2">×</span>
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-key">
+                      <span class="glabel">W<sub>K</sub></span>
+                      <div class="matrix c-key" data-mx="WK"></div>
+                      <span class="viz-dim">4×4</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="2">=</span>
+                  <div class="fc-node" data-step="2">
+                    <div class="viz-mtx-inline m-key">
+                      <span class="glabel">K</span>
+                      <div class="matrix c-key" data-mx="K"></div>
+                      <span class="viz-dim">4×4 · Key</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="3">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
-                <div class="fc-op" data-step="3">×</div>
-                <div class="fc-node" data-step="3"><div class="matrix c-value" data-mx="WV"></div><span class="matrix-label">W<sub>V</sub></span><span class="dim-hint">4×4 I</span></div>
-                <div class="fc-op" data-step="3">=</div>
-                <div class="fc-node" data-step="3"><div class="matrix c-value" data-mx="V"></div><span class="matrix-label">V</span><span class="dim-hint">4×4</span></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="0">
+                    <div class="viz-mtx-inline m-input">
+                      <span class="glabel">X</span>
+                      <div class="matrix c-input" data-mx="X"></div>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="3">×</span>
+                  <div class="fc-node" data-step="3">
+                    <div class="viz-mtx-inline m-value">
+                      <span class="glabel">W<sub>V</sub></span>
+                      <div class="matrix c-value" data-mx="WV"></div>
+                      <span class="viz-dim">4×4</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="3">=</span>
+                  <div class="fc-node" data-step="3">
+                    <div class="viz-mtx-inline m-value">
+                      <span class="glabel">V</span>
+                      <div class="matrix c-value" data-mx="V"></div>
+                      <span class="viz-dim">4×4 · Value</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="viz-formula-box viz-formula-attn">
+                  \(\text{softmax}\!\left(\frac{\textcolor{#9333ea}{Q}\textcolor{#0891b2}{K^{\top}}}{\sqrt{d_k}}\right)\textcolor{#ea580c}{V}\)
+                </div>
               </div>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="4">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="4"><div class="matrix c-query" data-mx="Q"></div><span class="matrix-label">Q</span></div>
-                <div class="fc-op" data-step="4">×</div>
-                <div class="fc-node" data-step="4"><div class="matrix c-key" data-mx="KT"></div><span class="matrix-label">K<sup>T</sup></span><span class="dim-hint">4×4</span></div>
-                <div class="fc-op" data-step="4">=</div>
-                <div class="fc-node" data-step="4">
-                  <div class="heatmap-wrap">
-                    <div class="heat-tokens">S = QK<sup>T</sup>/√4（未归一化）</div>
-                    <div class="heatmap" id="heat-attn" data-n="4" data-heat="scores"></div>
-                    <div class="heat-meta scores-note"></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="4">
+                    <div class="viz-mtx-inline m-query">
+                      <span class="glabel">Q</span>
+                      <div class="matrix c-query" data-mx="Q"></div>
+                    </div>
                   </div>
-                  <span class="matrix-label">分数 S</span><span class="dim-hint">4×4</span>
+                  <span class="viz-op fc-op" data-step="4">×</span>
+                  <div class="fc-node" data-step="4">
+                    <div class="viz-mtx-inline m-key">
+                      <span class="glabel">K<sup>T</sup></span>
+                      <div class="matrix c-key" data-mx="KT"></div>
+                      <span class="viz-dim">4×4</span>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="4">=</span>
+                  <div class="fc-node" data-step="4">
+                    <div class="heatmap-wrap">
+                      <div class="heat-tokens">S = QK<sup>T</sup>/√4</div>
+                      <div class="heatmap" id="heat-attn" data-n="4" data-heat="scores"></div>
+                      <div class="heat-meta scores-note"></div>
+                    </div>
+                    <span class="viz-dim">分数 S · 4×4</span>
+                  </div>
                 </div>
               </div>
               <div class="attn-token-viz">
@@ -2350,17 +3347,21 @@
           <div class="explain-anchor" data-explain-step="5">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-op" data-step="5">→</div>
-                <div class="fc-node" data-step="5"><span class="fc-box" style="background:rgba(168,85,247,0.15);color:#c084fc;border-color:rgba(168,85,247,0.4)">softmax（每行和为 1）</span></div>
-                <div class="fc-op" data-step="5">→</div>
-                <div class="fc-node" data-step="5">
-                  <div class="heatmap-wrap">
-                    <div class="heat-tokens">A = softmax(S)，每行和 = 1</div>
-                    <div class="heatmap" id="heat-soft" data-n="4" data-heat="weights"></div>
-                    <div class="heat-meta"></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <span class="viz-op fc-op" data-step="5">→</span>
+                  <div class="fc-node" data-step="5">
+                    <span class="fc-box" style="background:rgba(168,85,247,0.15);color:var(--c-query);border-color:rgba(168,85,247,0.4)">softmax · 每行和为 1</span>
                   </div>
-                  <span class="matrix-label">权重 A</span>
+                  <span class="viz-op fc-op" data-step="5">→</span>
+                  <div class="fc-node" data-step="5">
+                    <div class="heatmap-wrap">
+                      <div class="heat-tokens">A = softmax(S)</div>
+                      <div class="heatmap" id="heat-soft" data-n="4" data-heat="weights"></div>
+                      <div class="heat-meta"></div>
+                    </div>
+                    <span class="viz-dim">权重 A</span>
+                  </div>
                 </div>
               </div>
               <div class="attn-token-viz">
@@ -2375,18 +3376,31 @@
           <div class="explain-anchor" data-explain-step="6">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="6">
-                  <div class="heatmap-wrap">
-                    <div class="heatmap" id="heat-final" data-n="4" data-heat="weights"></div>
-                    <div class="heat-meta"></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="6">
+                    <div class="heatmap-wrap">
+                      <div class="heatmap" id="heat-final" data-n="4" data-heat="weights"></div>
+                      <div class="heat-meta"></div>
+                    </div>
+                    <span class="viz-dim">A</span>
                   </div>
-                  <span class="matrix-label">A</span>
+                  <span class="viz-op fc-op" data-step="6">×</span>
+                  <div class="fc-node" data-step="6">
+                    <div class="viz-mtx-inline m-value">
+                      <span class="glabel">V</span>
+                      <div class="matrix c-value" data-mx="V"></div>
+                    </div>
+                  </div>
+                  <span class="viz-op fc-op" data-step="6">=</span>
+                  <div class="fc-node" data-step="7">
+                    <div class="viz-mtx-inline m-cache">
+                      <span class="glabel">输出</span>
+                      <div class="matrix c-cache" data-mx="OUT"></div>
+                      <span class="viz-dim">4×4</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="fc-op" data-step="6">×</div>
-                <div class="fc-node" data-step="6"><div class="matrix c-value" data-mx="V"></div><span class="matrix-label">V</span></div>
-                <div class="fc-op" data-step="6">=</div>
-                <div class="fc-node" data-step="7"><div class="matrix c-cache" data-mx="OUT"></div><span class="matrix-label">输出</span><span class="dim-hint">4×4</span></div>
               </div>
               <div class="attn-token-viz">
                 <div class="atv-label"></div>
@@ -2400,8 +3414,16 @@
           <div class="explain-anchor" data-explain-step="7">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div class="fc-row">
-                <div class="fc-node" data-step="7"><div class="matrix c-cache" data-mx="OUT"></div><span class="matrix-label">Attention 输出</span></div>
+              <div class="viz-panel">
+                <div class="viz-flow-row fc-row">
+                  <div class="fc-node" data-step="7">
+                    <div class="viz-mtx-inline m-cache">
+                      <span class="glabel">Attention 输出</span>
+                      <div class="matrix c-cache" data-mx="OUT"></div>
+                      <span class="viz-dim">4×4 · 融入上下文</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2421,17 +3443,17 @@
       </div>
       <div class="lesson-wrap">
         <div class="flow-canvas" id="canvas-block">
-          <div class="explain-anchor" data-explain-step="0"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
-          <div class="explain-anchor" data-explain-step="1"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
-          <div class="explain-anchor" data-explain-step="2"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
-          <div class="explain-anchor" data-explain-step="3"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
-          <div class="explain-anchor" data-explain-step="4"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
-          <div class="explain-anchor" data-explain-step="5"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="0"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
+          <div class="explain-anchor" data-explain-step="1"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
+          <div class="explain-anchor" data-explain-step="2"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
+          <div class="explain-anchor" data-explain-step="3"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
+          <div class="explain-anchor" data-explain-step="4"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
+          <div class="explain-anchor" data-explain-step="5"><div class="explain-slot"></div><div class="anchor-body"><div class="viz-panel"><div class="block-diagram-mount"></div></div></div></div>
         </div>
       </div>
     </section>
 
-    <!-- ⑤ KV Cache -->
+    <!-- ⑤ KV Cache（可视化参考 kv_cache_demo） -->
     <section class="panel" id="panel-kv" data-step-count="5">
       <div class="panel-head">
         <h2 class="panel-title">第 ⑤ 章：KV Cache — 为什么生成越来越快？</h2>
@@ -2446,72 +3468,79 @@
           <div class="explain-anchor" data-explain-step="0">
             <div class="explain-slot"></div>
             <div class="anchor-body">
-              <div style="font-size:1.1rem;color:var(--muted);padding:0.5rem 0">生成时分两阶段：<strong style="color:#4ade80">Prefill</strong> 处理 prompt，<strong style="color:#4ade80">Decode</strong> 逐词生成</div>
+              <div class="kv-flow1">
+                <svg class="flines" viewBox="0 0 1120 300">
+                  <defs>
+                    <marker id="kv-mk-b" markerWidth="11" markerHeight="11" refX="5.5" refY="5.5" orient="auto"><path d="M1,1 L10,5.5 L1,10 Z" fill="var(--c-key)"/></marker>
+                    <marker id="kv-mk-o" markerWidth="11" markerHeight="11" refX="5.5" refY="5.5" orient="auto"><path d="M1,1 L10,5.5 L1,10 Z" fill="var(--c-value)"/></marker>
+                  </defs>
+                  <path d="M60,46 L1085,46" stroke="var(--border)" stroke-width="2" stroke-dasharray="7 6" fill="none"/>
+                  <line x1="108" y1="200" x2="108" y2="178" stroke="var(--c-key)" stroke-width="2" marker-end="url(#kv-mk-b)"/>
+                  <line x1="190" y1="200" x2="190" y2="178" stroke="var(--c-key)" stroke-width="2" marker-end="url(#kv-mk-b)"/>
+                  <line x1="272" y1="200" x2="272" y2="178" stroke="var(--c-key)" stroke-width="2" marker-end="url(#kv-mk-b)"/>
+                  <line x1="354" y1="200" x2="354" y2="178" stroke="var(--c-key)" stroke-width="2" marker-end="url(#kv-mk-b)"/>
+                  <line x1="436" y1="200" x2="436" y2="178" stroke="var(--c-key)" stroke-width="2" marker-end="url(#kv-mk-b)"/>
+                  <line x1="638" y1="200" x2="638" y2="178" stroke="var(--c-value)" stroke-width="2" marker-end="url(#kv-mk-o)"/>
+                  <line x1="813" y1="200" x2="813" y2="178" stroke="var(--c-value)" stroke-width="2" marker-end="url(#kv-mk-o)"/>
+                  <line x1="988" y1="200" x2="988" y2="178" stroke="var(--c-value)" stroke-width="2" marker-end="url(#kv-mk-o)"/>
+                  <path d="M460,110 L460,52 Q460,46 466,46 L549,46 Q555,46 555,52 L555,217 Q555,223 561,223 L597,223" fill="none" stroke="var(--c-key)" stroke-width="2.5" marker-end="url(#kv-mk-b)"/>
+                  <path d="M680,110 L680,52 Q680,46 686,46 L719,46 Q725,46 725,52 L725,217 Q725,223 731,223 L772,223" fill="none" stroke="var(--c-value)" stroke-width="2.5" marker-end="url(#kv-mk-o)"/>
+                  <path d="M855,110 L855,52 Q855,46 861,46 L894,46 Q900,46 900,52 L900,217 Q900,223 906,223 L947,223" fill="none" stroke="var(--c-value)" stroke-width="2.5" marker-end="url(#kv-mk-o)"/>
+                  <path d="M1030,110 L1030,52 Q1030,46 1036,46 L1069,46 Q1075,46 1075,52 L1075,194" fill="none" stroke="var(--c-value)" stroke-width="2.5" marker-end="url(#kv-mk-o)"/>
+                  <path d="M70,254 L70,261 L474,261 L474,254" fill="none" stroke="var(--c-key)" stroke-width="2"/>
+                  <path d="M600,254 L600,261 L1026,261 L1026,254" fill="none" stroke="var(--c-value)" stroke-width="2"/>
+                </svg>
+                <div class="frail-label" style="left:560px;width:520px;top:14px;">Autoregressive · 每生成一个字，都接回输入再生成下一个</div>
+                <div class="fcanopy pre" style="left:188px;width:170px;top:56px;">
+                  <div class="ctitle">Prefill 预填充</div>
+                  <div class="csub">整段 prompt 一次前向</div>
+                </div>
+                <div class="fcanopy dec" style="left:738px;width:150px;top:56px;">
+                  <div class="ctitle">Decode 解码</div>
+                  <div class="csub">一次写一个字</div>
+                </div>
+                <div class="fbox pre" style="left:58px;top:110px;width:430px;height:64px;">Transformer</div>
+                <div class="fbox dec" style="left:578px;top:110px;width:120px;height:64px;">Transformer</div>
+                <div class="fbox dec" style="left:753px;top:110px;width:120px;height:64px;">Transformer</div>
+                <div class="fbox dec" style="left:928px;top:110px;width:120px;height:64px;">Transformer</div>
+                <div class="fchip pp" style="left:70px;top:200px;">喜欢</div>
+                <div class="fchip pp" style="left:152px;top:200px;">唱</div>
+                <div class="fchip pp" style="left:234px;top:200px;">跳</div>
+                <div class="fchip pp" style="left:316px;top:200px;">Rap</div>
+                <div class="fchip pp" style="left:398px;top:200px;">还有</div>
+                <div class="fchip gg" style="left:600px;top:200px;">篮球</div>
+                <div class="fchip gg" style="left:775px;top:200px;">music</div>
+                <div class="fchip gg" style="left:950px;top:200px;">起</div>
+                <div class="fellip" style="left:1063px;top:200px;">…</div>
+                <div class="fblabel pp" style="left:70px;width:404px;top:266px;">你发来的提示词</div>
+                <div class="fblabel gg" style="left:600px;width:426px;top:266px;">模型逐字生成的回答</div>
+              </div>
+              <div class="kv-banner">每个新字都基于<b>前面全部内容</b>；KV Cache 优化的，是 Decode 阶段不必重复算历史词的 K、V</div>
+              <div class="kv-speedup">
+                <span class="cmpx-tag">单步复杂度</span>
+                <span class="cmpx-no">O(N<sup>2</sup>)</span>
+                <span class="cmpx-arr">⟶</span>
+                <span class="cmpx-yes">O(N)</span>
+                <span class="cmpx-mult">有 Cache 后每步快 N 倍</span>
+              </div>
+              <p class="cmpx-legend" style="margin:8px auto 0;font-size:0.72rem;color:var(--muted);text-align:center;max-width:1120px">N = 当前上下文长度（prompt + 已生成）</p>
             </div>
           </div>
           <div class="explain-anchor" data-explain-step="1">
             <div class="explain-slot"></div>
-            <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="1">Prefill · 算 K</div>
-              <div class="fc-row">
-                <div class="fc-node" data-step="1"><div class="matrix c-input" data-r="5" data-c="8"></div><span class="matrix-label">prompt</span><span class="dim-hint">N×d</span></div>
-                <div class="fc-op" data-step="1">×</div>
-                <div class="fc-node" data-step="1"><div class="matrix c-key" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>K</sub></span></div>
-                <div class="fc-op" data-step="1">→</div>
-                <div class="fc-node" data-step="2"><div class="matrix c-key" data-r="5" data-c="6"></div><span class="matrix-label">K</span></div>
-              </div>
-            </div>
+            <div class="anchor-body"><div class="kv-diagram-mount" data-kv-step="1"></div></div>
           </div>
           <div class="explain-anchor" data-explain-step="2">
             <div class="explain-slot"></div>
-            <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="2">Prefill · 算 V 并写入 Cache</div>
-              <div class="fc-row">
-                <div class="fc-node" data-step="1"><div class="matrix c-input" data-r="5" data-c="8"></div><span class="matrix-label">prompt</span></div>
-                <div class="fc-op" data-step="1">×</div>
-                <div class="fc-node" data-step="1"><div class="matrix c-value" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>V</sub></span></div>
-                <div class="fc-op" data-step="2">→</div>
-                <div class="fc-node" data-step="2">
-                  <div class="kv-cache-box">
-                    <div class="kv-title">KV Cache</div>
-                    <div class="kv-inner">
-                      <div><div class="matrix c-key" data-r="5" data-c="4"></div><span class="dim-hint">cached K</span></div>
-                      <div><div class="matrix c-value" data-r="5" data-c="4"></div><span class="dim-hint">cached V</span></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="anchor-body"><div class="kv-diagram-mount" data-kv-step="2"></div></div>
           </div>
           <div class="explain-anchor" data-explain-step="3">
             <div class="explain-slot"></div>
-            <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="3">Decode · 新词算 q</div>
-              <div class="fc-row">
-                <div class="fc-node" data-step="3"><div class="matrix c-input" data-r="1" data-c="8"></div><span class="matrix-label">new token</span><span class="dim-hint">1×d</span></div>
-                <div class="fc-op" data-step="3">×</div>
-                <div class="fc-node" data-step="3"><div class="matrix c-query" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>Q</sub></span></div>
-                <div class="fc-op" data-step="3">=</div>
-                <div class="fc-node" data-step="3"><div class="matrix c-query" data-r="1" data-c="6"></div><span class="matrix-label">q</span></div>
-              </div>
-            </div>
+            <div class="anchor-body"><div class="kv-diagram-mount" data-kv-step="3"></div></div>
           </div>
           <div class="explain-anchor" data-explain-step="4">
             <div class="explain-slot"></div>
-            <div class="anchor-body">
-              <div class="canvas-zone-label" data-zone="4">Decode · 追加 K/V，读 Cache 出词</div>
-              <div class="fc-row">
-                <div class="fc-node" data-step="4"><div class="matrix c-query" data-r="1" data-c="6"></div><span class="matrix-label">q</span></div>
-                <div class="fc-op" data-step="4">×</div>
-                <div class="fc-node" data-step="4"><div class="matrix c-key" data-r="6" data-c="4"></div><span class="matrix-label">cached K<sup>T</sup></span></div>
-                <div class="fc-op" data-step="4">→</div>
-                <div class="fc-node" data-step="4"><span class="fc-box" style="background:rgba(168,85,247,0.15);color:#c084fc;border-color:rgba(168,85,247,0.4)">softmax</span></div>
-                <div class="fc-op" data-step="4">×</div>
-                <div class="fc-node" data-step="4"><div class="matrix c-value" data-r="6" data-c="4"></div><span class="matrix-label">cached V</span></div>
-                <div class="fc-op" data-step="4">→</div>
-                <div class="fc-node" data-step="4"><span class="fc-box" style="background:rgba(34,197,94,0.15);color:#4ade80;border-color:rgba(34,197,94,0.45)">下一个词</span></div>
-              </div>
-            </div>
+            <div class="anchor-body"><div class="kv-diagram-mount" data-kv-step="4"></div></div>
           </div>
         </div>
       </div>
@@ -3425,9 +4454,16 @@
       });
     }
 
-    function buildExplainHTML(e, step, total) {
-      var html = '<div class="explain-box">' +
-        '<h3 class="explain-title">' + e.title + '</h3>';
+    function buildExplainHTML(e, step, total, panelId) {
+      var meta = CHAPTER_META[panelId];
+      var html = '<div class="explain-box ch-theme-' + (meta ? meta.theme : 'overview') + '">';
+      if (meta) {
+        html += '<div class="explain-chapter-badge ch-theme-' + meta.theme + '">' +
+          '<span class="ecb-num">' + meta.num + '</span>' +
+          '<span class="ecb-label">' + meta.label + '</span>' +
+          '<span class="ecb-step">步骤 ' + (step + 1) + '/' + total + '</span></div>';
+      }
+      html += '<h3 class="explain-title">' + e.title + '</h3>';
       if (e.plain) html += '<p class="explain-plain">' + e.plain + '</p>';
       if (e.analogy) html += '<p class="explain-analogy"><b>生活类比</b>' + e.analogy + '</p>';
       html += '<p class="explain-body">' + e.body + '</p>';
@@ -3440,6 +4476,159 @@
       if (e.la) html += '<div class="la-note"><div class="la-heading">线性代数读法</div><div class="la-body">' + e.la + '</div></div>';
       html += '</div>';
       return html;
+    }
+
+    /* ── KV Cache 全景图（来自 kv_cache_demo）── */
+    var KVF_HTML = (
+      '<div class="kvf">' +
+      '<svg class="kvf-svg" viewBox="0 0 1180 730">' +
+      '<defs>' +
+      '<marker id="kvf-ar-gr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10 Z" fill="var(--muted)"/></marker>' +
+      '<marker id="kvf-ar-yel" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10 Z" fill="#fbbf24"/></marker>' +
+      '</defs>' +
+      '<path class="kvf-path" data-kv-hi="pf-q" d="M134,180 L134,70 L165,70" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="pf-k" d="M134,180 L165,180" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="pf-v" d="M134,180 L134,290 L165,290" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="pf-q" d="M319.5,70 L780,70 L780,150 L800,150" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="pf-out" d="M1030,180 L1040,180" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="cache-write" d="M319.5,180 L400,180 L400,225" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#kvf-ar-yel)"/>' +
+      '<path class="kvf-path" data-kv-hi="cache-write" d="M319.5,290 L400,290" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#kvf-ar-yel)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-q" d="M134,580 L134,480 L165,480" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-k" d="M134,580 L165,580" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-v" d="M134,580 L134,680 L165,680" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-q" d="M319.5,480 L780,480 L780,550 L800,550" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-out" d="M1030,580 L1040,580" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-append" d="M319.5,580 L535,580 L535,385" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#kvf-ar-yel)"/>' +
+      '<path class="kvf-path" data-kv-hi="dec-append" d="M319.5,680 L585.5,680 L585.5,385" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#kvf-ar-yel)"/>' +
+      '<path class="kvf-path" data-kv-hi="cache-read" d="M700,305 L750,305 L750,180 L800,180" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '<path class="kvf-path" data-kv-hi="cache-read" d="M700,305 L750,305 L750,580 L800,580" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#kvf-ar-gr)"/>' +
+      '</svg>' +
+      '<div class="kvf-sec" data-kv-hi="pf" style="left:14px;top:8px;">Prefill 阶段</div>' +
+      '<div class="kvf-mtx m-input" data-kv-hi="pf" style="left:50px;top:116px;"><span class="glabel">prompt</span><div class="kv-grid" data-kv-grid="6,4,c-k"></div></div>' +
+      '<div class="kvf-op" data-kv-hi="pf" style="left:120px;top:166px;width:28px;height:28px;font-size:24px;">×</div>' +
+      '<div class="kvf-mtx m-wq" data-kv-hi="pf-q" style="left:160px;top:20px;"><span class="glabel">wQ</span><div class="kv-grid" data-kv-grid="4,4,c-q"></div></div>' +
+      '<div class="kvf-mtx m-wk" data-kv-hi="pf-k" style="left:160px;top:130px;"><span class="glabel">wK</span><div class="kv-grid" data-kv-grid="4,4,c-k"></div></div>' +
+      '<div class="kvf-mtx m-wv" data-kv-hi="pf-v" style="left:160px;top:240px;"><span class="glabel">wV</span><div class="kv-grid" data-kv-grid="4,4,c-v"></div></div>' +
+      '<div class="kvf-op" data-kv-hi="pf-q" style="left:232px;top:60px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-op" data-kv-hi="pf-k" style="left:232px;top:170px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-op" data-kv-hi="pf-v" style="left:232px;top:280px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-mtx m-rq" data-kv-hi="pf-q" style="left:260px;top:24px;"><div class="kv-grid" data-kv-grid="6,4,c-q"></div></div>' +
+      '<div class="kvf-mtx m-rk" data-kv-hi="pf-k" style="left:260px;top:134px;"><div class="kv-grid" data-kv-grid="6,4,c-k"></div></div>' +
+      '<div class="kvf-mtx m-rv" data-kv-hi="pf-v" style="left:260px;top:244px;"><div class="kv-grid" data-kv-grid="6,4,c-v"></div></div>' +
+      '<div class="kvf-node kvf-attn" data-kv-hi="pf-out" style="left:800px;top:140px;width:230px;height:80px;">' +
+      '\\(\\text{softmax}\\!\\left(\\frac{\\textcolor{#9333ea}{Q}\\textcolor{#0891b2}{K^{\\top}}}{\\sqrt{d_k}}\\right)\\textcolor{#ea580c}{V}\\)</div>' +
+      '<div class="kvf-lbl" data-kv-hi="pf-out" style="left:1040px;top:173px;">→ output</div>' +
+      '<div class="kvf-cache" data-kv-hi="cache" style="left:400px;top:225px;width:300px;height:160px;"></div>' +
+      '<div class="kvc-label" data-kv-hi="cache" style="left:495px;top:234px;font-size:17px;">KV Cache</div>' +
+      '<div class="kvf-mtx m-Krow" data-kv-hi="cache" style="left:440px;top:258px;z-index:3;"><span class="glabel">cached K (Kᵀ)</span><div class="kv-grid" data-kv-grid="4,7,c-k" data-kv-new-col="6" data-kv-new-cls="c-newk"></div></div>' +
+      '<div class="kvf-mtx m-Vrow" data-kv-hi="cache" style="left:580px;top:258px;z-index:3;"><span class="glabel">cached V</span><div class="kv-grid" data-kv-grid="7,4,c-v" data-kv-new-row="6" data-kv-new-cls="c-new"></div></div>' +
+      '<div class="kvf-loop" data-kv-hi="dec" style="left:14px;top:415px;width:1150px;height:305px;"></div>' +
+      '<div class="kvf-loop-tag" data-kv-hi="dec" style="right:30px;bottom:9px;">loop</div>' +
+      '<div class="kvf-sec" data-kv-hi="dec" style="left:14px;top:410px;">Decode 阶段</div>' +
+      '<div class="kvf-mtx m-input" data-kv-hi="dec-in" style="left:50px;top:551px;"><span class="glabel">new</span><div class="kv-grid" data-kv-grid="1,4,c-k"></div></div>' +
+      '<div class="kvf-op" data-kv-hi="dec-in" style="left:120px;top:566px;width:28px;height:28px;font-size:24px;">×</div>' +
+      '<div class="kvf-mtx m-wq" data-kv-hi="dec-q" style="left:160px;top:430px;"><span class="glabel">wQ</span><div class="kv-grid" data-kv-grid="4,4,c-q"></div></div>' +
+      '<div class="kvf-mtx m-wk" data-kv-hi="dec-k" style="left:160px;top:530px;"><span class="glabel">wK</span><div class="kv-grid" data-kv-grid="4,4,c-k"></div></div>' +
+      '<div class="kvf-mtx m-wv" data-kv-hi="dec-v" style="left:160px;top:630px;"><span class="glabel">wV</span><div class="kv-grid" data-kv-grid="4,4,c-v"></div></div>' +
+      '<div class="kvf-op" data-kv-hi="dec-q" style="left:232px;top:470px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-op" data-kv-hi="dec-k" style="left:232px;top:570px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-op" data-kv-hi="dec-v" style="left:232px;top:670px;width:24px;height:20px;font-size:19px;">=</div>' +
+      '<div class="kvf-mtx m-rq" data-kv-hi="dec-q" style="left:260px;top:451px;"><span class="glabel">q</span><div class="kv-grid" data-kv-grid="1,4,c-q"></div></div>' +
+      '<div class="kvf-mtx m-rk" data-kv-hi="dec-k" style="left:260px;top:551px;"><span class="glabel">k_new</span><div class="kv-grid" data-kv-grid="1,4,c-k"></div></div>' +
+      '<div class="kvf-mtx m-rv" data-kv-hi="dec-v" style="left:260px;top:651px;"><span class="glabel">v_new</span><div class="kv-grid" data-kv-grid="1,4,c-v"></div></div>' +
+      '<div class="kvf-node kvf-attn" data-kv-hi="dec-out" style="left:800px;top:540px;width:230px;height:80px;">' +
+      '\\(\\text{softmax}\\!\\left(\\frac{\\textcolor{#9333ea}{q}\\textcolor{#0891b2}{K^{\\top}}}{\\sqrt{d_k}}\\right)\\textcolor{#ea580c}{V}\\)</div>' +
+      '<div class="kvf-lbl" data-kv-hi="dec-out" style="left:1040px;top:573px;">→ output</div>' +
+      '</div>'
+    );
+
+    var KV_STEP_HI = {
+      1: ['pf', 'pf-k'],
+      2: ['pf-k', 'pf-v', 'cache', 'cache-write'],
+      3: ['dec', 'dec-in', 'dec-q'],
+      4: ['dec', 'dec-in', 'dec-q', 'dec-k', 'dec-v', 'dec-append', 'cache-read', 'cache', 'dec-out']
+    };
+
+    function fillKvGrid(el) {
+      if (!el || el.dataset.kvFilled) return;
+      var parts = (el.dataset.kvGrid || '').split(',');
+      if (parts.length < 3) return;
+      var rows = +parts[0], cols = +parts[1], cls = parts[2];
+      var newRow = el.dataset.kvNewRow !== undefined ? +el.dataset.kvNewRow : undefined;
+      var newCol = el.dataset.kvNewCol !== undefined ? +el.dataset.kvNewCol : undefined;
+      var newCls = el.dataset.kvNewCls || cls;
+      el.style.gridTemplateColumns = 'repeat(' + cols + ',1fr)';
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var cell = document.createElement('div');
+          var k = cls;
+          if (newRow !== undefined && r === newRow) k = newCls;
+          if (newCol !== undefined && c === newCol) k = newCls;
+          cell.className = 'cell ' + k;
+          el.appendChild(cell);
+        }
+      }
+      el.dataset.kvFilled = '1';
+    }
+
+    function renderKvMath(root) {
+      if (!root) return;
+      if (typeof renderMathInElement !== 'function') {
+        window.addEventListener('load', function () { renderKvMath(root); }, { once: true });
+        return;
+      }
+      renderMathInElement(root, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\(', right: '\\)', display: false }
+        ],
+        throwOnError: false
+      });
+    }
+
+    function applyKvHighlight(kvf, step) {
+      if (!kvf) return;
+      var keys = KV_STEP_HI[step] || [];
+      kvf.querySelectorAll('[data-kv-hi]').forEach(function (el) {
+        var hi = el.dataset.kvHi;
+        var on = keys.indexOf(hi) >= 0;
+        el.classList.toggle('kvf-hi', on);
+        el.classList.toggle('kvf-dim', !on);
+      });
+    }
+
+    function renderVizMath(panel) {
+      if (!panel) return;
+      panel.querySelectorAll('.viz-formula-box').forEach(function (el) {
+        if (!el.dataset.kvMath) {
+          renderKvMath(el);
+          el.dataset.kvMath = '1';
+        }
+      });
+    }
+
+    function enhanceVizPanel(panel) {
+      if (!panel || panel.id === 'panel-overview' || panel.id === 'panel-kv') return;
+      renderVizMath(panel);
+    }
+
+    function injectKvDiagrams(panel) {
+      if (!panel || panel.id !== 'panel-kv') return;
+      panel.querySelectorAll('.kv-diagram-mount').forEach(function (mount) {
+        if (!mount.dataset.kvBuilt) {
+          var uid = 'kvf' + Math.random().toString(36).slice(2, 8);
+          var html = KVF_HTML
+            .replace(/id="kvf-ar-gr"/g, 'id="' + uid + '-gr"')
+            .replace(/id="kvf-ar-yel"/g, 'id="' + uid + '-yel"')
+            .replace(/url\(#kvf-ar-gr\)/g, 'url(#' + uid + '-gr)')
+            .replace(/url\(#kvf-ar-yel\)/g, 'url(#' + uid + '-yel)');
+          mount.innerHTML = html;
+          mount.querySelectorAll('.kv-grid').forEach(fillKvGrid);
+          renderKvMath(mount);
+          mount.dataset.kvBuilt = '1';
+        }
+        applyKvHighlight(mount.querySelector('.kvf'), +mount.dataset.kvStep);
+      });
     }
 
     function setupFlowCanvas(panel) {
@@ -3513,7 +4702,13 @@
           var w = scaler.scrollWidth;
           var h = scaler.scrollHeight;
           if (!w || !h) return;
-          var scale = Math.min(1, availW / w, availH / h);
+          var maxScale = 1;
+          var pid = currentPanel.id;
+          if (pid === 'panel-la' || pid === 'panel-embed' || pid === 'panel-attn' || pid === 'panel-block') {
+            var cssMax = getComputedStyle(document.documentElement).getPropertyValue('--viz-diagram-max-scale').trim();
+            maxScale = parseFloat(cssMax) || 1.12;
+          }
+          var scale = Math.min(maxScale, availW / w, availH / h);
           scale = Math.max(0.35, Math.round(scale * 1000) / 1000);
           if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('zoom', '1')) {
             scaler.style.zoom = String(scale);
@@ -3534,22 +4729,34 @@
       });
     }
 
-    var CHAPTER_LABELS = {
-      'panel-overview': '全局地图',
-      'panel-la': '矩阵入门',
-      'panel-embed': '词变数字',
-      'panel-attn': 'Attention',
-      'panel-block': '一层积木',
-      'panel-kv': 'KV Cache'
+    var CHAPTER_META = {
+      'panel-overview': { num: '⓪', label: '全局地图', theme: 'overview' },
+      'panel-la': { num: '①', label: '矩阵入门', theme: 'la' },
+      'panel-embed': { num: '②', label: '词变数字', theme: 'embed' },
+      'panel-attn': { num: '③', label: 'Attention', theme: 'attn' },
+      'panel-block': { num: '④', label: '一层积木', theme: 'block' },
+      'panel-kv': { num: '⑤', label: 'KV Cache', theme: 'kv' }
     };
+    var CHAPTER_LABELS = {
+      'panel-overview': CHAPTER_META['panel-overview'].label,
+      'panel-la': CHAPTER_META['panel-la'].label,
+      'panel-embed': CHAPTER_META['panel-embed'].label,
+      'panel-attn': CHAPTER_META['panel-attn'].label,
+      'panel-block': CHAPTER_META['panel-block'].label,
+      'panel-kv': CHAPTER_META['panel-kv'].label
+    };
+
+    function setActiveChapterTheme(panelId) {
+      document.documentElement.setAttribute('data-chapter', panelId || 'panel-overview');
+    }
 
     function updateStepTitle(panel, step) {
       var titleEl = document.getElementById('step-title');
       var subEl = document.getElementById('step-meta-sub');
       if (!titleEl) return;
       if (panel.id === 'panel-overview') {
-        titleEl.textContent = '全局地图 · 先建立整体印象';
-        if (subEl) subEl.innerHTML = '<span id="step-counter">概览</span>';
+        titleEl.textContent = '⓪ 全局地图 · 先建立整体印象';
+        if (subEl) subEl.innerHTML = '<span id="step-counter">6 模块学习路径 · 概览</span>';
         return;
       }
       var items = EXPLAIN[panel.id];
@@ -3557,8 +4764,9 @@
         titleEl.textContent = items[step].title.replace(/<[^>]+>/g, '');
       }
       if (subEl) {
-        var chap = CHAPTER_LABELS[panel.id] || '';
-        subEl.innerHTML = chap + ' · 步骤 <span id="step-counter">' + (step + 1) + ' / ' + totalSteps + '</span>';
+        var meta = CHAPTER_META[panel.id];
+        var prefix = meta ? meta.num + ' ' + meta.label : CHAPTER_LABELS[panel.id] || '';
+        subEl.innerHTML = prefix + ' · 步骤 <span id="step-counter">' + (step + 1) + ' / ' + totalSteps + '</span>';
       }
     }
 
@@ -3569,7 +4777,7 @@
         var s = +anchor.dataset.explainStep;
         var slot = anchor.querySelector('.explain-slot');
         if (!slot || !items[s]) return;
-        slot.innerHTML = buildExplainHTML(items[s], s, items.length);
+        slot.innerHTML = buildExplainHTML(items[s], s, items.length, panel.id);
       });
     }
 
@@ -3613,6 +4821,11 @@
 
       updateStepTitle(panel, step);
 
+      if (panel.id === 'panel-kv' && step >= 1) {
+        var mount = panel.querySelector('.explain-anchor.is-active .kv-diagram-mount');
+        if (mount) applyKvHighlight(mount.querySelector('.kvf'), step);
+      }
+
       requestAnimationFrame(function () {
         fitActiveDiagram();
         if (panel.id === 'panel-attn') {
@@ -3655,6 +4868,7 @@
 
     function updateChapterProgress() {
       if (!currentPanel) return;
+      setActiveChapterTheme(currentPanel.id);
       var idx = PANEL_ORDER.indexOf(currentPanel.id);
       document.querySelectorAll('.chapter-pill').forEach(function (cp, i) {
         cp.classList.toggle('active', PANEL_ORDER[i] === currentPanel.id);
@@ -3663,6 +4877,7 @@
     }
 
     function switchPanel(pid) {
+      setActiveChapterTheme(pid);
       document.querySelectorAll('.chapter-pill').forEach(function (cp) {
         cp.classList.toggle('active', cp.dataset.panel === pid);
       });
@@ -3731,6 +4946,8 @@
       }
       setupFlowCanvas(panel);
       injectBlockDiagrams(panel);
+      injectKvDiagrams(panel);
+      enhanceVizPanel(panel);
       fillPanelMatrices(panel);
       if (panel.id !== 'panel-overview') buildDots(totalSteps);
       goToStep(0);
@@ -3982,6 +5199,8 @@
       }
       setupFlowCanvas(p);
       injectBlockDiagrams(p);
+      injectKvDiagrams(p);
+      enhanceVizPanel(p);
       fillPanelMatrices(p);
     });
 
