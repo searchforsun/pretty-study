@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<!-- 生成日期：2026-06-12 | 源：学习计划 | 输出：html/5.html | 格式：minimal 统一壳（对齐第1章） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoRA微调原理与实战 | 大模型应用开发者必备</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('llm-doc-theme');
+            document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+    <style>
+        :root, [data-theme="light"] {
+            color-scheme: light;
+            --bg: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-code: #1f2937;
+            --fg: #333;
+            --fg-heading: #1f2937;
+            --fg-muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #3b82f6;
+            --primary-soft: #eff6ff;
+            --topbar-bg: rgba(255,255,255,0.92);
+            --shadow: rgba(0,0,0,0.05);
+            --highlight-bg: #eff6ff;
+            --note-bg: #fffbeb;
+            --note-border: #f59e0b;
+            --resource-bg: #f0fdf4;
+            --resource-border: #10b981;
+            --app-bg: #fdf2f8;
+            --app-border: #ec4899;
+            --faq-bg: #f5f3ff;
+            --faq-border: #8b5cf6;
+            --exercise-bg: #f0f9ff;
+            --exercise-border: #bae6fd;
+            --quiz-bg: #fef3c7;
+            --quiz-border: #fcd34d;
+            --formula-bg: #f9fafb;
+            --toc-bg: #f8fafc;
+            --slider-track: #dbeafe;
+            --bar-low: #93c5fd;
+            --bar-high: #1d4ed8;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0f1419;
+            --bg-card: #1a2332;
+            --bg-code: #0d1117;
+            --fg: #e2e8f0;
+            --fg-heading: #f1f5f9;
+            --fg-muted: #94a3b8;
+            --border: #2d3748;
+            --primary: #60a5fa;
+            --primary-soft: rgba(59,130,246,0.15);
+            --topbar-bg: rgba(15,20,25,0.95);
+            --shadow: rgba(0,0,0,0.3);
+            --highlight-bg: rgba(59,130,246,0.12);
+            --note-bg: rgba(245,158,11,0.1);
+            --note-border: #f59e0b;
+            --resource-bg: rgba(16,185,129,0.1);
+            --resource-border: #10b981;
+            --app-bg: rgba(236,72,153,0.1);
+            --app-border: #ec4899;
+            --faq-bg: rgba(139,92,246,0.1);
+            --faq-border: #8b5cf6;
+            --exercise-bg: rgba(59,130,246,0.08);
+            --exercise-border: rgba(59,130,246,0.35);
+            --quiz-bg: rgba(245,158,11,0.1);
+            --quiz-border: rgba(245,158,11,0.4);
+            --formula-bg: #141c28;
+            --toc-bg: #141c28;
+            --slider-track: #1e3a5f;
+            --bar-low: #3b82f6;
+            --bar-high: #93c5fd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--fg);
+            background: var(--bg);
+            padding: 4.5rem 20px 40px;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--fg-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 55vw;
+        }
+
+        .topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .btn-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--fg);
+        }
+
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+        .layout {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--fg-heading);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--fg-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .summary {
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+
+        .summary h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+            color: var(--fg-heading);
+        }
+
+        .summary ul { margin: 0; padding-left: 1.25rem; }
+        .summary li { margin-bottom: 0.35rem; }
+
+        .toc {
+            background: var(--toc-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+        }
+
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--fg-heading);
+            margin: 2rem 0 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--fg-heading);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            color: var(--fg-heading);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        p { margin-bottom: 1rem; }
+
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.45rem; }
+
+        .table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px var(--shadow);
+            font-size: 0.92rem;
+        }
+
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: var(--toc-bg); font-weight: 600; }
+
+        .code-block {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        pre:not(.mermaid) {
+            background: var(--bg-code);
+            color: #f9fafb;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: 6px;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .code-block pre code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.88rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e5e7eb;
+            border-radius: 4px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .highlight, .note, .resource, .application-value, .faq {
+            padding: 1rem 1.15rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .highlight { background: var(--highlight-bg); border-left: 4px solid var(--primary); }
+        .note { background: var(--note-bg); border-left: 4px solid var(--note-border); }
+        .resource { background: var(--resource-bg); border-left: 4px solid var(--resource-border); }
+        .application-value { background: var(--app-bg); border-left: 4px solid var(--app-border); }
+        .faq { background: var(--faq-bg); border-left: 4px solid var(--faq-border); }
+        .term-ref td:first-child,
+        .term-ref th:first-child {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+
+        .section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.05rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--formula-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .exercise {
+            background: var(--exercise-bg);
+            border: 1px solid var(--exercise-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz {
+            background: var(--quiz-bg);
+            border: 1px solid var(--quiz-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz details {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .quiz summary { cursor: pointer; font-weight: 600; color: var(--fg-heading); }
+
+        
+
+        .demo-panel {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .demo-panel label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .demo-panel input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .prob-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .prob-row {
+            display: grid;
+            grid-template-columns: 3.5rem 1fr 3rem;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .prob-bar {
+            height: 18px;
+            border-radius: 3px;
+            background: var(--slider-track);
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--bar-low), var(--bar-high));
+            border-radius: 3px;
+            transition: width 0.25s ease;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 640px) {
+            .compare-grid { grid-template-columns: 1fr; }
+            body { padding-top: 4rem; }
+        }
+
+        .compare-card {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .compare-card h4 { margin-top: 0; }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            margin-right: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-footer a { margin: 0 0.5rem; }
+        .intro {
+            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--resource-bg) 100%);
+            border: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .intro-meta span {
+            background: var(--bg-card);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .toc ol.toc-cols { columns: 2; column-gap: 2rem; }
+        @media (max-width: 640px) { .toc ol.toc-cols { columns: 1; } }
+
+        .diagram, .flowchart {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 0.85rem;
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        .flowchart { padding: 1.25rem; }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            margin-right: 0.25rem;
+        }
+
+        .tag-blue { background: var(--primary-soft); color: var(--primary); }
+
+        details:not(.quiz details) {
+            margin: 0.75rem 0;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        details:not(.quiz details) summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--fg-heading);
+        }
+
+        .quiz-answer { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--quiz-border); }
+
+    
+    
+    
+    
+        :root, [data-theme="light"], [data-theme="dark"] {
+            --accent: var(--primary);
+            --card: var(--bg-card);
+        }
+        pre.mermaid {
+            background: transparent !important;
+            color: var(--fg);
+            padding: 0 !important;
+            border-radius: 0;
+            overflow: visible;
+        }
+        
+        .mermaid-toolbar {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            z-index: 2;
+        }
+        .mermaid-fs-btn {
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .mermaid-fs-btn:hover { border-color: var(--accent); }
+        .mermaid { margin: 0; text-align: center; }
+        .mermaid-wrap:fullscreen, .mermaid-wrap.is-pseudo-fullscreen {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            padding: 2.5rem 1rem 1rem;
+            overflow: auto;
+        }
+        .mermaid-wrap:fullscreen { border-radius: 0; width: 100%; height: 100%; margin: 0; }
+        .mermaid-wrap.is-pseudo-fullscreen {
+            position: fixed; inset: 0; z-index: 10000; margin: 0; border-radius: 0; border: none;
+        }
+        .mermaid-wrap:fullscreen .mermaid-toolbar,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid-toolbar {
+            position: fixed; top: 0.65rem; right: 0.65rem;
+        }
+        .mermaid-wrap:fullscreen .mermaid,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid {
+            flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto;
+        }
+        details.ascii-fallback { margin-bottom: 1rem; }
+        details.ascii-fallback summary {
+            cursor: pointer; color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 0.5rem;
+        }
+
+    
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <span class="topbar-title">第5章 · LoRA微调原理与实战</span>
+        <div class="topbar-actions">
+            <button type="button" class="btn-icon" id="themeBtn" aria-label="切换明暗主题">浅色</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <h1>LoRA微调原理与实战（应用导向）</h1>
+
+        <div class="intro">
+        <p><strong>本章定位：</strong>参数高效微调、QLoRA 与领域适配——在有限算力下让模型学会你的格式、术语与业务话术。</p>
+        <div class="intro-meta">
+            <span>⏱ 建议学习 3～4 小时</span>
+            <span>📖 第 5 课 / 共 7 课</span>
+            <span>🎯 目标：完成 LoRA/QLoRA 微调与合并部署</span>
+        </div>
+        </div>
+
+        <nav class="toc" aria-label="章节目录">
+            <h2>本章目录</h2>
+        <ol>
+            <li><a href="#sec1">LoRA核心原理</a></li>
+            <li><a href="#sec2">微调能解决什么，不能解决什么</a></li>
+            <li><a href="#sec3">微调完整流程</a></li>
+            <li><a href="#sec4">部署与常见问题排查</a></li>
+        </ol>
+        </nav>
+
+        <div class="section" id="sec1">
+        <h2>一、LoRA核心原理</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>PEFT（参数高效微调）</strong>：只训练模型的一小部分参数，而不是全部参数的微调方法。</p>
+        <p><strong>LoRA（低秩适应）</strong>：最流行的PEFT方法，通过在注意力层添加低秩矩阵来微调模型。</p>
+        <p><strong>QLoRA</strong>：LoRA的改进版，支持在4-bit量化的模型上进行微调，大幅降低显存需求。</p>
+
+                <h3>🔤 英文名称速查</h3>
+        <div class="table-wrap term-ref"><table>
+            <tr><th>名称</th><th>是什么 / 干什么</th></tr>
+            <tr><td><strong>rank (r) / alpha</strong></td><td>LoRA 低秩维度与缩放系数；常见 r=8~32，alpha=2×rank</td></tr>
+            <tr><td><strong>target_modules</strong></td><td>注入 LoRA 的层名列表，如 q_proj,v_proj 或 all</td></tr>
+            <tr><td><strong>q_proj / v_proj / o_proj</strong></td><td>Attention 的 Q/V/输出线性层；LoRA 最常改这些投影</td></tr>
+            <tr><td><strong>gate_proj / up_proj / down_proj</strong></td><td>SwiGLU FFN 的三层线性层；复杂格式任务可一并 LoRA</td></tr>
+            <tr><td><strong>PeftModel</strong></td><td>HuggingFace PEFT 包装类，在基座模型上挂载 LoRA adapter</td></tr>
+            <tr><td><strong>merge_and_unload()</strong></td><td>把 LoRA 权重合并进基座并卸载 adapter，得到可独立部署的完整模型</td></tr>
+            <tr><td><strong>quantization_bit=4</strong></td><td>LLaMA Factory 等配置项：QLoRA 以 4-bit 加载基座权重</td></tr>
+            <tr><td><strong>cutoff_len</strong></td><td>单条训练样本截断的最大 token 长度</td></tr>
+            <tr><td><strong>gradient_accumulation_steps</strong></td><td>梯度累积步数；小 batch 多次累积再更新，等效更大 batch</td></tr>
+            <tr><td><strong>instruction / input / output</strong></td><td>Alpaca 格式三字段：任务说明、可选输入、理想回答</td></tr>
+        </table></div>
+
+                <h3>核心原理</h3>
+        <div class="flowchart">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>原始线性层：        h = W · x          （W 维度 d×d，参数量大）
+
+LoRA 并联分支：      h = W·x + (α/r)·B·A·x
+                     ├─ W：冻结，不参与训练
+                     ├─ A：d×r（降维，随机初始化）
+                     ├─ B：r×d（升维，零初始化，训练初期 ΔW≈0）
+                     └─ α/r：缩放系数，控制 LoRA 更新幅度
+
+推理合并：           W' = W + (α/r)·BA   →  h = W'·x  （与原始单层矩阵乘等价）</code></pre></div>
+        </div>
+
+                <h3>为什么「低秩」有效？</h3>
+        <p>大模型在下游任务上的权重更新往往具有<strong>低内在维度</strong>——真正需要改变的自由度远小于 d×d。用 rank=r 的小矩阵近似 ΔW，相当于用 r 个「方向」捕捉任务适配，参数量从 O(d²) 降到 O(2dr)。实践中 r=8~32 已能覆盖大多数应用微调需求。</p>
+
+                <h3>LoRA 注入位置（target_modules）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>目标模块</th>
+                <th>说明</th>
+                <th>推荐场景</th>
+            </tr>
+            <tr>
+                <td><strong>q_proj, v_proj</strong></td>
+                <td>论文默认，只改 Query 与 Value 投影</td>
+                <td>显存紧张、快速验证</td>
+            </tr>
+            <tr>
+                <td><strong>q/k/v/o_proj</strong></td>
+                <td>注意力四个投影全开</td>
+                <td>通用首选，效果更稳</td>
+            </tr>
+            <tr>
+                <td><strong>+ gate/up/down_proj</strong></td>
+                <td>含 FFN（SwiGLU）线性层</td>
+                <td>复杂任务、格式强约束</td>
+            </tr>
+        </table></div>
+
+                <h3>QLoRA 三件套</h3>
+        <ul>
+            <li><strong>4-bit NF4 量化</strong>：将基座权重量化到 4bit，显存约为 FP16 的 1/4</li>
+            <li><strong>双重量化</strong>：对量化常数再次量化，进一步省显存</li>
+            <li><strong>分页优化器</strong>：训练状态溢出时换页到 CPU，避免 OOM</li>
+        </ul>
+
+                <h3>核心公式</h3>
+        <div class="highlight">
+            <strong>LoRA核心公式（只记意义，不记推导）：</strong>
+            <div class="formula">
+                <code>h = Wx + BAx</code>
+            </div>
+            <p><strong>公式解释：</strong></p>
+            <ul>
+                <li>输入：x(输入向量)、W(原模型权重矩阵)</li>
+                <li>新增：A(d×r)、B(r×d)，r ≪ d；缩放系数 α 通常取 2r</li>
+                <li>有效更新幅度：<code>ΔW = (α/r) · BA</code></li>
+                <li>输出：h(输出向量)</li>
+                <li>物理意义：训练只更新 A、B；推理前合并进 W，计算路径与全量微调一致</li>
+            </ul>
+        </div>
+
+                <h3>LoRA vs 全量微调对比</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>方法</th>
+                <th>参数更新量</th>
+                <th>70B模型显存需求</th>
+                <th>效果</th>
+                <th>适用场景</th>
+            </tr>
+            <tr>
+                <td>全量微调</td>
+                <td>100%</td>
+                <td>>400GB</td>
+                <td>最好</td>
+                <td>基座模型二次开发</td>
+            </tr>
+            <tr>
+                <td>LoRA</td>
+                <td>~0.1%</td>
+                <td>~40GB</td>
+                <td>接近全量</td>
+                <td>大多数场景</td>
+            </tr>
+            <tr>
+                <td>QLoRA</td>
+                <td>~0.1%</td>
+                <td>~16GB</td>
+                <td>接近LoRA</td>
+                <td>消费级显卡微调</td>
+            </tr>
+        </table></div>
+
+                <div class="highlight">
+            <strong>重要结论：</strong>应用开发中<strong>只需要用LoRA/QLoRA</strong>，完全不需要全量微调。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能在消费级显卡上微调70B级别的大模型</li>
+                <li>能快速对模型进行风格和格式对齐</li>
+                <li>微调后的模型推理没有额外延迟</li>
+            </ul>
+        </div>
+
+                <h3>PEFT 方法速览</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>方法</th>
+                <th>思路</th>
+                <th>推理开销</th>
+                <th>应用推荐度</th>
+            </tr>
+            <tr>
+                <td><strong>LoRA</strong></td>
+                <td>低秩矩阵并联，可合并权重</td>
+                <td>无（合并后）</td>
+                <td>⭐⭐⭐ 首选</td>
+            </tr>
+            <tr>
+                <td><strong>QLoRA</strong></td>
+                <td>LoRA + 4bit 量化基座</td>
+                <td>无（合并后）</td>
+                <td>⭐⭐⭐ 消费级显卡</td>
+            </tr>
+            <tr>
+                <td><strong>Adapter</strong></td>
+                <td>层间插入小 MLP</td>
+                <td>有额外层</td>
+                <td>⭐ 研究向</td>
+            </tr>
+            <tr>
+                <td><strong>Prefix Tuning</strong></td>
+                <td>可学习前缀 token</td>
+                <td>占上下文长度</td>
+                <td>⭐ 特定场景</td>
+            </tr>
+        </table></div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么 LoRA 推理时没有额外延迟？</strong></p>
+            <p>A：部署前执行 <code>W' = W + (α/r)BA</code> 权重合并，前向只剩一次矩阵乘法，与原始模型结构相同。</p>
+            <p><strong>Q：rank 越大越好吗？</strong></p>
+            <p>A：不一定。r 增大提升表达能力，但 LoRA 文件变大、训练更慢，且易过拟合。多数任务 r=8~16 足够，复杂格式对齐可试 32~64。</p>
+            <p><strong>Q：LoRA 权重可以热插拔吗？</strong></p>
+            <p>A：可以。同一基座可挂载多套 LoRA（如「客服风格」「JSON 输出」），按场景切换 adapter，这是应用层的重要优势。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV13Y4y1v7zR/" target="_blank">LoRA原理详解</a>（播放量：40万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/621311830" target="_blank">知乎：LoRA低秩适应详解</a></p>
+            <p><strong>📄 论文：</strong><a href="https://arxiv.org/abs/2106.09685" target="_blank">LoRA: Low-Rank Adaptation of Large Language Models</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec2">
+        <h2>二、微调能解决什么，不能解决什么</h2>
+
+                <h3>微调能解决的问题</h3>
+        <ul>
+            <li>✅ <strong>风格对齐</strong>：让模型输出特定风格的文本（如客服、医生、律师）</li>
+            <li>✅ <strong>格式对齐</strong>：让模型严格输出特定格式（如JSON、XML、Markdown）</li>
+            <li>✅ <strong>术语对齐</strong>：让模型理解并使用特定领域的术语</li>
+            <li>✅ <strong>行为对齐</strong>：让模型遵循特定的指令和流程</li>
+        </ul>
+
+                <h3>微调不能解决的问题</h3>
+        <ul>
+            <li>❌ <strong>事实性错误</strong>：微调不能可靠地注入新的事实知识</li>
+            <li>❌ <strong>复杂推理能力</strong>：推理能力是预训练决定的</li>
+            <li>❌ <strong>长上下文能力</strong>：上下文窗口是模型架构决定的</li>
+        </ul>
+
+                <div class="highlight">
+            <strong>决策依据：</strong>需要事实准确性用 RAG，需要风格/格式/行为对齐用微调，简单任务优先 Prompt 工程。
+        </div>
+
+                <h3>技术选型决策表</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>需求类型</th>
+                <th>首选方案</th>
+                <th>原因</th>
+            </tr>
+            <tr>
+                <td>回答基于最新文档/私有知识</td>
+                <td>RAG</td>
+                <td>知识可更新，事实可追溯</td>
+            </tr>
+            <tr>
+                <td>固定输出 JSON/XML 结构</td>
+                <td>微调</td>
+                <td>格式约束需内化到模型行为</td>
+            </tr>
+            <tr>
+                <td>特定行业话术与语气</td>
+                <td>微调</td>
+                <td>风格对齐是微调强项</td>
+            </tr>
+            <tr>
+                <td>偶尔改个 Prompt 就能搞定</td>
+                <td>Prompt 工程</td>
+                <td>成本最低，迭代最快</td>
+            </tr>
+            <tr>
+                <td>既要私有知识又要固定格式</td>
+                <td>RAG + 微调</td>
+                <td>常见生产组合：RAG 供事实，微调管格式</td>
+            </tr>
+        </table></div>
+
+                <h3>数据集质量检查清单</h3>
+        <ul>
+            <li>✅ 每条样本 instruction 清晰、无歧义</li>
+            <li>✅ output 是「理想回答」而非模型随意生成</li>
+            <li>✅ 覆盖边界 case（空输入、超长输入、拒答场景）</li>
+            <li>✅ 同类问题表述多样化，避免模板化重复</li>
+            <li>❌ 避免直接粘贴 RAG 检索片段当 output（应教「怎么用上下文」）</li>
+        </ul>
+
+                <h3>LoRA 核心参数调参指南</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>参数</th>
+                <th>推荐值</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><strong>rank(r)</strong></td>
+                <td>8-32</td>
+                <td>越大效果越好，但训练越慢，文件越大</td>
+            </tr>
+            <tr>
+                <td><strong>alpha</strong></td>
+                <td>2*rank</td>
+                <td>通常设置为rank的2倍</td>
+            </tr>
+            <tr>
+                <td><strong>学习率</strong></td>
+                <td>1e-4 - 3e-4</td>
+                <td>QLoRA建议使用2e-4</td>
+            </tr>
+            <tr>
+                <td><strong>训练轮数</strong></td>
+                <td>3-5</td>
+                <td>超过会过拟合</td>
+            </tr>
+            <tr>
+                <td><strong>批次大小</strong></td>
+                <td>4-16</td>
+                <td>根据显存调整；有效 batch = batch × gradient_accumulation_steps</td>
+            </tr>
+            <tr>
+                <td><strong>target_modules</strong></td>
+                <td>q/k/v/o_proj</td>
+                <td>显存不足时先只开 q_proj,v_proj</td>
+            </tr>
+            <tr>
+                <td><strong>lora_dropout</strong></td>
+                <td>0.05-0.1</td>
+                <td>小数据集可适当提高防过拟合</td>
+            </tr>
+            <tr>
+                <td><strong>max_seq_length</strong></td>
+                <td>2048-4096</td>
+                <td>按任务最长样本设定，过长浪费显存</td>
+            </tr>
+        </table></div>
+
+                <div class="note">
+            <strong>调参顺序建议：</strong>先保证数据质量 → 固定 r=8、epochs=3 跑通 → 效果不足再升 rank 或加 target_modules → 最后微调学习率。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能做出正确的技术选型：RAG vs 微调</li>
+                <li>能根据任务需求设置合适的微调参数</li>
+                <li>能避免微调的常见陷阱</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么我的微调效果很差？</strong></p>
+            <p>A：90% 是数据问题。100 条人工精标 > 10000 条 GPT 批量生成。检查 output 是否一致、是否漏掉拒答样本。</p>
+            <p><strong>Q：微调后模型变「傻」了怎么办？</strong></p>
+            <p>A：多为灾难性遗忘或过拟合。降低 epochs、减小 rank、混入 5%~10% 通用对话数据做混合训练。</p>
+            <p><strong>Q：该微调 7B 还是 70B？</strong></p>
+            <p>A：应用开发优先 7B~14B + QLoRA。70B 微调成本高，除非 7B 在评测集上确实达不到指标。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1aM411K7yQ/" target="_blank">大模型微调最佳实践</a>（播放量：30万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://huggingface.co/docs/peft/index" target="_blank">Hugging Face PEFT中文文档</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec3">
+        <h2>三、微调完整流程</h2>
+
+                <h3>微调完整步骤</h3>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">flowchart TB
+    S1["1. 准备数据集"] --> S2["2. 选择微调工具"]
+    S2 --> S3["3. 设置微调参数"]
+    S3 --> S4["4. 开始训练"]
+    S4 --> S5["5. 评估效果"]
+    S5 --> S6["6. 合并并部署"]
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+<div class="flowchart">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>1. 准备数据集（最重要）
+   ├─ 格式：instruction、input、output
+   └─ 数量：100-1000条高质量数据
+
+2. 选择微调工具
+   ├─ 首选：LLaMA Factory（最简单、功能最全）
+   └─ 备选：Axolotl、Hugging Face PEFT
+
+3. 设置微调参数
+   ├─ 模型：Llama 3 8B、Qwen 2 7B
+   ├─ 方法：QLoRA 4-bit
+   └─ 参数：rank=8、alpha=16、学习率=2e-4、轮数=3
+
+4. 开始训练
+   ├─ 监控训练损失
+   └─ 保存检查点
+
+5. 评估微调效果
+   ├─ 自动评估：BLEU、ROUGE
+   └─ 人工评估：最重要
+
+6. 部署微调模型
+   ├─ 合并LoRA权重到原模型
+   └─ 用vLLM部署</code></pre></div>
+        </div>
+            </details>
+
+                <h3>数据集设计最佳实践</h3>
+        <ul>
+            <li>数据集质量 > 数据集数量</li>
+            <li>每个样本应该是一个完整的指令-回答对</li>
+            <li>样本应该多样化，覆盖各种可能的输入和输出</li>
+            <li>避免重复和相似的样本</li>
+        </ul>
+
+                <h3>数据集格式示例（Alpaca）</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>[
+  {
+    "instruction": "将以下用户反馈分类为：咨询、投诉、建议",
+    "input": "你们的快递已经三天没更新了",
+    "output": "投诉"
+  },
+  {
+    "instruction": "以客服口吻回复用户，语气礼貌简洁",
+    "input": "如何申请退款？",
+    "output": "您好，您可在「我的订单」中选择对应商品，点击「申请退款」并按页面指引提交。一般 1-3 个工作日审核，如有疑问可随时联系在线客服。"
+  }
+]</code></pre></div>
+        <p>LLaMA Factory 同时支持 ShareGPT（多轮对话）、OpenAI messages 等格式；团队内统一一种即可。</p>
+
+                <h3>LLaMA Factory 最小配置示例</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code># examples/train_lora/qwen2_lora_sft.yaml 核心字段
+model_name_or_path: Qwen/Qwen2-7B-Instruct
+stage: sft
+finetuning_type: lora
+quantization_bit: 4          # QLoRA
+
+lora_rank: 8
+lora_alpha: 16
+lora_target: all             # 或 q_proj,v_proj,k_proj,o_proj
+
+learning_rate: 2.0e-4
+num_train_epochs: 3
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 4
+
+dataset: my_custom_dataset
+template: qwen
+cutoff_len: 2048</code></pre></div>
+        <p>启动命令：<code>llamafactory-cli train examples/train_lora/qwen2_lora_sft.yaml</code></p>
+
+                <h3>评估微调效果</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>评估方式</th>
+                <th>适用场景</th>
+                <th>注意点</th>
+            </tr>
+            <tr>
+                <td><strong>人工抽检</strong></td>
+                <td>所有生产项目</td>
+                <td>准备 20~50 条 hold-out 测试集，必做</td>
+            </tr>
+            <tr>
+                <td><strong>LLM-as-Judge</strong></td>
+                <td>规模化回归</td>
+                <td>用 GPT-4 等按 rubric 打分，需固定 judge Prompt</td>
+            </tr>
+            <tr>
+                <td><strong>BLEU/ROUGE</strong></td>
+                <td>模板化生成</td>
+                <td>对开放对话参考价值有限</td>
+            </tr>
+            <tr>
+                <td><strong>训练/验证 loss</strong></td>
+                <td>训练监控</td>
+                <td>loss 低 ≠ 业务效果好，仅作辅助</td>
+            </tr>
+        </table></div>
+
+                <h3>过拟合的表现与解决方案</h3>
+        <p><strong>过拟合表现：</strong>训练损失持续下降，但验证损失上升；模型在训练集上表现很好，但在新数据上表现很差。</p>
+        <p><strong>解决方案：</strong></p>
+        <ul>
+            <li>减少训练轮数</li>
+            <li>降低学习率</li>
+            <li>增加数据集的多样性</li>
+            <li>减小rank值</li>
+        </ul>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能独立完成一个完整的微调项目</li>
+                <li>能设计高质量的微调数据集</li>
+                <li>能评估微调效果，避免过拟合</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：微调后模型出现过拟合怎么办？</strong></p>
+            <p>A：首先减少训练轮数，然后降低学习率。如果还是不行，就增加数据集的多样性。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV19Y4y1v7zA/" target="_blank">LLaMA Factory从零到一实战</a>（播放量：25万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://github.com/hiyouga/LLaMA-Factory/blob/main/README_zh.md" target="_blank">LLaMA Factory 中文 README</a></p>
+            <p><strong>📄 工具：</strong><a href="https://github.com/hiyouga/LLaMA-Factory" target="_blank">LLaMA Factory GitHub</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec4">
+        <h2>四、部署与常见问题排查</h2>
+
+                <h3>LoRA 部署两种方式</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>方式</th>
+                <th>做法</th>
+                <th>适用场景</th>
+            </tr>
+            <tr>
+                <td><strong>合并权重</strong></td>
+                <td>导出 <code>W' = W + BA</code> 完整模型</td>
+                <td>单一 adapter、生产长期部署</td>
+            </tr>
+            <tr>
+                <td><strong>动态挂载</strong></td>
+                <td>基座 + adapter 文件，运行时加载</td>
+                <td>多租户、多风格切换、A/B 测试</td>
+            </tr>
+        </table></div>
+
+                <h3>合并与推理示例</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+base = "Qwen/Qwen2-7B-Instruct"
+adapter = "./output/lora_checkpoint"
+
+tokenizer = AutoTokenizer.from_pretrained(base)
+model = AutoModelForCausalLM.from_pretrained(base, device_map="auto")
+model = PeftModel.from_pretrained(model, adapter)
+
+# 方式一：合并后保存（推荐生产）
+merged = model.merge_and_unload()
+merged.save_pretrained("./merged_model")
+
+# 方式二：vLLM 加载合并模型
+# python -m vllm.entrypoints.openai.api_server --model ./merged_model</code></pre></div>
+
+                <h3>微调常见问题排查</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>现象</th>
+                <th>最可能原因</th>
+                <th>解决方案</th>
+            </tr>
+            <tr>
+                <td>输出乱码 / 重复</td>
+                <td>学习率过高或训练过久</td>
+                <td>降 lr 到 1e-4，减少 epochs</td>
+            </tr>
+            <tr>
+                <td>完全不听指令</td>
+                <td>template 与基座不匹配</td>
+                <td>确认 LLaMA Factory template 与模型一致</td>
+            </tr>
+            <tr>
+                <td>只会背训练集</td>
+                <td>过拟合</td>
+                <td>减 rank、加 dropout、扩充数据多样性</td>
+            </tr>
+            <tr>
+                <td>显存 OOM</td>
+                <td>未开 QLoRA 或 seq 过长</td>
+                <td>quantization_bit=4，减小 cutoff_len / batch</td>
+            </tr>
+            <tr>
+                <td>loss 不降</td>
+                <td>数据格式错误或全空 output</td>
+                <td>检查 JSON 字段、单条样本试跑</td>
+            </tr>
+        </table></div>
+
+                <h3>效果优化优先级</h3>
+        <ol>
+            <li>提升数据质量与覆盖度（最重要）</li>
+            <li>对齐 chat template 与推理 Prompt</li>
+            <li>调整 rank / target_modules</li>
+            <li>调整 epochs 与学习率</li>
+            <li>换更大基座模型（最后手段）</li>
+        </ol>
+
+                <div class="highlight">
+            <strong>重要结论：</strong>微调项目的 80% 时间应花在数据构造与评估上，而不是调参。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能将 LoRA 模型部署到 vLLM / Ollama 等推理框架</li>
+                <li>能按现象快速定位训练或部署问题</li>
+                <li>能在多 adapter 场景下设计切换策略</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：LoRA 文件有多大？</strong></p>
+            <p>A：7B 模型 r=8 约 20~40MB；r=64 约 200MB。远小于全量微调 checkpoint。</p>
+            <p><strong>Q：微调能和 RAG 一起用吗？</strong></p>
+            <p>A：可以且推荐。微调负责格式与风格，RAG 负责事实；推理时先检索再按微调后的格式输出。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📄 文档：</strong><a href="https://huggingface.co/docs/peft/conceptual_guides/lora" target="_blank">Hugging Face PEFT LoRA 指南</a></p>
+            <p><strong>📄 文档：</strong><a href="https://huggingface.co/docs/trl/sft_trainer" target="_blank">TRL SFTTrainer 文档</a></p>
+        </div>
+        </div>
+    
+        <div class="exercise">
+        <h2>📝 2小时实战小练习</h2>
+        <p>用 Hugging Face PEFT 对 Qwen2-7B 做 QLoRA 微调（最小可运行示例）：</p>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>pip install transformers peft bitsandbytes datasets accelerate
+
+from datasets import load_dataset
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from trl import SFTTrainer
+
+model_id = "Qwen/Qwen2-7B-Instruct"
+
+# 1. 准备数据（替换为你的 JSON 文件）
+dataset = load_dataset("json", data_files="train.json")["train"]
+
+# 2. 加载 4bit 基座
+model = AutoModelForCausalLM.from_pretrained(
+    model_id, load_in_4bit=True, device_map="auto"
+)
+model = prepare_model_for_kbit_training(model)
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+# 3. LoRA 配置
+lora_config = LoraConfig(
+    r=8, lora_alpha=16,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+    lora_dropout=0.05, task_type="CAUSAL_LM"
+)
+model = get_peft_model(model, lora_config)
+
+# 4. 格式化样本（使用 tokenizer 内置 chat template）
+def format_sample(row):
+    user_content = row["instruction"]
+    if row.get("input"):
+        user_content += "\n" + row["input"]
+    messages = [
+        {"role": "user", "content": user_content},
+        {"role": "assistant", "content": row["output"]},
+    ]
+    return {
+        "text": tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=False
+        )
+    }
+
+dataset = dataset.map(format_sample)
+
+# 5. 训练
+trainer = SFTTrainer(
+    model=model,
+    train_dataset=dataset,
+    dataset_text_field="text",
+    max_seq_length=2048,
+    args=TrainingArguments(
+        output_dir="./lora_out",
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=8,
+        learning_rate=2e-4,
+        num_train_epochs=3,
+        logging_steps=10,
+        save_steps=100,
+        fp16=True,
+    ),
+)
+trainer.train()
+model.save_pretrained("./lora_out/final")</code></pre></div>
+        <p><strong>练习要求：</strong></p>
+        <ol>
+            <li>构造 50~100 条领域指令数据，跑通上述训练脚本</li>
+            <li>对比 r=8 与 r=32 的效果与训练时间差异</li>
+            <li>用 hold-out 测试集人工评估，记录过拟合样本</li>
+            <li>（可选）合并权重后用 vLLM 部署并压测延迟</li>
+        </ol>
+        </div>
+    
+        <div class="quiz">
+        <h2>✅ 自测题（能答对就说明掌握了）</h2>
+        <ol>
+            <li>LoRA 训练时更新哪些参数？推理时为何无额外延迟？</li>
+            <li>QLoRA 相比 LoRA 额外做了哪三件事？</li>
+            <li>微调适合解决什么问题？不适合解决什么？</li>
+            <li>rank、alpha、学习率的推荐关系是什么？</li>
+            <li>微调效果差时，应优先排查什么？</li>
+            <li>RAG 与微调如何组合使用？</li>
+        </ol>
+        <details style="margin-top: 1rem;">
+            <summary style="cursor: pointer; color: #92400e; font-weight: 600;">点击查看参考答案</summary>
+            <ol style="margin-top: 0.75rem; color: #92400e;">
+                <li>只更新 LoRA 低秩矩阵 <strong>A、B</strong>，原权重 <strong>W 冻结</strong>；推理前将 <strong>ΔW = (α/r)·BA</strong> 合并进 W 得 W'，前向变为 <strong>h = W'·x</strong>，与原始单层矩阵乘等价，无并联分支额外开销</li>
+                <li>对<strong>基座权重</strong>做 4-bit NF4 量化、对量化常数做<strong>双重量化</strong>、优化器状态用<strong>分页优化器</strong>（溢出换页到 CPU）</li>
+                <li><strong>适合</strong>：风格/格式/行为/术语对齐；<strong>不适合</strong>：可靠注入新事实、突破预训练推理上限、扩展上下文窗口</li>
+                <li>rank r 通常 8~32；alpha 通常设为 <strong>2×rank</strong>；学习率 1e-4~3e-4（QLoRA 常用 2e-4）</li>
+                <li>优先排查<strong>数据质量与覆盖度</strong>（instruction 是否清晰、output 是否为理想回答、是否覆盖边界 case）；其次检查 chat template / 推理 Prompt 是否与训练对齐</li>
+                <li><strong>RAG 供事实</strong>（检索私有/最新知识），<strong>微调管格式与风格</strong>；推理时先检索拼上下文，再按微调后的输出规范生成</li>
+            </ol>
+        </details>
+        </div>
+
+        <footer class="nav-footer">
+            <p>大模型应用开发者原理学习计划 · 第 5 章</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="index.html">全书合集</a> <a href="4.html">← 第4章 RAG原理</a> <a href="6.html">第6章 Agent工具调用 →</a>
+            </p>
+            
+        </footer>
+    </div>
+
+    <script>
+(function () {
+  var themeBtn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  function label(t) { return t === 'dark' ? '浅色' : '深色'; }
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('llm-doc-theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.textContent = label(t);
+  }
+  if (themeBtn) {
+    applyTheme(root.getAttribute('data-theme') || 'light');
+    themeBtn.addEventListener('click', function () {
+      applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre');
+      var text = pre ? pre.innerText : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = '已复制';
+          setTimeout(function () { btn.textContent = '复制'; }, 1500);
+        }).catch(function () { prompt('复制以下内容：', text); });
+      } else {
+        prompt('复制以下内容：', text);
+      }
+    });
+  });
+})();
+    </script>
+                <script>
+(function () {
+  if (typeof mermaid === 'undefined') return;
+  var body = document.body;
+  var root = document.documentElement;
+  function mermaidTheme() {
+    return root.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+  }
+  function injectMermaidFullscreenUi() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      if (wrap.querySelector('.mermaid-toolbar')) return;
+      var bar = document.createElement('div');
+      bar.className = 'mermaid-toolbar';
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'mermaid-fs-btn';
+      btn.textContent = '全屏'; btn.setAttribute('aria-label', '图表全屏');
+      bar.appendChild(btn);
+      wrap.insertBefore(bar, wrap.firstChild);
+    });
+  }
+  function closePseudoFs(wrap) {
+    wrap.classList.remove('is-pseudo-fullscreen');
+    if (!document.querySelector('.mermaid-wrap.is-pseudo-fullscreen')) body.style.overflow = '';
+  }
+  function syncFsButton(wrap, btn) {
+    var on = document.fullscreenElement === wrap || wrap.classList.contains('is-pseudo-fullscreen');
+    btn.textContent = on ? '退出全屏' : '全屏';
+  }
+  function bindMermaidFullscreen() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      var btn = wrap.querySelector('.mermaid-fs-btn');
+      if (!btn || wrap.dataset.fsBound) return;
+      wrap.dataset.fsBound = '1';
+      btn.addEventListener('click', function () {
+        var native = document.fullscreenElement === wrap;
+        var pseudo = wrap.classList.contains('is-pseudo-fullscreen');
+        if (native || pseudo) {
+          if (native) document.exitFullscreen().catch(function () {});
+          if (pseudo) closePseudoFs(wrap);
+          syncFsButton(wrap, btn);
+          return;
+        }
+        var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+        if (typeof req === 'function') {
+          Promise.resolve(req.call(wrap)).catch(function () {
+            wrap.classList.add('is-pseudo-fullscreen');
+            body.style.overflow = 'hidden';
+          }).finally(function () { syncFsButton(wrap, btn); });
+        } else {
+          wrap.classList.add('is-pseudo-fullscreen');
+          body.style.overflow = 'hidden';
+          syncFsButton(wrap, btn);
+        }
+      });
+    });
+  }
+  function snapshotMermaidSources() {
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      if (!el.dataset.graph) el.dataset.graph = el.textContent.trim();
+    });
+  }
+  function rerenderMermaid() {
+    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme(), securityLevel: 'strict', flowchart: { htmlLabels: true } });
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.graph || el.textContent;
+    });
+    return mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+  }
+  window.rerenderMermaid = rerenderMermaid;
+  injectMermaidFullscreenUi();
+  snapshotMermaidSources();
+  Promise.resolve(rerenderMermaid()).then(bindMermaidFullscreen);
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+        document.querySelectorAll('.mermaid-wrap.is-pseudo-fullscreen').forEach(closePseudoFs);
+        rerenderMermaid();
+      }, 0);
+    });
+  }
+})();
+
+    </script>
+</body>
+</html>

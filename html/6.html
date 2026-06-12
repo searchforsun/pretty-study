@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<!-- 生成日期：2026-06-12 | 源：学习计划 | 输出：html/6.html | 格式：minimal 统一壳（对齐第1章） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent与工具调用原理 | 大模型应用开发者必备</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('llm-doc-theme');
+            document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+    <style>
+        :root, [data-theme="light"] {
+            color-scheme: light;
+            --bg: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-code: #1f2937;
+            --fg: #333;
+            --fg-heading: #1f2937;
+            --fg-muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #3b82f6;
+            --primary-soft: #eff6ff;
+            --topbar-bg: rgba(255,255,255,0.92);
+            --shadow: rgba(0,0,0,0.05);
+            --highlight-bg: #eff6ff;
+            --note-bg: #fffbeb;
+            --note-border: #f59e0b;
+            --resource-bg: #f0fdf4;
+            --resource-border: #10b981;
+            --app-bg: #fdf2f8;
+            --app-border: #ec4899;
+            --faq-bg: #f5f3ff;
+            --faq-border: #8b5cf6;
+            --exercise-bg: #f0f9ff;
+            --exercise-border: #bae6fd;
+            --quiz-bg: #fef3c7;
+            --quiz-border: #fcd34d;
+            --formula-bg: #f9fafb;
+            --toc-bg: #f8fafc;
+            --slider-track: #dbeafe;
+            --bar-low: #93c5fd;
+            --bar-high: #1d4ed8;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0f1419;
+            --bg-card: #1a2332;
+            --bg-code: #0d1117;
+            --fg: #e2e8f0;
+            --fg-heading: #f1f5f9;
+            --fg-muted: #94a3b8;
+            --border: #2d3748;
+            --primary: #60a5fa;
+            --primary-soft: rgba(59,130,246,0.15);
+            --topbar-bg: rgba(15,20,25,0.95);
+            --shadow: rgba(0,0,0,0.3);
+            --highlight-bg: rgba(59,130,246,0.12);
+            --note-bg: rgba(245,158,11,0.1);
+            --note-border: #f59e0b;
+            --resource-bg: rgba(16,185,129,0.1);
+            --resource-border: #10b981;
+            --app-bg: rgba(236,72,153,0.1);
+            --app-border: #ec4899;
+            --faq-bg: rgba(139,92,246,0.1);
+            --faq-border: #8b5cf6;
+            --exercise-bg: rgba(59,130,246,0.08);
+            --exercise-border: rgba(59,130,246,0.35);
+            --quiz-bg: rgba(245,158,11,0.1);
+            --quiz-border: rgba(245,158,11,0.4);
+            --formula-bg: #141c28;
+            --toc-bg: #141c28;
+            --slider-track: #1e3a5f;
+            --bar-low: #3b82f6;
+            --bar-high: #93c5fd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--fg);
+            background: var(--bg);
+            padding: 4.5rem 20px 40px;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--fg-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 55vw;
+        }
+
+        .topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .btn-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--fg);
+        }
+
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+        .layout {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--fg-heading);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--fg-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .summary {
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+
+        .summary h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+            color: var(--fg-heading);
+        }
+
+        .summary ul { margin: 0; padding-left: 1.25rem; }
+        .summary li { margin-bottom: 0.35rem; }
+
+        .toc {
+            background: var(--toc-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+        }
+
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--fg-heading);
+            margin: 2rem 0 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--fg-heading);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            color: var(--fg-heading);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        p { margin-bottom: 1rem; }
+
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.45rem; }
+
+        .table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px var(--shadow);
+            font-size: 0.92rem;
+        }
+
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: var(--toc-bg); font-weight: 600; }
+
+        .code-block {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        pre:not(.mermaid) {
+            background: var(--bg-code);
+            color: #f9fafb;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: 6px;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .code-block pre code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.88rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e5e7eb;
+            border-radius: 4px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .highlight, .note, .resource, .application-value, .faq {
+            padding: 1rem 1.15rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .highlight { background: var(--highlight-bg); border-left: 4px solid var(--primary); }
+        .note { background: var(--note-bg); border-left: 4px solid var(--note-border); }
+        .resource { background: var(--resource-bg); border-left: 4px solid var(--resource-border); }
+        .application-value { background: var(--app-bg); border-left: 4px solid var(--app-border); }
+        .faq { background: var(--faq-bg); border-left: 4px solid var(--faq-border); }
+        .term-ref td:first-child,
+        .term-ref th:first-child {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+
+        .section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.05rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--formula-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .exercise {
+            background: var(--exercise-bg);
+            border: 1px solid var(--exercise-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz {
+            background: var(--quiz-bg);
+            border: 1px solid var(--quiz-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz details {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .quiz summary { cursor: pointer; font-weight: 600; color: var(--fg-heading); }
+
+        
+
+        .demo-panel {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .demo-panel label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .demo-panel input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .prob-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .prob-row {
+            display: grid;
+            grid-template-columns: 3.5rem 1fr 3rem;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .prob-bar {
+            height: 18px;
+            border-radius: 3px;
+            background: var(--slider-track);
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--bar-low), var(--bar-high));
+            border-radius: 3px;
+            transition: width 0.25s ease;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 640px) {
+            .compare-grid { grid-template-columns: 1fr; }
+            body { padding-top: 4rem; }
+        }
+
+        .compare-card {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .compare-card h4 { margin-top: 0; }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            margin-right: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-footer a { margin: 0 0.5rem; }
+        .intro {
+            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--resource-bg) 100%);
+            border: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .intro-meta span {
+            background: var(--bg-card);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .toc ol.toc-cols { columns: 2; column-gap: 2rem; }
+        @media (max-width: 640px) { .toc ol.toc-cols { columns: 1; } }
+
+        .diagram, .flowchart {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 0.85rem;
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        .flowchart { padding: 1.25rem; }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            margin-right: 0.25rem;
+        }
+
+        .tag-blue { background: var(--primary-soft); color: var(--primary); }
+
+        details:not(.quiz details) {
+            margin: 0.75rem 0;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        details:not(.quiz details) summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--fg-heading);
+        }
+
+        .quiz-answer { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--quiz-border); }
+
+    
+    
+    
+    
+        :root, [data-theme="light"], [data-theme="dark"] {
+            --accent: var(--primary);
+            --card: var(--bg-card);
+        }
+        pre.mermaid {
+            background: transparent !important;
+            color: var(--fg);
+            padding: 0 !important;
+            border-radius: 0;
+            overflow: visible;
+        }
+        
+        .mermaid-toolbar {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            z-index: 2;
+        }
+        .mermaid-fs-btn {
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .mermaid-fs-btn:hover { border-color: var(--accent); }
+        .mermaid { margin: 0; text-align: center; }
+        .mermaid-wrap:fullscreen, .mermaid-wrap.is-pseudo-fullscreen {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            padding: 2.5rem 1rem 1rem;
+            overflow: auto;
+        }
+        .mermaid-wrap:fullscreen { border-radius: 0; width: 100%; height: 100%; margin: 0; }
+        .mermaid-wrap.is-pseudo-fullscreen {
+            position: fixed; inset: 0; z-index: 10000; margin: 0; border-radius: 0; border: none;
+        }
+        .mermaid-wrap:fullscreen .mermaid-toolbar,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid-toolbar {
+            position: fixed; top: 0.65rem; right: 0.65rem;
+        }
+        .mermaid-wrap:fullscreen .mermaid,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid {
+            flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto;
+        }
+        details.ascii-fallback { margin-bottom: 1rem; }
+        details.ascii-fallback summary {
+            cursor: pointer; color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 0.5rem;
+        }
+
+    
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <span class="topbar-title">第6章 · Agent与工具调用</span>
+        <div class="topbar-actions">
+            <button type="button" class="btn-icon" id="themeBtn" aria-label="切换明暗主题">浅色</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <h1>Agent与工具调用原理（应用导向）</h1>
+
+        <div class="intro">
+        <p><strong>本章定位：</strong>从单次函数调用到多步自主规划——大模型应用开发的核心能力，覆盖 ReAct、工具协议与生产级 Agent 架构。</p>
+        <div class="intro-meta">
+            <span>⏱ 建议学习 3～4 小时</span>
+            <span>📖 第 6 课 / 共 7 课</span>
+            <span>🎯 目标：设计可上线的工具调用与 Agent 循环</span>
+        </div>
+        </div>
+
+        <nav class="toc" aria-label="章节目录">
+            <h2>本章目录</h2>
+        <ol>
+            <li><a href="#sec1">工具调用的本质与协议</a></li>
+            <li><a href="#sec2">Agent 本质与 ReAct 框架</a></li>
+            <li><a href="#sec3">Agent 架构模式与框架选型</a></li>
+            <li><a href="#sec4">常见问题、安全与生产实践</a></li>
+        </ol>
+        </nav>
+
+        <div class="section" id="sec1">
+        <h2>一、工具调用的本质与协议</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>工具调用（Tool Calling）</strong>：让大模型能够调用外部函数或 API 来获取信息或执行操作的技术。模型本身不执行代码，只<strong>生成结构化的调用意图</strong>，由应用层解析并执行。</p>
+        <p><strong>函数调用（Function Calling）</strong>：OpenAI 提出的标准工具调用格式，现已成为行业事实标准，Anthropic、Google、阿里、字节等主流厂商均已对齐。</p>
+        <p><strong>JSON Schema</strong>：描述工具参数结构的标准格式，模型据此生成合法参数。</p>
+        <p><strong>tool_choice</strong>：控制模型是否必须调用工具的策略参数（<code>auto</code> / <code>required</code> / <code>none</code>）。</p>
+
+                <h3>🔤 英文名称速查</h3>
+        <div class="table-wrap term-ref"><table>
+            <tr><th>名称</th><th>是什么 / 干什么</th></tr>
+            <tr><td><strong>system / user / assistant / tool</strong></td><td>对话四类角色：系统指令、用户提问、模型回复、工具执行结果</td></tr>
+            <tr><td><strong>tool_calls</strong></td><td>assistant 消息里的结构化字段：要调哪个函数、参数 JSON</td></tr>
+            <tr><td><strong>tool_call_id</strong></td><td>一次工具调用的唯一 id；tool 消息必须带它才能和调用对应</td></tr>
+            <tr><td><strong>JSON Schema</strong></td><td>描述函数名、参数类型与必填项；模型据此生成合法 arguments</td></tr>
+            <tr><td><strong>tool_choice</strong></td><td><code>auto</code> 模型自定 / <code>required</code> 必须调工具 / <code>none</code> 禁止调工具</td></tr>
+            <tr><td><strong>ReAct</strong></td><td>Reason→Act→Observe 循环；多步工具调用与推理框架</td></tr>
+            <tr><td><strong>max_iterations</strong></td><td>Agent 最多循环几轮，防止无限调工具</td></tr>
+            <tr><td><strong>MCP</strong></td><td>Model Context Protocol，标准化接入外部工具/数据源，减少重复胶水代码</td></tr>
+            <tr><td><strong>Guardrail</strong></td><td>输入/输出防护：拦截注入、过滤敏感信息、校验格式</td></tr>
+        </table></div>
+
+                <h3>核心原理</h3>
+        <p>工具调用的本质是：<strong>模型生成符合特定格式的文本，由解析器解析并执行外部函数，然后将函数返回结果传回模型生成最终回答</strong>。</p>
+        <p>关键认知：大模型是「决策者 + 文案生成器」，不是「执行者」。所有副作用（查数据库、发邮件、改文件）必须在应用侧受控执行。</p>
+
+        <h3>对话中的四种角色</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>角色</th>
+                <th>谁写入</th>
+                <th>内容</th>
+            </tr>
+            <tr>
+                <td><code>system</code></td>
+                <td>开发者</td>
+                <td>系统指令、工具列表、行为约束</td>
+            </tr>
+            <tr>
+                <td><code>user</code></td>
+                <td>用户</td>
+                <td>用户问题或指令</td>
+            </tr>
+            <tr>
+                <td><code>assistant</code></td>
+                <td>模型</td>
+                <td>自然语言回复，或 <code>tool_calls</code> 结构化调用</td>
+            </tr>
+            <tr>
+                <td><code>tool</code></td>
+                <td>应用层</td>
+                <td>工具执行结果（必须带 <code>tool_call_id</code> 对应关系）</td>
+            </tr>
+        </table></div>
+
+                <h3>函数调用完整工作流程</h3>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">sequenceDiagram
+    participant Dev as 开发者
+    participant App as 应用层
+    participant LLM as 大模型
+    Dev->>App: 定义工具 JSON Schema
+    App->>LLM: 注入 tools + 用户提问
+    LLM->>App: tool_calls
+    App->>App: 执行函数(权限校验)
+    App->>LLM: tool 角色消息(结果)
+    LLM->>App: 最终回答
+    Note over App,LLM: 结果不足时可多轮 tool_calls
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+<div class="architecture">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>① 开发者定义工具（name + description + parameters JSON Schema）
+② 将工具列表注入 system prompt 或 tools 字段
+③ 用户提问 → 模型判断是否需要工具
+④ 模型输出 tool_calls（JSON：工具名 + 参数）
+⑤ 应用层解析 JSON，执行对应函数（带权限校验）
+⑥ 将 tool 角色消息（执行结果）追加到对话历史
+⑦ 模型读取结果，生成最终自然语言回答
+   └─ 若结果不足，可再次发起 tool_calls（多轮工具调用）</code></pre></div>
+        </div>
+            </details>
+
+        <h3>工具定义示例（JSON Schema）</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>{
+  "type": "function",
+  "function": {
+    "name": "get_weather",
+    "description": "查询指定城市当前天气。仅当用户询问天气、穿衣建议时使用。",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "城市名，如：上海、北京"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["celsius", "fahrenheit"],
+          "description": "温度单位，默认 celsius"
+        }
+      },
+      "required": ["city"]
+    }
+  }
+}</code></pre></div>
+
+        <h3>如何定义一个好的工具</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>要素</th>
+                <th>反例 ❌</th>
+                <th>正例 ✅</th>
+            </tr>
+            <tr>
+                <td><strong>名称</strong></td>
+                <td><code>tool1</code>、<code>do_stuff</code></td>
+                <td><code>get_weather</code>、<code>search_orders</code></td>
+            </tr>
+            <tr>
+                <td><strong>描述</strong></td>
+                <td>「查询信息」</td>
+                <td>「按订单号查询电商订单状态，返回物流与支付信息。用户需提供 order_id。」</td>
+            </tr>
+            <tr>
+                <td><strong>参数</strong></td>
+                <td>无 description 的 <code>string</code></td>
+                <td>每个字段写明格式、示例、是否必填</td>
+            </tr>
+            <tr>
+                <td><strong>边界</strong></td>
+                <td>两个工具功能重叠</td>
+                <td>「何时用 A、何时用 B、何时都不用」写清楚</td>
+            </tr>
+        </table></div>
+
+        <h3>并行 vs 串行工具调用</h3>
+        <ul>
+            <li><strong>并行调用</strong>：多个工具互不依赖时，一次响应中输出多个 <code>tool_calls</code>，应用层并发执行（如同时查天气 + 查航班）</li>
+            <li><strong>串行调用</strong>：后一步依赖前一步结果（如先查用户 ID，再查订单列表）</li>
+            <li><strong>最佳实践</strong>：能在 description 里写「可与其他工具并行」的，尽量让模型一次发起多个调用，减少往返延迟</li>
+        </ul>
+
+        <h3>主流厂商工具调用对比</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>厂商</th>
+                <th>协议名称</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td>OpenAI</td>
+                <td>Function Calling / Tools API</td>
+                <td>生态最成熟，支持 parallel tool calls</td>
+            </tr>
+            <tr>
+                <td>Anthropic</td>
+                <td>Tool Use</td>
+                <td>与 OpenAI 结构类似，Claude 工具遵循度高</td>
+            </tr>
+            <tr>
+                <td>Google</td>
+                <td>Function Declarations</td>
+                <td>Gemini 原生支持，适合多模态场景</td>
+            </tr>
+            <tr>
+                <td>阿里 / 字节</td>
+                <td>兼容 OpenAI 格式</td>
+                <td>通义、豆包等国内模型可直接复用 OpenAI SDK</td>
+            </tr>
+        </table></div>
+
+                <div class="highlight">
+            <strong>重要结论：</strong>工具调用的可靠性约 90% 取决于工具定义的质量；其余 10% 来自模型能力与错误处理。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>让大模型获取实时信息（天气、新闻、库存、股价）</li>
+                <li>让大模型与外部系统交互（数据库、CRM、工单系统）</li>
+                <li>让大模型执行受控操作（发通知、创建任务、生成报表）</li>
+                <li>将「只会说话」的模型变成「能做事」的应用入口</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么模型总是调用错误的工具？</strong></p>
+            <p>A：工具描述不清楚，或工具之间功能重叠。优化 description，明确「适用 / 不适用」场景，必要时减少工具数量。</p>
+            <p><strong>Q：模型编造了工具返回结果怎么办？</strong></p>
+            <p>A：模型在未真正执行工具时可能幻觉出结果。务必走完整流程：只有应用层执行函数后，才将 <code>tool</code> 消息写入历史；禁止模型自行「假装」已调用。</p>
+            <p><strong>Q：需要几个工具才合适？</strong></p>
+            <p>A：生产环境建议单 Agent 控制在 5–15 个工具；过多时按领域拆分子 Agent 或做工具路由。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV14m411A7qL/" target="_blank">大模型工具调用原理详解</a></p>
+            <p><strong>📄 官方文档：</strong><a href="https://platform.openai.com/docs/guides/function-calling" target="_blank">OpenAI Function Calling 指南</a></p>
+            <p><strong>📄 协议标准：</strong><a href="https://modelcontextprotocol.io/" target="_blank">MCP（Model Context Protocol）— 工具标准化接入</a></p>
+        </div>
+        </div>
+    
+        <div class="section" id="sec2">
+        <h2>二、Agent 本质与 ReAct 框架</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>Agent（智能体）</strong>：能自主感知环境、制定计划、执行行动、根据反馈调整策略的循环系统。与「单次问答」或「单次工具调用」不同，Agent 允许多轮推理与行动。</p>
+        <p><strong>ReAct</strong>：Reason + Act 框架，核心是「思考 → 行动 → 观察」循环，是目前最常用、最易调试的 Agent 模式。</p>
+        <p><strong>Observation</strong>：工具或环境返回的反馈，驱动下一轮思考。</p>
+
+                <h3>核心原理</h3>
+        <p>Agent 的本质是：<strong>一个由大模型驱动的「规划—执行—反思」循环，在终止条件满足前反复调用工具</strong>。</p>
+
+        <h3>什么时候需要 Agent？</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>场景</th>
+                <th>推荐方案</th>
+                <th>原因</th>
+            </tr>
+            <tr>
+                <td>固定流程、步骤已知</td>
+                <td>普通 Chain / 工作流</td>
+                <td>无需模型动态规划，更稳定、更便宜</td>
+            </tr>
+            <tr>
+                <td>单步查资料 + 回答</td>
+                <td>RAG 或单次工具调用</td>
+                <td>一步即可完成，不必上 Agent</td>
+            </tr>
+            <tr>
+                <td>步骤不确定、需试探</td>
+                <td>ReAct Agent</td>
+                <td>模型根据中间结果决定下一步</td>
+            </tr>
+            <tr>
+                <td>复杂任务需先拆计划</td>
+                <td>Plan-and-Execute</td>
+                <td>先规划再逐步执行，减少盲目调用</td>
+            </tr>
+        </table></div>
+
+                <h3>ReAct 框架完整工作流程</h3>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">flowchart TB
+    R1["思考 Reason"] --> A1["行动 Act"]
+    A1 --> O1["观察 Observe"]
+    O1 --> C1{{"足够回答?"}}
+    C1 -->|否| R1
+    C1 -->|是| ANS["回答 Answer"]
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+<div class="architecture">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>思考(Reason)：我需要做什么来解决这个问题？
+行动(Act)  ：调用工具(参数)
+观察(Observe)：工具返回的结果
+思考(Reason)：根据结果，下一步做什么？是否已足够回答？
+行动(Act)  ：…（重复）
+…直到满足终止条件…
+回答(Answer)：汇总最终答案</code></pre></div>
+        </div>
+            </details>
+
+                <h3>ReAct 框架完整示例</h3>
+        <div class="highlight">
+            <p><strong>用户问题：</strong>上海今天的天气怎么样？适合穿什么衣服？</p>
+            <p><strong>思考：</strong>需要先查上海天气，再根据气温和天气状况推荐穿着。</p>
+            <p><strong>行动：</strong><code>get_weather(city="上海")</code></p>
+            <p><strong>观察：</strong>晴，25–30°C，南风 3 级，湿度 60%。</p>
+            <p><strong>思考：</strong>气温较高、晴朗，无需雨具，适合轻薄透气衣物。</p>
+            <p><strong>回答：</strong>上海今天晴，25–30°C，建议短袖、短裤或裙装，注意防晒。</p>
+        </div>
+
+        <h3>多步推理示例（需多次工具调用）</h3>
+        <div class="highlight">
+            <p><strong>用户问题：</strong>帮我查一下订单 ORD-8821 的状态，如果已发货就告诉我预计到达日期。</p>
+            <p><strong>思考：</strong>先查订单状态，再根据状态决定是否查物流。</p>
+            <p><strong>行动：</strong><code>get_order(order_id="ORD-8821")</code></p>
+            <p><strong>观察：</strong>状态：已发货，物流单号 SF1234567890。</p>
+            <p><strong>思考：</strong>已发货，需查物流 ETA。</p>
+            <p><strong>行动：</strong><code>track_shipment(tracking_no="SF1234567890")</code></p>
+            <p><strong>观察：</strong>预计 2026-06-14 18:00 送达。</p>
+            <p><strong>回答：</strong>订单 ORD-8821 已发货，预计 6 月 14 日 18:00 前送达。</p>
+        </div>
+
+                <h3>Agent 的三大核心组件</h3>
+        <ol>
+            <li>
+                <strong>规划器（Planner）</strong>
+                <ul>
+                    <li>将复杂任务分解为子任务</li>
+                    <li>根据 Observation 动态调整计划</li>
+                    <li>决定何时停止循环、输出最终答案</li>
+                </ul>
+            </li>
+            <li>
+                <strong>工具执行器（Tool Executor）</strong>
+                <ul>
+                    <li>解析 <code>tool_calls</code>，映射到真实函数</li>
+                    <li>参数校验、超时、重试、权限控制</li>
+                    <li>将异常转为模型可理解的 Observation</li>
+                </ul>
+            </li>
+            <li>
+                <strong>记忆系统（Memory）</strong>
+                <ul>
+                    <li><strong>短期记忆</strong>：当前会话的 messages 历史</li>
+                    <li><strong>工作记忆</strong>：中间结论摘要（避免上下文爆炸）</li>
+                    <li><strong>长期记忆</strong>：用户偏好、历史交互（通常走向量库或数据库）</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Agent 循环的控制参数</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>参数</th>
+                <th>推荐值</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code>max_iterations</code></td>
+                <td>5–15</td>
+                <td>最大循环次数，防止无限循环</td>
+            </tr>
+            <tr>
+                <td><code>max_execution_time</code></td>
+                <td>30–120s</td>
+                <td>总超时，避免用户长时间等待</td>
+            </tr>
+            <tr>
+                <td><code>early_stopping</code></td>
+                <td>开启</td>
+                <td>模型输出最终答案格式时提前终止</td>
+            </tr>
+            <tr>
+                <td><code>return_intermediate_steps</code></td>
+                <td>调试时 true</td>
+                <td>返回每步思考与工具调用，便于排查</td>
+            </tr>
+        </table></div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>解决需要多步推理和多次工具调用的复杂任务</li>
+                <li>构建客服、运维、数据分析等自主辅助系统</li>
+                <li>在不确定路径的场景下，比硬编码工作流更灵活</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：什么时候用 Agent，什么时候不用？</strong></p>
+            <p>A：步骤固定 → 用 Chain；单步查资料 → RAG/单次工具；步骤不确定、需多轮试探 → 用 Agent。过度使用 Agent 会增加成本、延迟和不稳定性。</p>
+            <p><strong>Q：ReAct 和 Function Calling 是什么关系？</strong></p>
+            <p>A：Function Calling 是「单次或多次工具调用」的协议；ReAct 是在此之上的「思考—行动—观察」编排模式。Agent = 编排 + 工具调用 + 终止条件。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1sN411d7qM/" target="_blank">ReAct 框架从零到一实战</a></p>
+            <p><strong>📄 论文：</strong><a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting in Language Models</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec3">
+        <h2>三、Agent 架构模式与框架选型</h2>
+
+        <h3>常见 Agent 架构模式</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>模式</th>
+                <th>流程</th>
+                <th>适用场景</th>
+                <th>优缺点</th>
+            </tr>
+            <tr>
+                <td><strong>ReAct</strong></td>
+                <td>思考→行动→观察 循环</td>
+                <td>通用探索型任务</td>
+                <td>简单易懂；步数多时上下文膨胀</td>
+            </tr>
+            <tr>
+                <td><strong>Plan-and-Execute</strong></td>
+                <td>先出完整计划，再逐步执行</td>
+                <td>步骤多、结构清晰的任务</td>
+                <td>计划稳定；计划错误时难纠正</td>
+            </tr>
+            <tr>
+                <td><strong>Reflexion</strong></td>
+                <td>执行→评估→反思→重试</td>
+                <td>代码生成、需要自我纠错</td>
+                <td>成功率高；多轮反思成本高</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-Agent</strong></td>
+                <td>多角色分工协作</td>
+                <td>研发、审核、翻译等多专长</td>
+                <td>能力边界清晰；协调复杂</td>
+            </tr>
+            <tr>
+                <td><strong>LangGraph 状态机</strong></td>
+                <td>显式节点 + 边 + 状态</td>
+                <td>生产级、需人工介入的流程</td>
+                <td>可控性强；开发量较大</td>
+            </tr>
+        </table></div>
+
+        <h3>生产级 Agent 架构（推荐）</h3>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">flowchart TB
+    U["用户输入"] --> IG["输入 Guardrail"]
+    IG --> RT["Router"]
+    RT --> AL["Agent Loop"]
+    AL <--> TR["Tool Registry"]
+    TR --> EXT["外部 API / DB / RAG"]
+    AL --> MEM["Memory"]
+    MEM --> AL
+    AL --> OG["输出 Guardrail"]
+    OG --> OUT["返回用户"]
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+<div class="flowchart">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>用户输入
+   ↓
+[输入 Guardrail] ──拦截恶意/越权请求
+   ↓
+[Router] ──简单问题直接回答，复杂问题进 Agent
+   ↓
+[Agent Loop] ←→ [Tool Registry] ←→ 外部 API / DB / RAG
+   ↓              ↑
+[Memory] ────────┘（短期 history + 长期向量库）
+   ↓
+[输出 Guardrail] ──格式校验、敏感信息过滤
+   ↓
+返回用户（可选：流式 + 中间步骤展示）</code></pre></div>
+        </div>
+            </details>
+
+        <h3>MCP：工具接入的标准化方向</h3>
+        <p><strong>MCP（Model Context Protocol）</strong> 由 Anthropic 推动，旨在用统一协议连接「模型 ↔ 工具/数据源」，类似 USB 接口。Cursor、Claude Desktop 等已支持 MCP Server。</p>
+        <ul>
+            <li>工具提供方实现 MCP Server，暴露 Resources / Tools / Prompts</li>
+            <li>客户端（IDE、Agent 应用）通过 MCP Client 发现并调用</li>
+            <li>优势：一次接入、多处复用；减少每个项目重复写工具胶水代码</li>
+        </ul>
+
+        <h3>国内常用 Agent 框架对比</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>框架</th>
+                <th>特点</th>
+                <th>适用场景</th>
+                <th>学习曲线</th>
+            </tr>
+            <tr>
+                <td><strong>LangChain</strong></td>
+                <td>组件最全，文档丰富</td>
+                <td>快速原型、通用 Agent</td>
+                <td>中</td>
+            </tr>
+            <tr>
+                <td><strong>LangGraph</strong></td>
+                <td>有状态图、支持 Human-in-the-loop</td>
+                <td>生产级复杂流程</td>
+                <td>中高</td>
+            </tr>
+            <tr>
+                <td><strong>AutoGen</strong></td>
+                <td>微软出品，Multi-Agent 对话</td>
+                <td>多角色协作实验</td>
+                <td>中</td>
+            </tr>
+            <tr>
+                <td><strong>CrewAI</strong></td>
+                <td>角色 + 任务分配语义清晰</td>
+                <td>团队协作型 Agent</td>
+                <td>低</td>
+            </tr>
+            <tr>
+                <td><strong>ModelScope Agent</strong></td>
+                <td>国产，中文模型友好</td>
+                <td>国内开源模型项目</td>
+                <td>低</td>
+            </tr>
+            <tr>
+                <td><strong>Dify / Coze</strong></td>
+                <td>低代码可视化编排</td>
+                <td>业务人员参与、快速上线</td>
+                <td>低</td>
+            </tr>
+        </table></div>
+
+        <div class="note">
+            <strong>选型建议：</strong>学习原理用 LangChain ReAct；上生产优先 LangGraph 或 Dify（视团队技术栈）；Multi-Agent 仅在单 Agent 工具过多或角色边界明确时使用，避免过早复杂化。
+        </div>
+
+        <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>根据任务复杂度选择 ReAct / Plan-and-Execute / 状态机</li>
+                <li>用 MCP 减少工具接入重复劳动</li>
+                <li>避免「一切皆 Agent」的过度设计</li>
+            </ul>
+        </div>
+        </div>
+    
+        <div class="section" id="sec4">
+        <h2>四、常见问题、安全与生产实践</h2>
+
+                <h3>Agent 六大常见问题与解决方案</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>问题</th>
+                <th>最可能的原因</th>
+                <th>最佳解决方案</th>
+            </tr>
+            <tr>
+                <td><strong>无限循环</strong></td>
+                <td>无终止条件或 Observation 无信息量</td>
+                <td><code>max_iterations</code> + 明确停止指令；工具返回结构化错误</td>
+            </tr>
+            <tr>
+                <td><strong>规划失败</strong></td>
+                <td>任务过复杂或模型能力不足</td>
+                <td>任务分解、换更强模型、Plan-and-Execute</td>
+            </tr>
+            <tr>
+                <td><strong>工具调用错误</strong></td>
+                <td>描述不清、参数 schema 模糊</td>
+                <td>优化 description、Pydantic 校验、few-shot 示例</td>
+            </tr>
+            <tr>
+                <td><strong>忘记之前步骤</strong></td>
+                <td>上下文过长、关键信息被淹没</td>
+                <td>定期摘要中间结果；只保留最近 N 轮 tool 消息</td>
+            </tr>
+            <tr>
+                <td><strong>成本/延迟过高</strong></td>
+                <td>循环次数多、模型过大</td>
+                <td>小模型路由 + 大模型规划；缓存相同工具结果</td>
+            </tr>
+            <tr>
+                <td><strong>结果不可复现</strong></td>
+                <td>temperature 高、工具非确定性</td>
+                <td>Agent 用 temperature=0；记录完整 trace</td>
+            </tr>
+        </table></div>
+
+                <h3>提升 Agent 可靠性的 8 个技巧</h3>
+        <ol>
+            <li>用更强模型做规划（GPT-4o、Claude Sonnet、Qwen-Max 等）</li>
+            <li>工具 description 写清「何时用 / 何时不用」</li>
+            <li>应用层做参数校验，错误信息回传模型自我修正</li>
+            <li>要求模型在行动前先输出简短思考（CoT）</li>
+            <li>限制 <code>max_iterations</code> 和总超时</li>
+            <li>对关键操作加 Human-in-the-loop 确认</li>
+            <li>记录每步 trace（LangSmith、Langfuse、自建日志）</li>
+            <li>为工具调用做集成测试（固定输入 → 期望工具名与参数）</li>
+        </ol>
+
+        <h3>工具调用安全清单</h3>
+        <div class="warning">
+            <ul>
+                <li><strong>最小权限</strong>：每个工具只暴露必要 API，禁止模型直接执行任意 SQL / Shell</li>
+                <li><strong>参数白名单</strong>：枚举、正则校验，拒绝 <code>eval</code>、路径穿越等</li>
+                <li><strong>Prompt 注入防护</strong>：用户输入与 system 指令隔离；工具结果当不可信数据处理</li>
+                <li><strong>敏感操作二次确认</strong>：删数据、转账、发邮件等需用户或审批流确认</li>
+                <li><strong>审计日志</strong>：谁、何时、调用了什么工具、参数与结果</li>
+            </ul>
+        </div>
+
+        <h3>成本与延迟优化</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>策略</th>
+                <th>效果</th>
+            </tr>
+            <tr>
+                <td>Router 分流简单问题</td>
+                <td>减少 50%+ 不必要的 Agent 调用</td>
+            </tr>
+            <tr>
+                <td>工具结果缓存（相同参数）</td>
+                <td>降低外部 API 费用与延迟</td>
+            </tr>
+            <tr>
+                <td>压缩 Observation（只传摘要）</td>
+                <td>减少 token 消耗</td>
+            </tr>
+            <tr>
+                <td>并行 tool_calls</td>
+                <td>缩短多工具场景的总耗时</td>
+            </tr>
+        </table></div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>快速排查 Agent 线上问题（循环、幻觉、工具误调）</li>
+                <li>满足企业安全与合规要求</li>
+                <li>在效果与成本之间做可量化的权衡</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么 Agent 总是陷入无限循环？</strong></p>
+            <p>A：模型认为任务未完成，或工具返回空/错误信息导致反复重试。设置 <code>max_iterations</code>，并在 system 中定义「满足 X 条件即输出 Final Answer」。</p>
+            <p><strong>Q：如何调试 Agent？</strong></p>
+            <p>A：开启 verbose / trace，逐步查看：用户输入 → 模型思考 → tool_calls → 工具返回 → 下一轮。重点检查工具是否被误选、参数是否解析错误。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1aM411K7yR/" target="_blank">Agent 常见问题排查指南</a></p>
+            <p><strong>📄 文档：</strong><a href="https://langchain-ai.github.io/langgraph/" target="_blank">LangGraph 官方文档</a></p>
+            <p><strong>📄 可观测：</strong><a href="https://docs.smith.langchain.com/" target="_blank">LangSmith — Agent Trace 调试</a></p>
+        </div>
+        </div>
+    
+        <div class="exercise">
+        <h2>📝 2 小时实战小练习</h2>
+        <p>以下示例使用 OpenAI 兼容 API + 原生 Function Calling，再附 LangGraph 最小 Agent 写法（2024–2026 主流栈）。</p>
+
+        <h3>练习 A：原生 Function Calling 循环</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>import json
+from openai import OpenAI
+
+client = OpenAI()  # 或 base_url 指向通义/DeepSeek 等兼容端点
+
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "calculator",
+        "description": "计算数学表达式，支持 + - * / 和括号",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "expression": {"type": "string", "description": "如 12345 * 67890"}
+            },
+            "required": ["expression"]
+        }
+    }
+}]
+
+def run_calculator(expression: str) -> str:
+    allowed = set("0123456789+-*/(). ")
+    if not all(c in allowed for c in expression):
+        return "错误：表达式含非法字符"
+    try:
+        return str(eval(expression, {"__builtins__": {}}, {}))
+    except Exception as e:
+        return f"计算错误: {e}"
+
+TOOL_MAP = {"calculator": lambda args: run_calculator(args["expression"])}
+
+messages = [{"role": "user", "content": "计算 12345 * 67890 的结果"}]
+
+for _ in range(5):  # max_iterations
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        tools=tools,
+        tool_choice="auto"
+    )
+    msg = resp.choices[0].message
+    if not msg.tool_calls:
+        print("最终回答:", msg.content)
+        break
+    messages.append(msg)
+    for tc in msg.tool_calls:
+        args = json.loads(tc.function.arguments)
+        result = TOOL_MAP[tc.function.name](args)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": result
+        })</code></pre></div>
+
+        <h3>练习 B：LangGraph ReAct Agent（推荐生产入门）</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code># pip install langgraph langchain-openai
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+def calculator(expression: str) -> str:
+    """计算数学表达式"""
+    ...
+
+def search(query: str) -> str:
+    """搜索互联网实时信息"""
+    ...
+
+agent = create_react_agent(
+    ChatOpenAI(model="gpt-4o-mini", temperature=0),
+    tools=[calculator, search]
+)
+
+result = agent.invoke({
+    "messages": [("user", "2026 年世界杯在哪里举办？再算一下 999*888")]
+})
+print(result["messages"][-1].content)</code></pre></div>
+
+        <p><strong>练习要求：</strong></p>
+        <ol>
+            <li>运行练习 A，理解 messages 中四种角色的流转</li>
+            <li>用 LangGraph 实现计算器 + 搜索两个工具</li>
+            <li>新增「翻译」工具，测试多步任务（先搜索再翻译）</li>
+            <li>设置 <code>max_iterations=3</code>，观察超限时的行为并改进错误提示</li>
+            <li>（进阶）为 <code>delete_user</code> 类危险工具加人工确认环节</li>
+        </ol>
+        </div>
+    
+        <div class="quiz">
+        <h2>✅ 自测题（能答对就说明掌握了）</h2>
+        <ol>
+            <li>工具调用的本质是什么？模型是否直接执行函数？</li>
+            <li>对话历史中 <code>tool</code> 角色消息由谁写入？必须携带什么字段？</li>
+            <li>ReAct 框架的核心循环是什么？</li>
+            <li>Agent 的三大核心组件是什么？</li>
+            <li>什么场景适合 Agent，什么场景只需 RAG 或 Chain？</li>
+            <li>工具调用的可靠性主要取决于什么？</li>
+            <li>如何防止 Agent 陷入无限循环？</li>
+            <li>MCP 解决的是什么问题？</li>
+            <li>生产环境中工具调用至少要做哪三项安全防护？</li>
+            <li>Plan-and-Execute 与 ReAct 的主要区别是什么？</li>
+        </ol>
+        <details style="margin-top: 1rem;">
+            <summary style="cursor: pointer; color: #92400e; font-weight: 600;">点击查看答案</summary>
+            <ol style="margin-top: 0.75rem; color: #92400e;">
+                <li>模型生成结构化调用意图，由应用层解析执行；模型不直接执行函数</li>
+                <li>应用层写入；必须带 <code>tool_call_id</code> 与 assistant 的 tool_calls 对应</li>
+                <li>思考(Reason) → 行动(Act) → 观察(Observe)</li>
+                <li>规划器、工具执行器、记忆系统</li>
+                <li>步骤不确定、需多轮工具 → Agent；固定流程 → Chain；单步检索 → RAG</li>
+                <li>工具定义（name、description、parameters）的质量</li>
+                <li>max_iterations、总超时、明确终止条件、有信息量的 Observation</li>
+                <li>工具/数据源接入的标准化，避免重复胶水代码</li>
+                <li>最小权限、参数校验、敏感操作确认（另：审计日志、防 Prompt 注入）</li>
+                <li>Plan-and-Execute 先出完整计划再逐步执行；ReAct 每步根据观察动态决定下一步</li>
+            </ol>
+        </details>
+        </div>
+
+        <footer class="nav-footer">
+            <p>大模型应用开发者原理学习计划 · 第 6 章</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="index.html">全书合集</a> <a href="5.html">← 第5章 LoRA微调</a> <a href="7.html">第7章 推理优化与安全 →</a>
+            </p>
+            
+        </footer>
+    </div>
+
+    <script>
+(function () {
+  var themeBtn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  function label(t) { return t === 'dark' ? '浅色' : '深色'; }
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('llm-doc-theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.textContent = label(t);
+  }
+  if (themeBtn) {
+    applyTheme(root.getAttribute('data-theme') || 'light');
+    themeBtn.addEventListener('click', function () {
+      applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre');
+      var text = pre ? pre.innerText : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = '已复制';
+          setTimeout(function () { btn.textContent = '复制'; }, 1500);
+        }).catch(function () { prompt('复制以下内容：', text); });
+      } else {
+        prompt('复制以下内容：', text);
+      }
+    });
+  });
+})();
+    </script>
+                <script>
+(function () {
+  if (typeof mermaid === 'undefined') return;
+  var body = document.body;
+  var root = document.documentElement;
+  function mermaidTheme() {
+    return root.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+  }
+  function injectMermaidFullscreenUi() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      if (wrap.querySelector('.mermaid-toolbar')) return;
+      var bar = document.createElement('div');
+      bar.className = 'mermaid-toolbar';
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'mermaid-fs-btn';
+      btn.textContent = '全屏'; btn.setAttribute('aria-label', '图表全屏');
+      bar.appendChild(btn);
+      wrap.insertBefore(bar, wrap.firstChild);
+    });
+  }
+  function closePseudoFs(wrap) {
+    wrap.classList.remove('is-pseudo-fullscreen');
+    if (!document.querySelector('.mermaid-wrap.is-pseudo-fullscreen')) body.style.overflow = '';
+  }
+  function syncFsButton(wrap, btn) {
+    var on = document.fullscreenElement === wrap || wrap.classList.contains('is-pseudo-fullscreen');
+    btn.textContent = on ? '退出全屏' : '全屏';
+  }
+  function bindMermaidFullscreen() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      var btn = wrap.querySelector('.mermaid-fs-btn');
+      if (!btn || wrap.dataset.fsBound) return;
+      wrap.dataset.fsBound = '1';
+      btn.addEventListener('click', function () {
+        var native = document.fullscreenElement === wrap;
+        var pseudo = wrap.classList.contains('is-pseudo-fullscreen');
+        if (native || pseudo) {
+          if (native) document.exitFullscreen().catch(function () {});
+          if (pseudo) closePseudoFs(wrap);
+          syncFsButton(wrap, btn);
+          return;
+        }
+        var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+        if (typeof req === 'function') {
+          Promise.resolve(req.call(wrap)).catch(function () {
+            wrap.classList.add('is-pseudo-fullscreen');
+            body.style.overflow = 'hidden';
+          }).finally(function () { syncFsButton(wrap, btn); });
+        } else {
+          wrap.classList.add('is-pseudo-fullscreen');
+          body.style.overflow = 'hidden';
+          syncFsButton(wrap, btn);
+        }
+      });
+    });
+  }
+  function snapshotMermaidSources() {
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      if (!el.dataset.graph) el.dataset.graph = el.textContent.trim();
+    });
+  }
+  function rerenderMermaid() {
+    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme(), securityLevel: 'strict', flowchart: { htmlLabels: true } });
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.graph || el.textContent;
+    });
+    return mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+  }
+  window.rerenderMermaid = rerenderMermaid;
+  injectMermaidFullscreenUi();
+  snapshotMermaidSources();
+  Promise.resolve(rerenderMermaid()).then(bindMermaidFullscreen);
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+        document.querySelectorAll('.mermaid-wrap.is-pseudo-fullscreen').forEach(closePseudoFs);
+        rerenderMermaid();
+      }, 0);
+    });
+  }
+})();
+
+    </script>
+</body>
+</html>

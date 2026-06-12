@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<!-- 生成日期：2026-06-12 | 源：学习计划 | 输出：html/3.html | 格式：minimal 统一壳（对齐第1章） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型能力边界 | 大模型应用开发者必备</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('llm-doc-theme');
+            document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+    <style>
+        :root, [data-theme="light"] {
+            color-scheme: light;
+            --bg: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-code: #1f2937;
+            --fg: #333;
+            --fg-heading: #1f2937;
+            --fg-muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #3b82f6;
+            --primary-soft: #eff6ff;
+            --topbar-bg: rgba(255,255,255,0.92);
+            --shadow: rgba(0,0,0,0.05);
+            --highlight-bg: #eff6ff;
+            --note-bg: #fffbeb;
+            --note-border: #f59e0b;
+            --resource-bg: #f0fdf4;
+            --resource-border: #10b981;
+            --app-bg: #fdf2f8;
+            --app-border: #ec4899;
+            --faq-bg: #f5f3ff;
+            --faq-border: #8b5cf6;
+            --exercise-bg: #f0f9ff;
+            --exercise-border: #bae6fd;
+            --quiz-bg: #fef3c7;
+            --quiz-border: #fcd34d;
+            --formula-bg: #f9fafb;
+            --toc-bg: #f8fafc;
+            --slider-track: #dbeafe;
+            --bar-low: #93c5fd;
+            --bar-high: #1d4ed8;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0f1419;
+            --bg-card: #1a2332;
+            --bg-code: #0d1117;
+            --fg: #e2e8f0;
+            --fg-heading: #f1f5f9;
+            --fg-muted: #94a3b8;
+            --border: #2d3748;
+            --primary: #60a5fa;
+            --primary-soft: rgba(59,130,246,0.15);
+            --topbar-bg: rgba(15,20,25,0.95);
+            --shadow: rgba(0,0,0,0.3);
+            --highlight-bg: rgba(59,130,246,0.12);
+            --note-bg: rgba(245,158,11,0.1);
+            --note-border: #f59e0b;
+            --resource-bg: rgba(16,185,129,0.1);
+            --resource-border: #10b981;
+            --app-bg: rgba(236,72,153,0.1);
+            --app-border: #ec4899;
+            --faq-bg: rgba(139,92,246,0.1);
+            --faq-border: #8b5cf6;
+            --exercise-bg: rgba(59,130,246,0.08);
+            --exercise-border: rgba(59,130,246,0.35);
+            --quiz-bg: rgba(245,158,11,0.1);
+            --quiz-border: rgba(245,158,11,0.4);
+            --formula-bg: #141c28;
+            --toc-bg: #141c28;
+            --slider-track: #1e3a5f;
+            --bar-low: #3b82f6;
+            --bar-high: #93c5fd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--fg);
+            background: var(--bg);
+            padding: 4.5rem 20px 40px;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--fg-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 55vw;
+        }
+
+        .topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .btn-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--fg);
+        }
+
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+        .layout {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--fg-heading);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--fg-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .summary {
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+
+        .summary h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+            color: var(--fg-heading);
+        }
+
+        .summary ul { margin: 0; padding-left: 1.25rem; }
+        .summary li { margin-bottom: 0.35rem; }
+
+        .toc {
+            background: var(--toc-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+        }
+
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--fg-heading);
+            margin: 2rem 0 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--fg-heading);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            color: var(--fg-heading);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        p { margin-bottom: 1rem; }
+
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.45rem; }
+
+        .table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px var(--shadow);
+            font-size: 0.92rem;
+        }
+
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: var(--toc-bg); font-weight: 600; }
+
+        .code-block {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        pre:not(.mermaid) {
+            background: var(--bg-code);
+            color: #f9fafb;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: 6px;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .code-block pre code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.88rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e5e7eb;
+            border-radius: 4px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .highlight, .note, .resource, .application-value, .faq {
+            padding: 1rem 1.15rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .highlight { background: var(--highlight-bg); border-left: 4px solid var(--primary); }
+        .note { background: var(--note-bg); border-left: 4px solid var(--note-border); }
+        .resource { background: var(--resource-bg); border-left: 4px solid var(--resource-border); }
+        .application-value { background: var(--app-bg); border-left: 4px solid var(--app-border); }
+        .faq { background: var(--faq-bg); border-left: 4px solid var(--faq-border); }
+        .term-ref td:first-child,
+        .term-ref th:first-child {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+
+        .section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.05rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--formula-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .exercise {
+            background: var(--exercise-bg);
+            border: 1px solid var(--exercise-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz {
+            background: var(--quiz-bg);
+            border: 1px solid var(--quiz-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz details {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .quiz summary { cursor: pointer; font-weight: 600; color: var(--fg-heading); }
+
+        
+
+        .demo-panel {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .demo-panel label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .demo-panel input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .prob-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .prob-row {
+            display: grid;
+            grid-template-columns: 3.5rem 1fr 3rem;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .prob-bar {
+            height: 18px;
+            border-radius: 3px;
+            background: var(--slider-track);
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--bar-low), var(--bar-high));
+            border-radius: 3px;
+            transition: width 0.25s ease;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 640px) {
+            .compare-grid { grid-template-columns: 1fr; }
+            body { padding-top: 4rem; }
+        }
+
+        .compare-card {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .compare-card h4 { margin-top: 0; }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            margin-right: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-footer a { margin: 0 0.5rem; }
+        .intro {
+            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--resource-bg) 100%);
+            border: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .intro-meta span {
+            background: var(--bg-card);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .toc ol.toc-cols { columns: 2; column-gap: 2rem; }
+        @media (max-width: 640px) { .toc ol.toc-cols { columns: 1; } }
+
+        .diagram, .flowchart {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 0.85rem;
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        .flowchart { padding: 1.25rem; }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            margin-right: 0.25rem;
+        }
+
+        .tag-blue { background: var(--primary-soft); color: var(--primary); }
+
+        details:not(.quiz details) {
+            margin: 0.75rem 0;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        details:not(.quiz details) summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--fg-heading);
+        }
+
+        .quiz-answer { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--quiz-border); }
+
+    
+    
+    
+    
+        :root, [data-theme="light"], [data-theme="dark"] {
+            --accent: var(--primary);
+            --card: var(--bg-card);
+        }
+        pre.mermaid {
+            background: transparent !important;
+            color: var(--fg);
+            padding: 0 !important;
+            border-radius: 0;
+            overflow: visible;
+        }
+        
+        .mermaid-toolbar {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            z-index: 2;
+        }
+        .mermaid-fs-btn {
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .mermaid-fs-btn:hover { border-color: var(--accent); }
+        .mermaid { margin: 0; text-align: center; }
+        .mermaid-wrap:fullscreen, .mermaid-wrap.is-pseudo-fullscreen {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            padding: 2.5rem 1rem 1rem;
+            overflow: auto;
+        }
+        .mermaid-wrap:fullscreen { border-radius: 0; width: 100%; height: 100%; margin: 0; }
+        .mermaid-wrap.is-pseudo-fullscreen {
+            position: fixed; inset: 0; z-index: 10000; margin: 0; border-radius: 0; border: none;
+        }
+        .mermaid-wrap:fullscreen .mermaid-toolbar,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid-toolbar {
+            position: fixed; top: 0.65rem; right: 0.65rem;
+        }
+        .mermaid-wrap:fullscreen .mermaid,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid {
+            flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto;
+        }
+        details.ascii-fallback { margin-bottom: 1rem; }
+        details.ascii-fallback summary {
+            cursor: pointer; color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 0.5rem;
+        }
+
+    
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <span class="topbar-title">第3章 · 大模型能力边界</span>
+        <div class="topbar-actions">
+            <button type="button" class="btn-icon" id="themeBtn" aria-label="切换明暗主题">浅色</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <h1>大模型能力边界（应用导向）</h1>
+
+        <div class="intro">
+        <p><strong>本章定位：</strong>搞清楚大模型<strong>能力从哪来、上限在哪</strong>，才能在应用层做出正确选型——该用 RAG、微调还是 Prompt，该选 7B 还是 70B，本章给出决策依据。</p>
+        <div class="intro-meta">
+            <span>⏱ 建议学习 2～3 小时</span>
+            <span>📖 第 3 课 / 共 7 课</span>
+            <span>🎯 目标：正确选型 RAG / 微调 / Prompt 与模型规模</span>
+        </div>
+        </div>
+
+        <nav class="toc" aria-label="章节目录">
+            <h2>本章目录</h2>
+        <ol>
+            <li><a href="#sec1">大模型三阶段训练学到了什么</a></li>
+            <li><a href="#sec2">涌现能力的本质</a></li>
+            <li><a href="#sec3">大模型能做什么，不能做什么</a></li>
+            <li><a href="#sec4">应用层模型选型与架构原则</a></li>
+        </ol>
+        </nav>
+
+        <div class="section" id="sec1">
+        <h2>一、大模型三阶段训练学到了什么</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>预训练（Pre-training）</strong>：用海量文本（通常数万亿 token）训练基座模型，目标是预测下一个 token，从而内化语言规律与世界知识。</p>
+        <p><strong>SFT（监督微调，Supervised Fine-Tuning）</strong>：用高质量的「指令 → 回答」对继续训练，让模型从「续写文本」变成「听懂指令并作答」。</p>
+        <p><strong>RLHF / DPO（偏好对齐）</strong>：用人类或 AI 的偏好信号进一步训练，让输出更安全、更有帮助、更符合对话习惯。DPO 是 RLHF 的简化替代，应用开发中不必区分细节。</p>
+        <p><strong>基座模型 vs 对话模型</strong>：只完成预训练的叫基座模型（Base）；经过 SFT + 对齐的叫指令/对话模型（Instruct/Chat），应用开发<strong>几乎总是用后者</strong>。</p>
+
+                <h3>🔤 英文名称速查</h3>
+        <div class="table-wrap term-ref"><table>
+            <tr><th>名称</th><th>是什么 / 干什么</th></tr>
+            <tr><td><strong>Base / Instruct / Chat</strong></td><td>模型版本后缀：仅预训练 / 指令微调后 / 对齐后的对话版</td></tr>
+            <tr><td><strong>ICL</strong></td><td>In-Context Learning，在 Prompt 里给示例即可迁移任务，无需改权重</td></tr>
+            <tr><td><strong>CoT</strong></td><td>Chain-of-Thought，链式推理；让模型先写步骤再答，利于算术与逻辑题</td></tr>
+            <tr><td><strong>RLHF / DPO</strong></td><td>用人类或 AI 偏好对齐模型；DPO 是 RLHF 的简化训练目标</td></tr>
+            <tr><td><strong>涌现能力</strong></td><td>规模到阈值后突然出现的能力（如 ICL）；工程上记「7B 通常是实用门槛」</td></tr>
+            <tr><td><strong>幻觉 Hallucination</strong></td><td>模型自信地编造事实；用 RAG+溯源、拒答策略缓解，不能只靠 Prompt</td></tr>
+            <tr><td><strong>Prompt / RAG / Fine-tune</strong></td><td>改输入 / 外挂检索知识 / 改模型权重；成本与持久性依次升高</td></tr>
+        </table></div>
+
+                <h3>三阶段训练流程</h3>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">flowchart TB
+    A["海量互联网文本"] --> B["预训练<br/>数月·数千 GPU"]
+    B --> C["基座模型 Base"]
+    C --> D["SFT<br/>高质量指令数据"]
+    D --> E["指令模型 Instruct"]
+    E --> F["RLHF / DPO"]
+    F --> G["对齐模型 Aligned"]
+    G --> H["RAG / Agent / Prompt"]
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+            
+<div class="flowchart">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>海量互联网文本
+    ↓ 预训练（数月，数千 GPU）
+基座模型 Base Model —— 会续写，不太听指令
+    ↓ SFT（数天，高质量指令数据）
+指令模型 Instruct Model —— 能对话、能遵循格式
+    ↓ RLHF / DPO（数天，偏好数据）
+对齐模型 Aligned Model —— 更安全、更「像助手」
+    ↓
+应用层：RAG / Agent / 工具调用 / 业务 Prompt</code></pre></div>
+        </div>
+            </details>
+
+                <h3>核心原理</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>训练阶段</th>
+                <th>数据规模（典型）</th>
+                <th>学到的能力</th>
+                <th>不能学到的能力</th>
+            </tr>
+            <tr>
+                <td><strong>预训练</strong></td>
+                <td>数万亿 token</td>
+                <td>世界知识、语言规律、统计模式、基本推理、代码语法</td>
+                <td>指令遵循、对话格式、人类偏好、安全边界</td>
+            </tr>
+            <tr>
+                <td><strong>SFT</strong></td>
+                <td>万～百万条指令对</td>
+                <td>指令遵循、对话格式、输出风格、工具调用格式</td>
+                <td>可靠注入新知识、显著提升推理上限</td>
+            </tr>
+            <tr>
+                <td><strong>RLHF / DPO</strong></td>
+                <td>数千～数万偏好对</td>
+                <td>人类偏好、安全对齐、拒绝有害请求、回答技巧</td>
+                <td>任何新的知识或能力</td>
+            </tr>
+        </table></div>
+
+                <h3>类比理解（应用开发者版）</h3>
+        <ul>
+            <li><strong>预训练</strong> = 读遍图书馆：知识都在脑子里，但不知道你要什么格式</li>
+            <li><strong>SFT</strong> = 上岗培训：学会「用户问 A，我答 B」的标准流程</li>
+            <li><strong>RLHF</strong> = 质检反馈：学会哪些回答用户更喜欢、哪些该拒绝</li>
+        </ul>
+
+                <div class="highlight">
+            <strong>最重要的结论：</strong>
+            <ul>
+                <li>✅ <strong>预训练是模型能力的唯一来源</strong>——知识、推理上限、代码能力都在这一步决定</li>
+                <li>✅ SFT 和 RLHF 只是「解锁」和「对齐」预训练能力，<strong>不会凭空增加新能力</strong></li>
+                <li>✅ 想让模型掌握<strong>训练截止日之后</strong>的事实 → 必须 RAG 或工具，不能指望微调</li>
+                <li>✅ 选模型时先看<strong>基座质量</strong>，再看 SFT/对齐做得好不好</li>
+            </ul>
+        </div>
+
+                <h3>对应用开发的直接影响</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>你的需求</th>
+                <th>该改哪一层</th>
+                <th>常见误区</th>
+            </tr>
+            <tr>
+                <td>补充公司内部文档知识</td>
+                <td>RAG（应用层）</td>
+                <td>❌ 用微调硬灌文档</td>
+            </tr>
+            <tr>
+                <td>固定 JSON 输出格式</td>
+                <td>SFT 或 Prompt + 解析</td>
+                <td>❌ 指望 RLHF 解决格式</td>
+            </tr>
+            <tr>
+                <td>客服语气、拒答策略</td>
+                <td>SFT + 对齐 + 系统 Prompt</td>
+                <td>❌ 只调 Temperature</td>
+            </tr>
+            <tr>
+                <td>实时股价、天气</td>
+                <td>工具 / API（Agent）</td>
+                <td>❌ 让模型「记住」实时数据</td>
+            </tr>
+        </table></div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能准确评估不同基座模型的能力差异，不被「微调版」营销话术误导</li>
+                <li>知道为什么微调不能解决事实性错误，避免重复踩坑</li>
+                <li>能在预训练/SFT/应用层之间做出正确的技术分工</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么相同参数的模型，有的指令遵循能力强有的弱？</strong></p>
+            <p>A：SFT 数据的质量、多样性和对齐策略不同。好的 SFT 能更好「解锁」同一基座里的预训练能力；基座本身弱，SFT 也救不了推理上限。</p>
+            <p><strong>Q：Continued Pre-training（继续预训练）和 SFT 有什么区别？</strong></p>
+            <p>A：继续预训练用大量领域文本做「下一个 token 预测」，<strong>可以</strong>注入领域知识，但成本高、需防灾难性遗忘；SFT 主要改行为不改知识库。领域知识量大时考虑继续预训练 + RAG 组合。</p>
+            <p><strong>Q：知识截止日（Knowledge Cutoff）是什么意思？</strong></p>
+            <p>A：预训练数据的最后时间点。之后发生的事件模型「没见过」，只能靠 RAG/联网/tools 补足。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV17v4y1L7yX/" target="_blank">大模型三阶段训练详解</a>（播放量：60万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/619487836" target="_blank">知乎：大模型训练的三个阶段</a></p>
+            <p><strong>📄 论文：</strong><a href="https://arxiv.org/abs/2203.02155" target="_blank">InstructGPT（OpenAI，三阶段训练经典论文）</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec2">
+        <h2>二、涌现能力的本质</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>涌现能力（Emergent Abilities）</strong>：模型在参数/数据规模跨过某个阈值后，突然出现小模型不具备的能力——表现上像「量变引起质变」。</p>
+        <p><strong>上下文学习（In-Context Learning, ICL）</strong>：无需更新权重，只在 Prompt 里给几个示例，模型就能模仿完成任务。</p>
+        <p><strong>思维链（Chain-of-Thought, CoT）</strong>：让模型「一步步思考」，显著提升数学、逻辑类任务表现。</p>
+
+                <h3>核心原理</h3>
+        <p>涌现能力在研究和工程上通常归因于以下机制（不必纠结是否「真涌现」，应用层关心的是<strong>规模阈值</strong>）：</p>
+        <ol>
+            <li><strong>任务复杂度 vs 参数量</strong>：复杂任务需要模型捕捉高阶统计模式，小模型容量不够</li>
+            <li><strong>评估指标的断崖</strong>：准确率从「随机猜」到「突然可用」在曲线上像垂直跳变（如多步算术）</li>
+            <li><strong>表征空间维度</strong>：更大模型能分离更细粒度的概念边界，ICL 才有「示范可迁移」的空间</li>
+        </ol>
+
+                <div class="note">
+            <strong>学术补充：</strong>有研究认为部分「涌现」来自评估方式（非线性指标），而非模型突然获得新机制。对应用开发者而言，结论不变——<strong>小模型就是搞不定某些任务，换大模型或换架构（MoE）往往比调 Prompt 有效</strong>。
+        </div>
+
+                <h3>参数规模与典型能力边界</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>规模</th>
+                <th>典型代表</th>
+                <th>擅长</th>
+                <th>明显短板</th>
+            </tr>
+            <tr>
+                <td>&lt; 3B</td>
+                <td>Phi-2、Gemma 2B</td>
+                <td>简单分类、关键词提取、端侧部署</td>
+                <td>复杂推理、稳定 ICL、长链工具调用</td>
+            </tr>
+            <tr>
+                <td>7B～14B</td>
+                <td>Llama 3 8B、Qwen2 7B</td>
+                <td>通用对话、中等代码、RAG 问答、简单 Agent</td>
+                <td>多步数学、复杂规划、极长上下文一致性</td>
+            </tr>
+            <tr>
+                <td>70B+</td>
+                <td>Llama 3 70B、Qwen2 72B</td>
+                <td>复杂推理、长文档分析、多工具编排</td>
+                <td>成本、延迟、仍会有幻觉</td>
+            </tr>
+            <tr>
+                <td>闭源旗舰</td>
+                <td>GPT-4o、Claude 3.5</td>
+                <td>高难度推理、多模态、复杂 Agent</td>
+                <td>价格、数据隐私、供应商锁定</td>
+            </tr>
+        </table></div>
+
+                <h3>常见的涌现能力</h3>
+        <ul>
+            <li><strong>上下文学习</strong>：Prompt 里放 3～5 个「输入→输出」样例，模型零样本迁移到新输入（7B 以上更稳定）</li>
+            <li><strong>思维链推理</strong>：加一句「Let's think step by step」或中文「请一步步推理」，数学/逻辑正确率可大幅提升</li>
+            <li><strong>工具使用 / Function Calling</strong>：理解何时调 API、如何填 JSON 参数（依赖 SFT 格式 + 足够大的基座）</li>
+            <li><strong>自我修正</strong>：大模型更能在多轮对话中根据错误反馈调整（仍不可靠，生产需校验）</li>
+        </ul>
+
+                <h3>CoT 为什么有效（与第二章的联系）</h3>
+        <p>大模型本质是<strong>逐 token 预测</strong>（见第 2 章）。直接要最终答案时，模型必须在「一步」内完成全部推理；CoT 把中间步骤也变成要生成的 token，相当于<strong>把难题拆成多个简单预测</strong>，错误率显著下降。</p>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code># 无 CoT（小模型易错）
+问：23 × 17 = ?
+
+# 有 CoT（推荐写法）
+问：23 × 17 = ?
+请一步步计算，最后给出答案。</code></pre></div>
+
+                <div class="note">
+            <strong>注意：</strong>ICL、CoT、工具调用在<strong>7B 以上</strong>模型上更可靠；1B～3B 模型可部署在端侧，但复杂任务应路由到大模型或专用小模型。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>按任务复杂度选型：简单抽取用 7B，复杂分析用 70B 或 API 旗舰</li>
+                <li>小模型失败时，先试 CoT / 更好 Prompt，再考虑换模型而非无限堆业务逻辑</li>
+                <li>设计「大小模型路由」：80% 流量走便宜小模型，20% 难题走大模型</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么 GPT-4 比 Llama 3 8B 强这么多？</strong></p>
+            <p>A：预训练数据规模与质量、参数与架构（含 MoE）、对齐数据、后训练技巧都不同。8B 与旗舰差距主要在<strong>预训练与规模</strong>，不是 Prompt 能弥补的。</p>
+            <p><strong>Q：MoE 模型（如 Mixtral）算多少参数？</strong></p>
+            <p>A：总参数量大，但每 token 只激活部分专家（如 47B 总量、每次约 13B 激活）。选型时看<strong>激活参数量 +  benchmark</strong>，不能只看名字里的数字。</p>
+            <p><strong>Q：小模型 + RAG 能替代大模型吗？</strong></p>
+            <p>A：RAG 解决「知识从哪来」，不解决「推理有多强」。检索+总结类任务可以；多步推理、复杂代码仍需要更强基座。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV15M411K7sG/" target="_blank">大模型涌现能力到底是什么？</a>（播放量：35万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/600108546" target="_blank">知乎：大模型涌现能力研究</a></p>
+            <p><strong>📄 论文：</strong><a href="https://arxiv.org/abs/2206.07682" target="_blank">Emergent Abilities of Large Language Models（Wei et al.）</a></p>
+        </div>
+        </div>
+
+        <div class="section" id="sec3">
+        <h2>三、大模型能做什么，不能做什么</h2>
+
+                <h3>能力全景：能 / 不能 / 需外挂</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>类别</th>
+                <th>典型任务</th>
+                <th>结论</th>
+            </tr>
+            <tr>
+                <td><span class="tag tag-green">擅长</span></td>
+                <td>摘要、翻译、改写、分类、情感分析、代码补全、格式转换</td>
+                <td>直接 Prompt 即可，7B 往往够用</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-green">擅长</span></td>
+                <td>基于给定上下文的问答、合规检查、对话式引导</td>
+                <td>RAG + 中等模型即可</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-blue">有条件</span></td>
+                <td>数学、逻辑、多步规划</td>
+                <td>需 CoT + 大模型；关键路径要程序校验</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-blue">有条件</span></td>
+                <td>领域事实（医疗、法律、内部规章）</td>
+                <td>必须 RAG 或工具，不能单靠 parametric memory</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-red">不擅长</span></td>
+                <td>精确算术、统计计数、UUID/日期等精确值</td>
+                <td>用计算器 / SQL / 代码执行</td>
+            </tr>
+            <tr>
+                <td><span class="tag tag-red">不能</span></td>
+                <td>实时信息、私有未提供数据、物理操作</td>
+                <td>API、Agent、人工流程</td>
+            </tr>
+        </table></div>
+
+                <h3>大模型能做的事情（详细）</h3>
+        <ul>
+            <li>✅ 理解和生成自然语言（多语言、多风格）</li>
+            <li>✅ 总结、翻译、改写、扩写、提取结构化字段</li>
+            <li>✅ 在<strong>给定上下文内</strong>推理（RAG 检索到的段落、用户粘贴的全文）</li>
+            <li>✅ 生成代码、SQL、JSON、Markdown 等（需解析器校验）</li>
+            <li>✅ 遵循指令完成开放式任务（写作、头脑风暴、角色扮演）</li>
+            <li>✅ 作为 Agent 的「大脑」编排工具调用（本身不执行工具）</li>
+        </ul>
+
+                <h3>大模型不能 / 不应单独做的事情</h3>
+        <ul>
+            <li>❌ <strong>可靠记忆事实</strong>：权重里是模糊统计，不是数据库 → 幻觉（Hallucination）</li>
+            <li>❌ <strong>精确计算</strong>：大数乘除、长链加减、统计「有多少个」常错</li>
+            <li>❌ <strong>实时世界状态</strong>：训练截止日后的新闻、库存、股价（除非联网）</li>
+            <li>❌ <strong>100% 确定性</strong>：同一 Prompt 可能因采样得到不同答案</li>
+            <li>❌ <strong>替代权限与审计</strong>：谁能否访问什么数据，必须由应用层控制</li>
+        </ul>
+
+                <h3>幻觉的三种常见类型</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>类型</th>
+                <th>表现</th>
+                <th>缓解手段</th>
+            </tr>
+            <tr>
+                <td>事实幻觉</td>
+                <td>编造人名、论文、法条、产品参数</td>
+                <td>RAG + 引用溯源 + 「仅根据上文回答」</td>
+            </tr>
+            <tr>
+                <td>忠实度幻觉</td>
+                <td>总结偏离原文、张冠李戴</td>
+                <td>分块检索、要求引用原文句子</td>
+            </tr>
+            <tr>
+                <td>逻辑幻觉</td>
+                <td>推理链前后矛盾</td>
+                <td>CoT + 外部验证（代码/SQL 执行）</td>
+            </tr>
+        </table></div>
+
+                <div class="highlight">
+            <strong>重要结论：</strong>解决<strong>事实性</strong>问题，首选 <strong>RAG</strong>（知识外置、可更新、可审计）；解决<strong>行为/格式</strong>问题，考虑 SFT 或强 Prompt；解决<strong>计算/实时</strong>问题，必须<strong>工具</strong>。没有银弹。
+        </div>
+
+                <h3>技术选型决策树（完整版）</h3>
+        <div class="decision-tree">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>你的核心问题是什么？
+│
+├─ 答案必须来自最新/私有/可引用文档？
+│   └─ 是 → RAG（+ 必要时联网 Search）
+│       ├─ 还要固定话术/JSON  schema？→ RAG + 轻量 SFT 或 Structured Output
+│       └─ 仅问答 → RAG + 引用片段即可
+│
+├─ 答案必须数学/逻辑 100% 正确？
+│   └─ 是 → 大模型 CoT + 代码解释器 / 规则引擎校验
+│
+├─ 主要是语气、角色、输出格式、业务流程？
+│   └─ 是 → Prompt 工程 → 不够再 LoRA SFT
+│
+├─ 需要调用外部系统（下单、查库、发邮件）？
+│   └─ 是 → Agent + Function Calling + 权限层
+│
+└─ 只是通用聊天/创意？
+    └─ Prompt + 合适规模模型 + 采样参数（见第 2 章）</code></pre></div>
+        </div>
+
+                <h3>RAG vs 微调 vs Prompt：一张表搞定</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>维度</th>
+                <th>Prompt 工程</th>
+                <th>RAG</th>
+                <th>微调（LoRA）</th>
+            </tr>
+            <tr>
+                <td>成本</td>
+                <td>最低</td>
+                <td>中（向量库+检索）</td>
+                <td>高（数据+GPU）</td>
+            </tr>
+            <tr>
+                <td>知识更新</td>
+                <td>改 Prompt</td>
+                <td>更新文档/索引</td>
+                <td>往往需重新训练</td>
+            </tr>
+            <tr>
+                <td>事实准确性</td>
+                <td>弱</td>
+                <td>强（有溯源）</td>
+                <td>弱（不可靠灌知识）</td>
+            </tr>
+            <tr>
+                <td>风格/格式</td>
+                <td>中</td>
+                <td>弱</td>
+                <td>强</td>
+            </tr>
+            <tr>
+                <td>典型场景</td>
+                <td>快速验证、通用任务</td>
+                <td>企业知识库、客服</td>
+                <td>垂直话术、JSON 专精</td>
+            </tr>
+        </table></div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>避免「大模型万能论」，架构里明确：LLM 负责语言，数据库负责事实，代码负责计算</li>
+                <li>评审需求时能一眼判断：该上 RAG 还是微调，避免重复造轮子</li>
+                <li>为 SLA 设预期：允许创造性任务高方差，禁止在关键事实上「只信模型」</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么微调不能解决事实性错误？</strong></p>
+            <p>A：SFT 样本有限，模型学的是「遇到这类问题怎么答」的模式，不是可靠存储百万条事实。预训练里没有的知识，微调最多「背住」几百条，且易过拟合、难更新。</p>
+            <p><strong>Q：RAG 检索错了怎么办？</strong></p>
+            <p>A：这是 RAG 的主战场：分块策略、混合检索、重排序、HyDE、查询改写。模型再强，检索垃圾进也会垃圾出（GIGO）。</p>
+            <p><strong>Q：能不能 RAG + 微调一起用？</strong></p>
+            <p>A：可以，且很常见：RAG 供事实，微调对齐领域术语和输出格式。二者互补，不是二选一。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1a84y1v7zK/" target="_blank">大模型能力边界与技术选型</a>（播放量：20万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/626547308" target="_blank">知乎：RAG还是微调？这是一个问题</a></p>
+            <p><strong>📄 延伸：</strong>下一章 <a href="4.html">RAG 原理与实战</a> 会展开检索与分块细节</p>
+        </div>
+        </div>
+
+        <div class="section" id="sec4">
+        <h2>四、应用层模型选型与架构原则</h2>
+
+                <h3>选型四问（上线前必答）</h3>
+        <ol>
+            <li><strong>延迟与成本预算</strong>：能否接受 2s+ 首 token？能否用 API 按 token 计费？</li>
+            <li><strong>数据隐私</strong>：能否出公网？需否私有化部署 7B/70B？</li>
+            <li><strong>任务复杂度</strong>：抽取 vs 多步推理 vs Agent？</li>
+            <li><strong>事实可审计性</strong>：错了谁负责？要不要引用来源？</li>
+        </ol>
+
+                <h3>常见架构模式</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>模式</th>
+                <th>组成</th>
+                <th>适用</th>
+            </tr>
+            <tr>
+                <td>纯 Prompt</td>
+                <td>LLM + 系统 Prompt</td>
+                <td>原型、创意、内部工具</td>
+            </tr>
+            <tr>
+                <td>RAG 问答</td>
+                <td>检索 + LLM + 引用</td>
+                <td>文档库、客服、合规问答</td>
+            </tr>
+            <tr>
+                <td>Agent</td>
+                <td>LLM + Tools + 记忆 + 规划循环</td>
+                <td>自动化办公、多步任务</td>
+            </tr>
+            <tr>
+                <td>大小模型路由</td>
+                <td>小模型分流 + 大模型兜底</td>
+                <td>高并发、成本敏感</td>
+            </tr>
+        </table></div>
+
+                <h3>生产环境五条铁律</h3>
+        <ul>
+            <li><strong>关键事实不裸信模型</strong>：RAG 引用或 DB 查询结果为准</li>
+            <li><strong>关键计算走代码</strong>：Calculator、SQL、单元测试</li>
+            <li><strong>输出要可解析</strong>：JSON Schema、正则、重试策略</li>
+            <li><strong>设护栏</strong>：输入长度、敏感词、速率限制、人工兜底</li>
+            <li><strong>可观测</strong>：记录 Prompt、检索片段、模型版本，便于复盘幻觉</li>
+        </ul>
+
+                <div class="highlight">
+            <strong>心智模型：</strong>把 LLM 当作「读过很多书的实习生」——文笔好、反应快，但记错数字、捏造出处、不会自己查最新规章；你要给他<strong>资料（RAG）、计算器（Tools）和检查清单（Prompt/代码校验）</strong>。
+        </div>
+
+                <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>写技术方案时能画出清晰边界：哪些模块用 LLM，哪些用传统软件</li>
+                <li>与产品/业务对齐预期，减少「AI 怎么还会错」的扯皮</li>
+                <li>为后续章节（RAG、LoRA、Agent）打好「为什么需要它们」的认知基础</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：开源 7B 和 GPT-4 API 怎么选？</strong></p>
+            <p>A：7B 私有化 + 低延迟 + RAG 够用的场景选开源；复杂推理、少运维、快速迭代选 API。很多团队「简单走 7B，难题走 GPT-4」混合。</p>
+            <p><strong>Q：用户说「就要 100% 准确」怎么办？</strong></p>
+            <p>A：明确范围：在<strong>限定知识库 + 检索命中 + 拒答策略</strong>下可达高准确；开放域百科级 100% 不现实。用产品文案管理预期。</p>
+        </div>
+        </div>    <div class="exercise">
+        <h2>📝 1小时实战小练习</h2>
+
+                <h3>练习 A：模型能力对比（约 30 分钟）</h3>
+        <p>对比同一个 Prompt 在不同模型下的输出差异，总结不同模型的能力特点：</p>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code># 测试 Prompt（推理 + 反直觉陷阱）
+prompt = """
+有一个池塘，里面有一片荷叶。荷叶每天都会长大一倍，48天能长满整个池塘。
+请问荷叶长满半个池塘需要多少天？
+
+请一步步推理，最后给出明确答案。
+"""
+
+# 测试模型列表（任选你有 API 或本地能跑的）
+models = [
+    "Llama 3 8B",
+    "Qwen2 7B",
+    "GPT-3.5",
+    "GPT-4o"
+]
+
+# 记录表格（建议填）
+# | 模型 | 最终答案 | 推理是否合理 | 是否掉进「47天」陷阱 |
+</code></pre></div>
+        <p><strong>参考答案要点：</strong>47 天（第 48 天满池，则第 47 天为一半）。观察小模型是否直接猜、大模型 CoT 是否稳定。</p>
+
+                <h3>练习 B：CoT 消融（约 15 分钟）</h3>
+        <p>同一模型，分别测试「直接问答案」和「请一步步推理」，对比正确率。再试一道简单算术：<code>156 × 23 = ?</code></p>
+
+                <h3>练习 C：技术选型沙盘（约 15 分钟）</h3>
+        <p>为下面三个需求各写一行方案（Prompt / RAG / 微调 / Agent / 工具）：</p>
+        <ol>
+            <li>公司内部 HR 制度问答，必须引用条款原文</li>
+            <li>电商客服，要求固定礼貌话术 + JSON 订单字段提取</li>
+            <li>实时查询订单物流状态并回复用户</li>
+        </ol>
+        <p><strong>参考：</strong>1→RAG+引用；2→Prompt/SFT+解析；3→Agent/API 查物流，LLM 只负责组织语言。</p>
+
+                <p><strong>练习要求：</strong></p>
+        <ol>
+            <li>完成练习 A，填写对比表</li>
+            <li>验证 CoT 对你选用的模型是否有效（练习 B）</li>
+            <li>练习 C 与同伴或自我对照，能口头解释选型理由</li>
+        </ol>
+        </div>
+    
+        <div class="quiz">
+        <h2>✅ 自测题（能答对就说明掌握了）</h2>
+        <ol>
+            <li>大模型<strong>知识能力</strong>的唯一主要来源是什么阶段？</li>
+            <li>SFT 主要改变模型的什么，而不是增加什么？</li>
+            <li>RLHF/DPO 主要解决什么问题？</li>
+            <li>什么是上下文学习（ICL）？为什么 7B 通常是实用门槛？</li>
+            <li>CoT 为什么能提升推理题正确率？（联系自回归本质）</li>
+            <li>幻觉有哪几种类型？各用什么手段缓解？</li>
+            <li>解决<strong>事实准确性</strong>的首选方案是什么？微调能替代吗？</li>
+            <li>精确计算、实时库存应交给 LLM 还是工具？</li>
+            <li>RAG 和微调分别擅长什么？能否组合使用？</li>
+            <li>生产环境「五条铁律」里，哪一条和审计合规最直接相关？</li>
+        </ol>
+        <details style="margin-top: 1rem;">
+            <summary style="cursor: pointer; color: #92400e; font-weight: 600;">点击查看答案</summary>
+            <ol style="margin-top: 0.75rem; color: #92400e;">
+                <li>预训练（继续预训练可补充领域知识，但成本高）</li>
+                <li>改变指令遵循/格式/风格；不增加可靠的新事实与推理上限</li>
+                <li>人类偏好、安全对齐、回答质量</li>
+                <li>Prompt 内示例即可任务迁移；7B+ 表征能力足够支撑稳定 ICL</li>
+                <li>把推理拆成多个 token 逐步生成，降低单步预测难度</li>
+                <li>事实→RAG+溯源；忠实度→分块+引用；逻辑→CoT+外部验证</li>
+                <li>RAG；微调不能可靠替代事实层</li>
+                <li>工具（代码/SQL/API），不应交给 LLM 心算</li>
+                <li>RAG 擅事实，微调擅风格/格式；可以组合</li>
+                <li>关键事实不裸信模型 + 可观测（记录检索与版本）</li>
+            </ol>
+        </details>
+        </div>
+
+        <footer class="nav-footer">
+            <p>大模型应用开发者原理学习计划 · 第 3 章</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="index.html">全书合集</a> <a href="2.html">← 第2章 自回归生成</a> <a href="4.html">第4章 RAG原理 →</a>
+            </p>
+            
+        </footer>
+    </div>
+
+    <script>
+(function () {
+  var themeBtn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  function label(t) { return t === 'dark' ? '浅色' : '深色'; }
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('llm-doc-theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.textContent = label(t);
+  }
+  if (themeBtn) {
+    applyTheme(root.getAttribute('data-theme') || 'light');
+    themeBtn.addEventListener('click', function () {
+      applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre');
+      var text = pre ? pre.innerText : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = '已复制';
+          setTimeout(function () { btn.textContent = '复制'; }, 1500);
+        }).catch(function () { prompt('复制以下内容：', text); });
+      } else {
+        prompt('复制以下内容：', text);
+      }
+    });
+  });
+})();
+    </script>
+                <script>
+(function () {
+  if (typeof mermaid === 'undefined') return;
+  var body = document.body;
+  var root = document.documentElement;
+  function mermaidTheme() {
+    return root.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+  }
+  function injectMermaidFullscreenUi() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      if (wrap.querySelector('.mermaid-toolbar')) return;
+      var bar = document.createElement('div');
+      bar.className = 'mermaid-toolbar';
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'mermaid-fs-btn';
+      btn.textContent = '全屏'; btn.setAttribute('aria-label', '图表全屏');
+      bar.appendChild(btn);
+      wrap.insertBefore(bar, wrap.firstChild);
+    });
+  }
+  function closePseudoFs(wrap) {
+    wrap.classList.remove('is-pseudo-fullscreen');
+    if (!document.querySelector('.mermaid-wrap.is-pseudo-fullscreen')) body.style.overflow = '';
+  }
+  function syncFsButton(wrap, btn) {
+    var on = document.fullscreenElement === wrap || wrap.classList.contains('is-pseudo-fullscreen');
+    btn.textContent = on ? '退出全屏' : '全屏';
+  }
+  function bindMermaidFullscreen() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      var btn = wrap.querySelector('.mermaid-fs-btn');
+      if (!btn || wrap.dataset.fsBound) return;
+      wrap.dataset.fsBound = '1';
+      btn.addEventListener('click', function () {
+        var native = document.fullscreenElement === wrap;
+        var pseudo = wrap.classList.contains('is-pseudo-fullscreen');
+        if (native || pseudo) {
+          if (native) document.exitFullscreen().catch(function () {});
+          if (pseudo) closePseudoFs(wrap);
+          syncFsButton(wrap, btn);
+          return;
+        }
+        var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+        if (typeof req === 'function') {
+          Promise.resolve(req.call(wrap)).catch(function () {
+            wrap.classList.add('is-pseudo-fullscreen');
+            body.style.overflow = 'hidden';
+          }).finally(function () { syncFsButton(wrap, btn); });
+        } else {
+          wrap.classList.add('is-pseudo-fullscreen');
+          body.style.overflow = 'hidden';
+          syncFsButton(wrap, btn);
+        }
+      });
+    });
+  }
+  function snapshotMermaidSources() {
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      if (!el.dataset.graph) el.dataset.graph = el.textContent.trim();
+    });
+  }
+  function rerenderMermaid() {
+    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme(), securityLevel: 'strict', flowchart: { htmlLabels: true } });
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.graph || el.textContent;
+    });
+    return mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+  }
+  window.rerenderMermaid = rerenderMermaid;
+  injectMermaidFullscreenUi();
+  snapshotMermaidSources();
+  Promise.resolve(rerenderMermaid()).then(bindMermaidFullscreen);
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+        document.querySelectorAll('.mermaid-wrap.is-pseudo-fullscreen').forEach(closePseudoFs);
+        rerenderMermaid();
+      }, 0);
+    });
+  }
+})();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<!-- 生成日期：2026-06-12 | 源：学习计划 | 输出：html/4.html | 格式：minimal 统一壳（对齐第1章） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG原理与实战 | 大模型应用开发者必备</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('llm-doc-theme');
+            document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
+    <style>
+        :root, [data-theme="light"] {
+            color-scheme: light;
+            --bg: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-code: #1f2937;
+            --fg: #333;
+            --fg-heading: #1f2937;
+            --fg-muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #3b82f6;
+            --primary-soft: #eff6ff;
+            --topbar-bg: rgba(255,255,255,0.92);
+            --shadow: rgba(0,0,0,0.05);
+            --highlight-bg: #eff6ff;
+            --note-bg: #fffbeb;
+            --note-border: #f59e0b;
+            --resource-bg: #f0fdf4;
+            --resource-border: #10b981;
+            --app-bg: #fdf2f8;
+            --app-border: #ec4899;
+            --faq-bg: #f5f3ff;
+            --faq-border: #8b5cf6;
+            --exercise-bg: #f0f9ff;
+            --exercise-border: #bae6fd;
+            --quiz-bg: #fef3c7;
+            --quiz-border: #fcd34d;
+            --formula-bg: #f9fafb;
+            --toc-bg: #f8fafc;
+            --slider-track: #dbeafe;
+            --bar-low: #93c5fd;
+            --bar-high: #1d4ed8;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #0f1419;
+            --bg-card: #1a2332;
+            --bg-code: #0d1117;
+            --fg: #e2e8f0;
+            --fg-heading: #f1f5f9;
+            --fg-muted: #94a3b8;
+            --border: #2d3748;
+            --primary: #60a5fa;
+            --primary-soft: rgba(59,130,246,0.15);
+            --topbar-bg: rgba(15,20,25,0.95);
+            --shadow: rgba(0,0,0,0.3);
+            --highlight-bg: rgba(59,130,246,0.12);
+            --note-bg: rgba(245,158,11,0.1);
+            --note-border: #f59e0b;
+            --resource-bg: rgba(16,185,129,0.1);
+            --resource-border: #10b981;
+            --app-bg: rgba(236,72,153,0.1);
+            --app-border: #ec4899;
+            --faq-bg: rgba(139,92,246,0.1);
+            --faq-border: #8b5cf6;
+            --exercise-bg: rgba(59,130,246,0.08);
+            --exercise-border: rgba(59,130,246,0.35);
+            --quiz-bg: rgba(245,158,11,0.1);
+            --quiz-border: rgba(245,158,11,0.4);
+            --formula-bg: #141c28;
+            --toc-bg: #141c28;
+            --slider-track: #1e3a5f;
+            --bar-low: #3b82f6;
+            --bar-high: #93c5fd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--fg);
+            background: var(--bg);
+            padding: 4.5rem 20px 40px;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--fg-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 55vw;
+        }
+
+        .topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .btn-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--fg);
+        }
+
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+        .layout {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--fg-heading);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--fg-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .summary {
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+
+        .summary h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+            color: var(--fg-heading);
+        }
+
+        .summary ul { margin: 0; padding-left: 1.25rem; }
+        .summary li { margin-bottom: 0.35rem; }
+
+        .toc {
+            background: var(--toc-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem;
+            border: none;
+            padding: 0;
+        }
+
+        .toc ol { margin: 0; padding-left: 1.25rem; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--fg-heading);
+            margin: 2rem 0 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--fg-heading);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            color: var(--fg-heading);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        p { margin-bottom: 1rem; }
+
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.45rem; }
+
+        .table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px var(--shadow);
+            font-size: 0.92rem;
+        }
+
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: var(--toc-bg); font-weight: 600; }
+
+        .code-block {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        pre:not(.mermaid) {
+            background: var(--bg-code);
+            color: #f9fafb;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: 6px;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .code-block pre code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.88rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e5e7eb;
+            border-radius: 4px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+        .highlight, .note, .resource, .application-value, .faq {
+            padding: 1rem 1.15rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .highlight { background: var(--highlight-bg); border-left: 4px solid var(--primary); }
+        .note { background: var(--note-bg); border-left: 4px solid var(--note-border); }
+        .resource { background: var(--resource-bg); border-left: 4px solid var(--resource-border); }
+        .application-value { background: var(--app-bg); border-left: 4px solid var(--app-border); }
+        .faq { background: var(--faq-bg); border-left: 4px solid var(--faq-border); }
+        .term-ref td:first-child,
+        .term-ref th:first-child {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+
+        .section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .formula {
+            text-align: center;
+            font-size: 1.05rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--formula-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .exercise {
+            background: var(--exercise-bg);
+            border: 1px solid var(--exercise-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz {
+            background: var(--quiz-bg);
+            border: 1px solid var(--quiz-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .quiz details {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .quiz summary { cursor: pointer; font-weight: 600; color: var(--fg-heading); }
+
+        
+
+        .demo-panel {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .demo-panel label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .demo-panel input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+        }
+
+        .prob-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        .prob-row {
+            display: grid;
+            grid-template-columns: 3.5rem 1fr 3rem;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .prob-bar {
+            height: 18px;
+            border-radius: 3px;
+            background: var(--slider-track);
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--bar-low), var(--bar-high));
+            border-radius: 3px;
+            transition: width 0.25s ease;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 640px) {
+            .compare-grid { grid-template-columns: 1fr; }
+            body { padding-top: 4rem; }
+        }
+
+        .compare-card {
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .compare-card h4 { margin-top: 0; }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            margin-right: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-footer a { margin: 0 0.5rem; }
+        .intro {
+            background: linear-gradient(135deg, var(--primary-soft) 0%, var(--resource-bg) 100%);
+            border: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .intro-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .intro-meta span {
+            background: var(--bg-card);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .toc ol.toc-cols { columns: 2; column-gap: 2rem; }
+        @media (max-width: 640px) { .toc ol.toc-cols { columns: 1; } }
+
+        .diagram, .flowchart {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 0.85rem;
+            background: var(--formula-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+
+        .flowchart { padding: 1.25rem; }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            margin-right: 0.25rem;
+        }
+
+        .tag-blue { background: var(--primary-soft); color: var(--primary); }
+
+        details:not(.quiz details) {
+            margin: 0.75rem 0;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        details:not(.quiz details) summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--fg-heading);
+        }
+
+        .quiz-answer { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--quiz-border); }
+
+    
+    
+    
+    
+        :root, [data-theme="light"], [data-theme="dark"] {
+            --accent: var(--primary);
+            --card: var(--bg-card);
+        }
+        pre.mermaid {
+            background: transparent !important;
+            color: var(--fg);
+            padding: 0 !important;
+            border-radius: 0;
+            overflow: visible;
+        }
+        
+        .mermaid-toolbar {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            z-index: 2;
+        }
+        .mermaid-fs-btn {
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .mermaid-fs-btn:hover { border-color: var(--accent); }
+        .mermaid { margin: 0; text-align: center; }
+        .mermaid-wrap:fullscreen, .mermaid-wrap.is-pseudo-fullscreen {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            padding: 2.5rem 1rem 1rem;
+            overflow: auto;
+        }
+        .mermaid-wrap:fullscreen { border-radius: 0; width: 100%; height: 100%; margin: 0; }
+        .mermaid-wrap.is-pseudo-fullscreen {
+            position: fixed; inset: 0; z-index: 10000; margin: 0; border-radius: 0; border: none;
+        }
+        .mermaid-wrap:fullscreen .mermaid-toolbar,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid-toolbar {
+            position: fixed; top: 0.65rem; right: 0.65rem;
+        }
+        .mermaid-wrap:fullscreen .mermaid,
+        .mermaid-wrap.is-pseudo-fullscreen .mermaid {
+            flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto;
+        }
+        details.ascii-fallback { margin-bottom: 1rem; }
+        details.ascii-fallback summary {
+            cursor: pointer; color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 0.5rem;
+        }
+
+    
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <span class="topbar-title">第4章 · RAG原理与实战</span>
+        <div class="topbar-actions">
+            <button type="button" class="btn-icon" id="themeBtn" aria-label="切换明暗主题">浅色</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <h1>RAG原理与实战（应用导向）</h1>
+
+        <div class="intro">
+        <p><strong>本章定位：</strong>向量检索、分块、Rerank 与企业知识库全链路——对应企业知识库 / 客服问答等 80% 场景的核心能力。</p>
+        <div class="intro-meta">
+            <span>⏱ 建议学习 3～4 小时</span>
+            <span>📖 第 4 课 / 共 7 课</span>
+            <span>🎯 目标：搭建可上线的 RAG 检索与生成链路</span>
+        </div>
+        </div>
+
+        <nav class="toc" aria-label="章节目录">
+            <h2>本章目录</h2>
+        <ol>
+            <li><a href="#sec1">向量嵌入的本质</a></li>
+            <li><a href="#sec2">RAG系统完整流程</a></li>
+            <li><a href="#sec3">RAG常见问题与解决方案</a></li>
+            <li><a href="#sec4">高级 RAG 模式与选型</a></li>
+            <li><a href="#sec5">效果评估与排查清单</a></li>
+        </ol>
+        </nav>
+
+        <div class="section" id="sec1">
+        <h2>一、向量嵌入的本质</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>向量嵌入(Embedding)</strong>：将文本转换为固定长度的数字向量的技术。</p>
+        <p><strong>语义相似度</strong>：衡量两个文本在语义上相似程度的指标。</p>
+
+                <h3>🔤 英文名称速查</h3>
+        <div class="table-wrap term-ref"><table>
+            <tr><th>名称</th><th>是什么 / 干什么</th></tr>
+            <tr><td><strong>embedding model</strong></td><td>把文本变成向量的模型（如 BGE-M3、text-embedding-3）</td></tr>
+            <tr><td><strong>normalize_embeddings</strong></td><td>检索前 L2 归一化向量，使余弦相似度 ≈ 内积，排序更快</td></tr>
+            <tr><td><strong>vectorstore</strong></td><td>向量数据库（Chroma、Milvus 等），存 chunk 向量与原文/metadata</td></tr>
+            <tr><td><strong>Bi-Encoder</strong></td><td>query、document 各自编码再比相似度；适合首轮粗检索，速度快</td></tr>
+            <tr><td><strong>Cross-Encoder / Rerank</strong></td><td>query+document 拼接后联合编码；精排 Top-K，精度高但慢</td></tr>
+            <tr><td><strong>Top-K</strong></td><td>检索阶段取相似度最高的 K 个文档块（常见 K=20）</td></tr>
+            <tr><td><strong>BM25</strong></td><td>经典关键词稀疏检索；补 SKU、编号、专有名词等精确匹配</td></tr>
+            <tr><td><strong>chunk_size / overlap</strong></td><td>分块长度与块间重叠 token 数；影响检索粒度与上下文完整性</td></tr>
+            <tr><td><strong>Faithfulness / Recall@K</strong></td><td>答案是否被资料支撑 / 前 K 条检索是否含正确文档</td></tr>
+        </table></div>
+
+                <h3>核心原理</h3>
+        <p>向量嵌入的本质是将文本的语义信息编码为数字向量，使得<strong>语义相似的文本，向量距离近；语义不同的文本，向量距离远</strong>。</p>
+        <p>可以把它理解成「语义坐标系」：同一主题、同一意图的句子会被映射到高维空间里彼此靠近的位置；模型从未见过你的私有文档，但只要文档被正确嵌入，检索就能靠「距离近」找到相关内容。</p>
+
+                <h3>三种常见距离/相似度（开发时只记选型）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>指标</th>
+                <th>含义</th>
+                <th>RAG 中是否常用</th>
+                <th>备注</th>
+            </tr>
+            <tr>
+                <td><strong>余弦相似度</strong></td>
+                <td>看向量夹角，不看长度</td>
+                <td>⭐ 最常用</td>
+                <td>BGE 等模型输出通常做 L2 归一化后，余弦 ≈ 点积，检索最快</td>
+            </tr>
+            <tr>
+                <td>欧氏距离 (L2)</td>
+                <td>看空间直线距离</td>
+                <td>偶尔用</td>
+                <td>未归一化向量时更合理；归一化后与余弦等价</td>
+            </tr>
+            <tr>
+                <td>内积 (IP)</td>
+                <td>向量点乘，越大越相似</td>
+                <td>常用（Milvus 等）</td>
+                <td>归一化向量上 IP 与余弦单调等价，适合 ANN 索引</td>
+            </tr>
+        </table></div>
+
+                <div class="note">
+            <strong>工程要点：</strong>嵌入模型与向量库的距离度量必须一致。BGE 系列务必设置 <code>normalize_embeddings=True</code>，否则相似度排序会明显偏差。
+        </div>
+        <h3>核心公式</h3>
+        <div class="highlight">
+            <strong>余弦相似度核心公式（只记意义，不记推导）：</strong>
+            <div class="formula">
+                <code>cosine_similarity(A, B) = (A·B) / (||A|| × ||B||)</code>
+            </div>
+            <p><strong>公式解释：</strong></p>
+            <ul>
+                <li>输入：两个向量A和B</li>
+                <li>输出：两个向量的夹角余弦值，范围[-1, 1]</li>
+                <li>物理意义：值越接近1，语义越相似；越接近-1，语义越相反</li>
+            </ul>
+        </div>
+
+                <h3>国内常用嵌入模型对比</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>模型</th>
+                <th>类型</th>
+                <th>维度</th>
+                <th>效果</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td><strong>BGE-M3</strong></td>
+                <td>开源</td>
+                <td>1024</td>
+                <td>⭐⭐⭐⭐⭐</td>
+                <td>多语言、长文本、效果最好</td>
+            </tr>
+            <tr>
+                <td>gte-large</td>
+                <td>开源</td>
+                <td>1024</td>
+                <td>⭐⭐⭐⭐</td>
+                <td>速度快、效果好</td>
+            </tr>
+            <tr>
+                <td>Qwen-Embedding</td>
+                <td>开源</td>
+                <td>1024</td>
+                <td>⭐⭐⭐⭐</td>
+                <td>中文效果好</td>
+            </tr>
+            <tr>
+                <td>OpenAI text-embedding-3-large</td>
+                <td>闭源</td>
+                <td>3072</td>
+                <td>⭐⭐⭐⭐⭐</td>
+                <td>效果最好，但需要API</td>
+            </tr>
+        </table></div>
+
+                <div class="highlight">
+            <strong>最佳实践：</strong>开源首选 BGE-M3（中英混合、长文本、稀疏+稠密混合检索）；闭源首选 OpenAI text-embedding-3-large。1024 维是效果与速度的平衡点；3072 维通常只在追求极致召回时使用。
+        </div>
+
+                <h3>嵌入质量怎么判断（不用背论文，会看榜单即可）</h3>
+        <ul>
+            <li><strong>MTEB / C-MTEB</strong>：嵌入模型综合排行榜，优先看中文子任务（检索、分类、聚类）</li>
+            <li><strong>Recall@K</strong>：前 K 条结果里是否包含正确答案——RAG 离线评测最实用</li>
+            <li><strong>线上抽检</strong>：准备 50～100 条真实用户问法，人工标注「应命中文档」，比盲目换模型更有效</li>
+        </ul>
+        <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能选择合适的嵌入模型</li>
+                <li>理解向量检索的原理</li>
+                <li>能解释为什么有些相似文本检索不到</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么两个意思相近的句子，检索不到？</strong></p>
+            <p>A：常见原因有四类：① 嵌入模型对领域术语区分度不够；② 用户问法与文档表述差异大（口语 vs 书面）；③ 分块把关键句切断了；④ 只检索了 Top3 而正确答案排在第 4 位以后。依次尝试：换模型 → 查询改写 → 调分块 → 增大 K 并加 Rerank。</p>
+            <p><strong>Q：查询和文档要不要用同一个嵌入模型？</strong></p>
+            <p>A：必须同一个模型、同一套预处理。查询侧很多模型支持 <code>query:</code> / <code>passage:</code> 前缀（如 BGE），漏加前缀会导致效果断崖式下降。</p>
+            <p><strong>Q：向量维度越高越好吗？</strong></p>
+            <p>A：不是。维度升高带来存储与检索成本上升，边际收益递减。生产环境 768～1024 维足够；先优化分块和 Rerank，再考虑升维。</p>
+        </div>
+        <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1tM411K7fQ/" target="_blank">向量嵌入原理详解</a>（播放量：30万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/614372532" target="_blank">知乎：一文看懂向量嵌入</a></p>
+        </div>
+        </div>
+    
+        <div class="section" id="sec2">
+        <h2>二、RAG系统完整流程</h2>
+
+                <h3>术语解释</h3>
+        <p><strong>RAG（检索增强生成）</strong>：将外部知识库检索到的相关信息添加到Prompt中，让大模型基于这些信息生成回答的技术。</p>
+        <p><strong>分块</strong>：将长文档分割成适合嵌入和检索的小片段。</p>
+        <p><strong>重排序(Rerank)</strong>：对向量检索到的结果进行二次排序，提升准确率的技术。</p>
+
+                <h3>核心原理</h3>
+        <p>RAG 解决的核心矛盾是：<strong>大模型擅长推理与表达，但不擅长记住你的私有、时效性知识</strong>。RAG 把「记事实」交给向量库，把「组织语言」交给 LLM。</p>
+        <p>RAG 系统的完整流程：</p>
+                    <div class="mermaid-wrap">
+                <pre class="mermaid">flowchart TB
+    subgraph OFF["离线 Indexing"]
+        D1["文档加载"] --> D2["清洗去噪"]
+        D2 --> D3["文档分块"]
+        D3 --> D4["向量化"]
+        D4 --> D5[("向量数据库")]
+    end
+    subgraph ON["在线 Retrieval + Generation"]
+        Q1["用户查询"] --> Q2["查询改写/扩展"]
+        Q2 --> Q3["向量化"]
+        Q3 --> Q4["向量检索 Top-K"]
+        Q4 --> Q5["Rerank"]
+        Q5 --> Q6["上下文拼接"]
+        Q6 --> Q7["Prompt + LLM"]
+        Q7 --> Q8["回答 + 溯源"]
+    end
+    D5 -.-> Q4
+                </pre>
+            </div>
+            <details class="ascii-fallback">
+            <summary>文本版流程（ASCII）</summary>
+            
+<div class="architecture">
+            <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>离线处理（Indexing）：
+文档加载 → 清洗/去噪 → 文档分割(分块) → 向量化 → 写入向量数据库（+ 可选 BM25 索引）
+
+在线查询（Retrieval + Generation）：
+用户查询 → [可选] 查询改写/扩展 → 向量化 → 向量检索(Top-K) → [可选] 混合检索融合
+         → 重排序(Rerank) → 上下文拼接 → Prompt 模板 → 大模型生成 → 回答 [+ 引用溯源]</code></pre></div>
+        </div>
+            </details>
+
+                <h3>向量数据库选型（国内项目常见）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>产品</th>
+                <th>部署</th>
+                <th>适合场景</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td><strong>Chroma</strong></td>
+                <td>本地/嵌入式</td>
+                <td>原型、小数据量</td>
+                <td>上手最快，LangChain 集成好</td>
+            </tr>
+            <tr>
+                <td><strong>Milvus / Zilliz</strong></td>
+                <td>自建/云</td>
+                <td>百万～亿级向量</td>
+                <td>生产级 ANN、混合检索、分区</td>
+            </tr>
+            <tr>
+                <td><strong>Qdrant</strong></td>
+                <td>自建/云</td>
+                <td>中等规模、过滤多</td>
+                <td>Payload 过滤强，Rust 实现</td>
+            </tr>
+            <tr>
+                <td><strong>Elasticsearch</strong></td>
+                <td>自建</td>
+                <td>已有 ES 栈</td>
+                <td>关键词 + 向量混合检索成熟</td>
+            </tr>
+            <tr>
+                <td>pgvector</td>
+                <td>PostgreSQL 插件</td>
+                <td>数据量 &lt; 百万</td>
+                <td>业务数据与向量同库，运维简单</td>
+            </tr>
+        </table></div>
+
+                <div class="note">
+            <strong>选型建议：</strong>POC 用 Chroma；上生产按数据量选 Milvus/Qdrant/pgvector。不要过早纠结「最强向量库」——分块与 Rerank 的收益通常更大。
+        </div>
+
+                <h3>分块策略对比（决定召回的上限）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>策略</th>
+                <th>做法</th>
+                <th>优点</th>
+                <th>缺点</th>
+            </tr>
+            <tr>
+                <td><strong>固定长度 + 重叠</strong></td>
+                <td>512～1024 token，重叠 10%～20%</td>
+                <td>简单稳定，90% 场景够用</td>
+                <td>可能切断表格/条款</td>
+            </tr>
+            <tr>
+                <td><strong>递归字符分割</strong></td>
+                <td>按 \n\n → \n → 句号 逐级切</td>
+                <td>保留段落结构，LangChain 默认</td>
+                <td>超长段落仍需二次切</td>
+            </tr>
+            <tr>
+                <td><strong>语义分块</strong></td>
+                <td>按 embedding 相似度突变点切</td>
+                <td>块内主题更纯</td>
+                <td>离线成本高，边界不稳定</td>
+            </tr>
+            <tr>
+                <td><strong>Parent-Child</strong></td>
+                <td>小块检索，大块给 LLM</td>
+                <td>检索准 + 上下文全</td>
+                <td>实现与存储复杂度上升</td>
+            </tr>
+        </table></div>
+
+                <h3>重排序模型（精筛必备）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>模型</th>
+                <th>类型</th>
+                <th>特点</th>
+            </tr>
+            <tr>
+                <td><strong>BGE-Reranker-v2-m3</strong></td>
+                <td>开源</td>
+                <td>中文首选，多语言，性价比最高</td>
+            </tr>
+            <tr>
+                <td>bge-reranker-large</td>
+                <td>开源</td>
+                <td>效果略好，延迟更高</td>
+            </tr>
+            <tr>
+                <td>Cohere Rerank</td>
+                <td>API</td>
+                <td>闭源效果稳定，按调用计费</td>
+            </tr>
+        </table></div>
+        <h3>最关键的两个环节（决定 RAG 效果的 90%）</h3>
+        <ol>
+            <li>
+                <strong>分块策略</strong>
+                <ul>
+                    <li>黄金区间：512～1024 token，重叠 10%～20%（如 chunk_size=512, overlap=100）</li>
+                    <li>结构化文档（PDF 表格、法律条款）：优先按标题/章节切，再对超长节做固定长度切</li>
+                    <li>为什么：太小丢失上下文，太大引入噪音且挤占 LLM 窗口</li>
+                </ul>
+            </li>
+            <li>
+                <strong>重排序 (Rerank)</strong>
+                <ul>
+                    <li>向量检索是粗筛（高召回、低精度）——Bi-Encoder 各自编码，无法细粒度交互</li>
+                    <li>Rerank 是 Cross-Encoder，查询与文档<strong>一起</strong>进模型，精度高但慢</li>
+                    <li>标准流水线：检索 Top20 → Rerank 取 Top3～5 → 拼进 Prompt</li>
+                    <li>实测：加 Rerank 后答案准确率常提升 30%～50%</li>
+                </ul>
+            </li>
+        </ol>
+
+                <h3>生产级 Prompt 模板（可直接改）</h3>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code>你是企业知识库助手。请严格根据以下「参考资料」回答，不要编造。
+
+规则：
+1. 仅使用参考资料中的信息；资料不足时明确说「根据现有资料无法确定」
+2. 回答简洁，必要时用条目列出
+3. 在文末标注引用编号，如 [1][2]
+
+参考资料：
+{context}
+
+用户问题：{question}
+
+请回答：</code></pre></div>
+
+                <div class="highlight">
+            <strong>重要结论：</strong>90% 的 RAG 效果差，根因在分块不合理、没有 Rerank、或 Prompt 未约束「仅依据上下文」。换更大 LLM 往往是最后一步。
+        </div>
+        <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能独立设计一个生产级RAG系统</li>
+                <li>能解决90%的大模型应用场景</li>
+                <li>能排查RAG系统的常见问题</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么我的 RAG 系统效果很差？</strong></p>
+            <p>A：按优先级排查：① 分块大小/重叠；② 是否 Rerank；③ 嵌入模型与 query 前缀；④ Top-K 是否过小；⑤ Prompt 是否允许模型自由发挥。前两项修完通常就有质变。</p>
+            <p><strong>Q：检索 Top-K 设多少合适？</strong></p>
+            <p>A：向量检索阶段 K=15～30，Rerank 后取 3～5 条进 Prompt。K 太小漏召回，太大 Rerank 与 LLM 成本上升且噪音多。</p>
+        </div>
+        <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV18M411K7zA/" target="_blank">RAG系统从零到一实战</a>（播放量：50万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://python.langchain.com/docs/modules/data_connection/" target="_blank">LangChain中文文档：数据连接</a></p>
+        </div>
+        </div>
+    
+        <div class="section" id="sec3">
+        <h2>三、RAG常见问题与解决方案</h2>
+
+                <h3>RAG 八大常见问题与解决方案</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>问题</th>
+                <th>最可能的原因</th>
+                <th>最佳解决方案</th>
+            </tr>
+            <tr>
+                <td><strong>检索不到相关信息</strong></td>
+                <td>分块不合理 / K 过小</td>
+                <td>调 chunk 与 overlap；检索 K 提到 20；加查询改写</td>
+            </tr>
+            <tr>
+                <td><strong>检索到了但回答错误</strong></td>
+                <td>无 Rerank / 噪音块多</td>
+                <td>BGE-Rerank；减少进 Prompt 的块数</td>
+            </tr>
+            <tr>
+                <td><strong>回答不完整</strong></td>
+                <td>答案跨多个块</td>
+                <td>Parent-Child 检索；增大 overlap；多跳检索</td>
+            </tr>
+            <tr>
+                <td><strong>模型编造内容</strong></td>
+                <td>Prompt 未约束 / 上下文无关</td>
+                <td>加强「仅依据资料」；降低 temperature；加引用校验</td>
+            </tr>
+            <tr>
+                <td><strong>专业术语搜不到</strong></td>
+                <td>纯向量对精确词弱</td>
+                <td>混合检索（BM25 + 向量）；同义词表</td>
+            </tr>
+            <tr>
+                <td><strong>表格/数字答错</strong></td>
+                <td>PDF 解析丢结构</td>
+                <td>换解析器（Unstructured/MinerU）；表格单独入库</td>
+            </tr>
+            <tr>
+                <td><strong>多轮对话越问越偏</strong></td>
+                <td>用整段历史去检索</td>
+                <td>只对「当前问题」检索；历史单独摘要进 Prompt</td>
+            </tr>
+            <tr>
+                <td><strong>延迟太高</strong></td>
+                <td>Rerank/嵌入/onnx 未优化</td>
+                <td>缓存热门 query；Rerank 批处理；小模型做路由</td>
+            </tr>
+        </table></div>
+        <h3>RAG系统效果优化优先级</h3>
+        <ol>
+            <li>优化分块策略（最重要）—— often 2× 提升</li>
+            <li>添加重排序（第二重要）—— 过滤噪音</li>
+            <li>混合检索（BM25 + 向量）—— 专有名词、编号</li>
+            <li>查询改写 / HyDE —— 口语问法、短 query</li>
+            <li>使用更好的嵌入模型</li>
+            <li>优化 Prompt 与引用约束</li>
+            <li>使用更好的大模型（边际收益最小，成本最高）</li>
+        </ol>
+
+                <h3>混合检索一句话原理</h3>
+        <p>向量检索擅长「语义相近但用词不同」；BM25 关键词检索擅长「型号、SKU、法条编号」等精确匹配。融合公式常用：</p>
+        <div class="formula">
+            <code>final_score = α × vector_score + (1 - α) × bm25_score</code>（α 常取 0.5～0.7，需用验证集调）
+        </div>
+        <h3>应用价值</h3>
+        <div class="application-value">
+            <ul>
+                <li>能快速排查和解决RAG系统的常见问题</li>
+                <li>能按照正确的优先级优化RAG系统</li>
+                <li>能提升RAG系统的准确率和召回率</li>
+            </ul>
+        </div>
+
+                <h3>常见问题解释</h3>
+        <div class="faq">
+            <p><strong>Q：为什么检索到了相关信息，但模型还是回答错误？</strong></p>
+            <p>A：① 排序靠前的块其实是噪音（缺 Rerank）；② 正确信息在靠后的块里，LLM 更关注前文（Lost in the Middle）；③ Prompt 未要求逐条依据资料。先 Rerank 取 Top3，再在 Prompt 里要求「若资料矛盾则指出」。</p>
+            <p><strong>Q：RAG 和微调怎么选？</strong></p>
+            <p>A：要<strong>事实准确、资料常更新</strong> → RAG；要<strong>风格、格式、固定流程</strong> → 微调；两者可组合：RAG 供事实，微调调语气。详见第 3 章（大模型能力边界）决策树。</p>
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📺 B站视频：</strong><a href="https://www.bilibili.com/video/BV1a84y1v7zQ/" target="_blank">RAG系统常见问题排查指南</a>（播放量：25万+）</p>
+            <p><strong>📄 中文文档：</strong><a href="https://zhuanlan.zhihu.com/p/640127458" target="_blank">知乎：RAG系统优化技巧</a></p>
+            <p><strong>📄 官方：</strong><a href="https://www.llamaindex.ai/" target="_blank">LlamaIndex 文档</a>（高级 RAG 模式示例丰富）</p>
+        </div>
+        </div>
+    
+        <div class="section" id="sec4">
+        <h2>四、高级 RAG 模式与选型</h2>
+
+                <h3>Naive RAG → Advanced RAG → Modular RAG</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>阶段</th>
+                <th>典型能力</th>
+                <th>何时够用</th>
+            </tr>
+            <tr>
+                <td><strong>Naive RAG</strong></td>
+                <td>切分 → 嵌入 → Top-K → 生成</td>
+                <td>内部 POC、文档少、问法规范</td>
+            </tr>
+            <tr>
+                <td><strong>Advanced RAG</strong></td>
+                <td>+ Rerank、混合检索、查询改写、Parent-Child</td>
+                <td>绝大多数生产系统应达到此级</td>
+            </tr>
+            <tr>
+                <td><strong>Modular RAG</strong></td>
+                <td>路由、多索引、Agent 式检索、Self-RAG 反思</td>
+                <td>多数据源、复杂合规、高准确要求</td>
+            </tr>
+        </table></div>
+
+                <h3>三种常用增强手段（按投入产出排序）</h3>
+        <ol>
+            <li>
+                <strong>查询改写 (Query Transformation)</strong>
+                <p>用 LLM 把口语问题改写成检索友好表述，或生成 3 个不同角度的子查询再合并结果。适合：客服口语、错别字、超短 query。</p>
+            </li>
+            <li>
+                <strong>HyDE（假设性文档嵌入）</strong>
+                <p>先让 LLM 写一段「假答案」，用假答案的向量去检索，而非用问题向量。适合：问题抽象、文档表述风格与问法差异大。注意：事实性极强的场景需慎用，假答案可能引入偏差。</p>
+            </li>
+            <li>
+                <strong>Self-RAG / 答案校验</strong>
+                <p>生成后让模型自评「是否被资料支持」，不支持则重新检索或拒答。适合：金融、医疗等低幻觉容忍场景。</p>
+            </li>
+        </ol>
+
+                <h3>什么时候不要用 RAG？</h3>
+        <ul>
+            <li>❌ 没有可靠文档，或文档质量极差（OCR 满篇乱码）</li>
+            <li>❌ 任务纯创意写作、头脑风暴，不需要 grounding</li>
+            <li>❌ 强实时数据（股价秒级）—— 应用 API + 工具调用，而非静态向量库</li>
+            <li>❌ 期望模型学会「操作流程」—— 用微调或 Agent 工作流，而非堆文档</li>
+        </ul>
+
+                <div class="application-value">
+            <strong>应用价值：</strong>
+            <ul>
+                <li>能判断项目停在 Naive 还是必须上 Advanced</li>
+                <li>能为客服、制度、产品手册选对的增强组合</li>
+                <li>避免「文档+RAG 万能论」导致的无效投入</li>
+            </ul>
+        </div>
+        </div>
+    
+        <div class="section" id="sec5">
+        <h2>五、效果评估与排查清单</h2>
+
+                <h3>离线指标（上线前必做）</h3>
+        <div class="table-wrap"><table>
+            <tr>
+                <th>指标</th>
+                <th>含义</th>
+                <th>参考目标</th>
+            </tr>
+            <tr>
+                <td><strong>Recall@K</strong></td>
+                <td>前 K 条是否含正确文档</td>
+                <td>@10 ≥ 0.85（视领域而定）</td>
+            </tr>
+            <tr>
+                <td><strong>MRR</strong></td>
+                <td>第一个正确结果排第几</td>
+                <td>越高越好，配合 Rerank 看</td>
+            </tr>
+            <tr>
+                <td><strong>Faithfulness</strong></td>
+                <td>答案是否被上下文支持</td>
+                <td>人工或 LLM-as-judge 抽检</td>
+            </tr>
+            <tr>
+                <td><strong>Answer Relevance</strong></td>
+                <td>是否答非所问</td>
+                <td>与业务 QA 标准对齐</td>
+            </tr>
+        </table></div>
+
+                <h3>15 分钟排查清单（效果突然变差时用）</h3>
+        <ol>
+            <li>最近是否更新了文档但未重建索引？</li>
+            <li>嵌入模型 / Rerank 模型是否换版本或漏了 normalize？</li>
+            <li>chunk_size 是否因换解析器而隐性变化？</li>
+            <li>Prompt 是否被产品改松（去掉「仅依据资料」）？</li>
+            <li>LLM temperature 是否被调到 &gt; 0.5？</li>
+            <li>用 5 条失败 case 打印 retrieval 结果，问题在「检」还是「生」？</li>
+        </ol>
+
+                <div class="note">
+            <strong>经验法则：</strong>检索错 → 先修索引与分块；检索对、生成错 → 先修 Prompt 与 Rerank；都错 → 查 pipeline 是否串库、串环境。
+        </div>
+
+                <h3>学习资源</h3>
+        <div class="resource">
+            <p><strong>📄 评测框架：</strong><a href="https://docs.ragas.io/" target="_blank">Ragas — RAG 评估指标与脚本</a></p>
+            <p><strong>📄 中文：</strong>在知乎 / 掘金搜索「RAG 评估 Recall MRR Ragas」获取最新实践文章</p>
+        </div>
+        </div>
+    
+        <div class="exercise">
+        <h2>📝 2小时实战小练习</h2>
+        <p>用 LangChain + Chroma + BGE-M3 + BGE-Rerank 搭建带精筛的知识库问答，并对比「无 Rerank vs 有 Rerank」：</p>
+        <div class="code-block"><button class="copy-btn" data-copy>复制</button><pre><code># pip install langchain langchain-community chromadb sentence-transformers FlagEmbedding
+
+from langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.llms import HuggingFacePipeline
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from FlagEmbedding import FlagReranker
+
+# ---------- 1. 索引 ----------
+loader = TextLoader("your_document.txt", encoding="utf-8")
+documents = loader.load()
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,
+    chunk_overlap=100,
+    separators=["\n\n", "\n", "。", " ", ""]
+)
+texts = text_splitter.split_documents(documents)
+
+embeddings = HuggingFaceBgeEmbeddings(
+    model_name="BAAI/bge-m3",
+    model_kwargs={"device": "cuda"},
+    encode_kwargs={"normalize_embeddings": True},
+    query_instruction="Represent this sentence for searching relevant passages: "
+)
+db = Chroma.from_documents(texts, embeddings, persist_directory="./chroma_db")
+
+# ---------- 2. Rerank ----------
+reranker = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True)
+
+def retrieve_with_rerank(query, fetch_k=20, top_n=4):
+    docs = db.similarity_search(query, k=fetch_k)
+    pairs = [[query, d.page_content] for d in docs]
+    scores = reranker.compute_score(pairs, normalize=True)
+    ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
+    return [d for d, _ in ranked[:top_n]]
+
+# ---------- 3. LLM ----------
+model_name = "Qwen/Qwen2-7B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(
+    model_name, device_map="auto", torch_dtype="auto", trust_remote_code=True
+)
+pipe = pipeline(
+    "text-generation", model=model, tokenizer=tokenizer,
+    max_new_tokens=512, temperature=0.2, top_p=0.9
+)
+llm = HuggingFacePipeline(pipeline=pipe)
+
+prompt = PromptTemplate.from_template("""请仅根据参考资料回答问题。资料不足请说明无法确定。
+
+参考资料：
+{context}
+
+问题：{question}
+回答：""")
+
+chain = LLMChain(llm=llm, prompt=prompt)
+
+# ---------- 4. 对比测试 ----------
+query = "请介绍一下本文档的主要内容"
+
+# A. 无 Rerank（仅 Top3 向量检索）
+naive_docs = db.similarity_search(query, k=3)
+naive_ctx = "\n\n".join(d.page_content for d in naive_docs)
+print("=== 无 Rerank ===")
+print(chain.run(context=naive_ctx, question=query))
+
+# B. 有 Rerank
+rerank_docs = retrieve_with_rerank(query)
+rerank_ctx = "\n\n".join(d.page_content for d in rerank_docs)
+print("=== 有 Rerank ===")
+print(chain.run(context=rerank_ctx, question=query))
+</code></pre></div>
+        <p><strong>练习要求：</strong></p>
+        <ol>
+            <li>准备一份 10～30 页的 txt/md，跑通索引与问答</li>
+            <li>固定 10 个问题，分别测 chunk_size=256/512/1024，记录 Recall（是否检到正确段）</li>
+            <li>对比同一问题「无 Rerank / 有 Rerank」的答案与引用段落</li>
+            <li>（进阶）加一条 BM25 或换 query_instruction，观察专有名词检索变化</li>
+            <li>（进阶）用 5 条 QA 对算 Recall@5，写入简单表格便于汇报</li>
+        </ol>
+        </div>
+    
+        <div class="quiz">
+        <h2>✅ 自测题（能答对就说明掌握了）</h2>
+        <ol>
+            <li>向量嵌入的本质是什么？余弦相似度取值范围？越接近 1 表示什么？</li>
+            <li>为什么 BGE 要设置 <code>normalize_embeddings=True</code>？</li>
+            <li>RAG 离线阶段与在线阶段各包含哪些步骤？</li>
+            <li>RAG 效果的 90% 由哪两个环节决定？黄金分块参数？</li>
+            <li>Bi-Encoder 检索与 Cross-Encoder Rerank 的区别？标准 Top-K 流水线？</li>
+            <li>混合检索解决什么问题？融合时常见 α 取值？</li>
+            <li>Parent-Child 分块解决什么痛点？</li>
+            <li>什么时候应优先 RAG，什么时候应微调？</li>
+            <li>Recall@K 与 Faithfulness 分别衡量什么？</li>
+            <li>效果变差时，如何用「检 vs 生」快速定位？</li>
+        </ol>
+        <details style="margin-top: 1rem; color: #92400e;">
+            <summary><strong>点击查看参考答案</strong></summary>
+            <ol style="margin-top: 0.75rem;">
+                <li>语义编码为向量；[-1,1]；语义越相似</li>
+                <li>与余弦/内积检索一致，避免向量模长干扰排序</li>
+                <li>离线：加载→分块→嵌入→入库；在线：query→检索→Rerank→拼 Prompt→生成</li>
+                <li>分块与 Rerank；512～1024 token，重叠 10%～20%</li>
+                <li>前者各自编码快但粗；后者 query-doc 联合编码慢但准；检 20 → Rerank 取 3～5</li>
+                <li>专有名词/编号精确匹配；α 约 0.5～0.7</li>
+                <li>小块提高检索精度，大块保证上下文完整</li>
+                <li>事实与更新→RAG；风格流程→微调；可组合</li>
+                <li>Recall@K：前 K 是否含正确文档；Faithfulness：答案是否被资料支持</li>
+                <li>打印 retrieval 结果：检错修分块/索引；检对生错修 Prompt/Rerank/温度</li>
+            </ol>
+        </details>
+        </div>
+
+        <footer class="nav-footer">
+            <p>大模型应用开发者原理学习计划 · 第 4 章</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="index.html">全书合集</a> <a href="3.html">← 第3章 能力边界</a> <a href="5.html">第5章 LoRA微调 →</a>
+            </p>
+            
+        </footer>
+    </div>
+
+    <script>
+(function () {
+  var themeBtn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  function label(t) { return t === 'dark' ? '浅色' : '深色'; }
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('llm-doc-theme', t); } catch (e) {}
+    if (themeBtn) themeBtn.textContent = label(t);
+  }
+  if (themeBtn) {
+    applyTheme(root.getAttribute('data-theme') || 'light');
+    themeBtn.addEventListener('click', function () {
+      applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre');
+      var text = pre ? pre.innerText : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = '已复制';
+          setTimeout(function () { btn.textContent = '复制'; }, 1500);
+        }).catch(function () { prompt('复制以下内容：', text); });
+      } else {
+        prompt('复制以下内容：', text);
+      }
+    });
+  });
+})();
+    </script>
+                <script>
+(function () {
+  if (typeof mermaid === 'undefined') return;
+  var body = document.body;
+  var root = document.documentElement;
+  function mermaidTheme() {
+    return root.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+  }
+  function injectMermaidFullscreenUi() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      if (wrap.querySelector('.mermaid-toolbar')) return;
+      var bar = document.createElement('div');
+      bar.className = 'mermaid-toolbar';
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'mermaid-fs-btn';
+      btn.textContent = '全屏'; btn.setAttribute('aria-label', '图表全屏');
+      bar.appendChild(btn);
+      wrap.insertBefore(bar, wrap.firstChild);
+    });
+  }
+  function closePseudoFs(wrap) {
+    wrap.classList.remove('is-pseudo-fullscreen');
+    if (!document.querySelector('.mermaid-wrap.is-pseudo-fullscreen')) body.style.overflow = '';
+  }
+  function syncFsButton(wrap, btn) {
+    var on = document.fullscreenElement === wrap || wrap.classList.contains('is-pseudo-fullscreen');
+    btn.textContent = on ? '退出全屏' : '全屏';
+  }
+  function bindMermaidFullscreen() {
+    document.querySelectorAll('.mermaid-wrap').forEach(function (wrap) {
+      var btn = wrap.querySelector('.mermaid-fs-btn');
+      if (!btn || wrap.dataset.fsBound) return;
+      wrap.dataset.fsBound = '1';
+      btn.addEventListener('click', function () {
+        var native = document.fullscreenElement === wrap;
+        var pseudo = wrap.classList.contains('is-pseudo-fullscreen');
+        if (native || pseudo) {
+          if (native) document.exitFullscreen().catch(function () {});
+          if (pseudo) closePseudoFs(wrap);
+          syncFsButton(wrap, btn);
+          return;
+        }
+        var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+        if (typeof req === 'function') {
+          Promise.resolve(req.call(wrap)).catch(function () {
+            wrap.classList.add('is-pseudo-fullscreen');
+            body.style.overflow = 'hidden';
+          }).finally(function () { syncFsButton(wrap, btn); });
+        } else {
+          wrap.classList.add('is-pseudo-fullscreen');
+          body.style.overflow = 'hidden';
+          syncFsButton(wrap, btn);
+        }
+      });
+    });
+  }
+  function snapshotMermaidSources() {
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      if (!el.dataset.graph) el.dataset.graph = el.textContent.trim();
+    });
+  }
+  function rerenderMermaid() {
+    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme(), securityLevel: 'strict', flowchart: { htmlLabels: true } });
+    document.querySelectorAll('.mermaid').forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.graph || el.textContent;
+    });
+    return mermaid.run({ querySelector: '.mermaid' }).catch(function () {});
+  }
+  window.rerenderMermaid = rerenderMermaid;
+  injectMermaidFullscreenUi();
+  snapshotMermaidSources();
+  Promise.resolve(rerenderMermaid()).then(bindMermaidFullscreen);
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+        document.querySelectorAll('.mermaid-wrap.is-pseudo-fullscreen').forEach(closePseudoFs);
+        rerenderMermaid();
+      }, 0);
+    });
+  }
+})();
+
+    </script>
+</body>
+</html>

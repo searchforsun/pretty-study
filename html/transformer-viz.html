@@ -1,0 +1,4000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transformer 零基础可视化教程</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem('tf-viz-theme');
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      color-scheme: light;
+      --topbar-h: 3.5rem;
+      --ctrl-h: 4.25rem;
+      --stage-h: calc(100dvh - var(--topbar-h) - var(--ctrl-h));
+      --bg: #f1f5f9;
+      --bg-panel: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-elevated: #e2e8f0;
+      --fg: #0f172a;
+      --muted: #475569;
+      --border: rgba(15,23,42,0.1);
+      --primary: #4f46e5;
+      --primary-soft: rgba(79,70,229,0.1);
+      --primary-text: #4338ca;
+      --primary-border: rgba(79,70,229,0.28);
+      --font: "Noto Sans SC", "Plus Jakarta Sans", system-ui, sans-serif;
+      --heading: "Plus Jakarta Sans", "Noto Sans SC", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --cell-size: 20px;
+      --cell-gap: 4px;
+      --cell-size-attn: 32px;
+      --cell-gap-attn: 6px;
+      --layout-max: 1480px;
+
+      --c-input: #2563eb;
+      --c-query: #9333ea;
+      --c-key: #0891b2;
+      --c-value: #ea580c;
+      --c-cache: #059669;
+      --c-ffn: #ca8a04;
+      --c-norm: #db2777;
+      --c-dim: #64748b;
+
+      --topbar-bg: rgba(255,255,255,0.94);
+      --hero-bg: rgba(255,255,255,0.92);
+      --ctrl-bg: rgba(255,255,255,0.96);
+      --shadow: rgba(15,23,42,0.08);
+      --shadow-lg: rgba(15,23,42,0.12);
+      --grad-1: rgba(79,70,229,0.07);
+      --grad-2: rgba(5,150,105,0.05);
+      --success: #059669;
+      --success-light: #10b981;
+      --success-bg: rgba(16,185,129,0.1);
+      --success-border: rgba(16,185,129,0.35);
+      --success-glow: rgba(16,185,129,0.18);
+      --plain-fg: #1e293b;
+      --plain-bg: rgba(79,70,229,0.08);
+      --analogy-fg: #92400e;
+      --analogy-bg: rgba(251,191,36,0.14);
+      --analogy-border: rgba(217,119,6,0.25);
+      --analogy-label: #b45309;
+      --la-fg: #065f46;
+      --la-bg: rgba(16,185,129,0.08);
+      --la-border: rgba(16,185,129,0.22);
+      --tip-fg: #4338ca;
+      --tip-bg: rgba(79,70,229,0.08);
+      --tip-border: rgba(79,70,229,0.22);
+      --link-track: rgba(15,23,42,0.1);
+      --matrix-bg: rgba(15,23,42,0.05);
+      --afm-col-bg: rgba(15,23,42,0.03);
+      --afm-col-border: rgba(15,23,42,0.1);
+      --progress-track: rgba(15,23,42,0.08);
+      --matrix-cell-fg: rgba(15,23,42,0.88);
+      --heatmap-cell-fg: rgba(15,23,42,0.92);
+      --card-hover-shadow: 0 8px 32px rgba(15,23,42,0.1);
+
+      --scrollbar-size: 10px;
+      --scrollbar-track: rgba(15, 23, 42, 0.05);
+      --scrollbar-thumb: rgba(79, 70, 229, 0.38);
+      --scrollbar-thumb-hover: rgba(79, 70, 229, 0.58);
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0c0e14;
+      --bg-panel: #12151e;
+      --bg-card: #1a1f2e;
+      --bg-elevated: #222838;
+      --fg: #f1f5f9;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.09);
+      --primary: #6366f1;
+      --primary-soft: rgba(99,102,241,0.14);
+      --primary-text: #a5b4fc;
+      --primary-border: rgba(99,102,241,0.3);
+      --c-input: #3b82f6;
+      --c-query: #a855f7;
+      --c-key: #22d3ee;
+      --c-value: #f97316;
+      --c-cache: #22c55e;
+      --c-ffn: #eab308;
+      --c-norm: #ec4899;
+      --c-dim: #94a3b8;
+      --topbar-bg: rgba(10,12,16,0.95);
+      --hero-bg: rgba(12,14,20,0.92);
+      --ctrl-bg: rgba(10,12,16,0.97);
+      --shadow: rgba(0,0,0,0.25);
+      --shadow-lg: rgba(0,0,0,0.35);
+      --grad-1: rgba(99,102,241,0.12);
+      --grad-2: rgba(34,197,94,0.06);
+      --success: #4ade80;
+      --success-light: #86efac;
+      --success-bg: rgba(34,197,94,0.1);
+      --success-border: rgba(34,197,94,0.35);
+      --success-glow: rgba(34,197,94,0.22);
+      --plain-fg: #e2e8f0;
+      --plain-bg: rgba(99,102,241,0.1);
+      --analogy-fg: #fde68a;
+      --analogy-bg: rgba(234,179,8,0.08);
+      --analogy-border: rgba(234,179,8,0.22);
+      --analogy-label: #fbbf24;
+      --la-fg: #a7f3d0;
+      --la-bg: rgba(34,197,94,0.06);
+      --la-border: rgba(34,197,94,0.2);
+      --tip-fg: #c7d2fe;
+      --tip-bg: rgba(99,102,241,0.14);
+      --tip-border: rgba(99,102,241,0.25);
+      --link-track: rgba(255,255,255,0.07);
+      --matrix-bg: rgba(0,0,0,0.45);
+      --afm-col-bg: rgba(0,0,0,0.15);
+      --afm-col-border: rgba(255,255,255,0.08);
+      --progress-track: rgba(255,255,255,0.06);
+      --matrix-cell-fg: rgba(255,255,255,0.92);
+      --heatmap-cell-fg: rgba(255,255,255,0.92);
+      --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.25);
+
+      --scrollbar-size: 10px;
+      --scrollbar-track: rgba(255, 255, 255, 0.04);
+      --scrollbar-thumb: rgba(99, 102, 241, 0.48);
+      --scrollbar-thumb-hover: rgba(129, 140, 248, 0.72);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    /* 统一滚动条：贴视口右侧（由 .app-main 承担纵向滚动） */
+    .app-main.is-page-scroll,
+    .explain-box {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+    .app-main.is-page-scroll::-webkit-scrollbar,
+    .explain-box::-webkit-scrollbar {
+      width: var(--scrollbar-size);
+      height: var(--scrollbar-size);
+    }
+    .app-main.is-page-scroll::-webkit-scrollbar-track,
+    .explain-box::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 999px;
+    }
+    .app-main.is-page-scroll::-webkit-scrollbar-thumb,
+    .explain-box::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    .app-main.is-page-scroll::-webkit-scrollbar-thumb:hover,
+    .explain-box::-webkit-scrollbar-thumb:hover {
+      background-color: var(--scrollbar-thumb-hover);
+    }
+    .app-main.is-page-scroll::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, var(--grad-1), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 0%, var(--grad-2), transparent);
+      color: var(--fg);
+      line-height: 1.65;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .doc-top {
+      flex-shrink: 0;
+      position: relative; z-index: 1000;
+      height: var(--topbar-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1rem 0 1.25rem;
+      gap: 0.75rem;
+      background: var(--topbar-bg);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 0.65rem; min-width: 0; flex-shrink: 1; }
+    .doc-title { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-subtitle { display: none; }
+
+    /* 顶栏章节：唯一章节导航 */
+    .chapter-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 0.25rem;
+    }
+    .chapter-pills::-webkit-scrollbar { display: none; }
+    .chapter-pill {
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font);
+      width: auto;
+      height: auto;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0.4rem 0.75rem;
+      white-space: nowrap;
+    }
+    .chapter-pill:hover { border-color: var(--primary-border); color: var(--primary-text); }
+    .chapter-pill.active {
+      border-color: var(--success-border);
+      background: var(--success-bg);
+      color: var(--success);
+      box-shadow: 0 0 0 2px var(--success-glow);
+    }
+    .chapter-pill.done { color: var(--success); opacity: 0.85; }
+    @media (max-width: 720px) {
+      .doc-title { display: none; }
+      .chapter-pill { font-size: 0.74rem; padding: 0.35rem 0.6rem; }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .theme-toggle {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 0.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .theme-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary-text);
+      background: var(--primary-soft);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .logo {
+      width: 2.5rem; height: 2.5rem; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--c-key));
+      display: grid; place-items: center;
+      font-family: var(--heading);
+      font-weight: 800; font-size: 0.72rem; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+    }
+    .doc-title {
+      margin: 0; font-family: var(--heading);
+      font-size: 1.05rem; font-weight: 700;
+    }
+    .doc-subtitle {
+      margin: 0.1rem 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .legend { display: none; }
+
+    .app-main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-main.is-page-scroll {
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+    }
+    .app-main.is-page-scroll .layout {
+      overflow: visible;
+    }
+
+    .layout {
+      flex: 1;
+      min-height: 0;
+      max-width: var(--layout-max);
+      width: 100%;
+      margin: 0 auto;
+      padding: 0.5rem 0.85rem 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 1024px) {
+      .layout { padding: 0.65rem 1.25rem 0; }
+    }
+
+    .panel {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel.active { display: flex; }
+
+    /* 概览页：滚动交给全宽 app-main，滚动条在视口最右侧 */
+    #panel-overview {
+      overflow: visible;
+    }
+    #panel-overview .overview-shell {
+      flex: 0 0 auto;
+      min-height: auto;
+      height: auto;
+      overflow: visible;
+      padding-bottom: 0.75rem;
+    }
+    #panel-overview .panel-head { display: none; }
+
+    .panel:not(#panel-overview) .panel-head { display: none; }
+
+    .panel-head { margin-bottom: 0.75rem; flex-shrink: 0; }
+    .panel-title {
+      font-family: var(--heading);
+      font-size: clamp(1.4rem, 3vw, 1.85rem);
+      font-weight: 800;
+      margin: 0 0 0.4rem;
+    }
+    .panel-sub { color: var(--muted); font-size: 1rem; margin: 0; max-width: 50em; }
+    .panel-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      background: var(--tip-bg);
+      border: 1px solid var(--tip-border);
+      font-size: 0.9rem;
+      color: var(--tip-fg);
+      max-width: 52em;
+    }
+    .panel-tip svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 0.1rem; color: var(--primary-text); }
+
+    /* ── 全局概览页：纵向一屏铺满 ── */
+    .overview-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.45rem, 1.1vh, 0.7rem);
+      overflow: visible;
+    }
+    .overview-intro {
+      flex-shrink: 0;
+      padding: 0.55rem 0.85rem;
+      border-radius: 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+    }
+    .overview-intro h2 {
+      font-family: var(--heading);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-weight: 800;
+      margin: 0 0 0.25rem;
+      line-height: 1.3;
+    }
+    .overview-intro p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .overview-intro strong { color: var(--fg); }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.55rem;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.7rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .overview-card:hover {
+      border-color: rgba(99,102,241,0.35);
+      box-shadow: var(--card-hover-shadow);
+    }
+    .overview-card-icon {
+      width: 2.25rem; height: 2.25rem;
+      border-radius: 9px;
+      display: grid; place-items: center;
+      margin-bottom: 0.45rem;
+      flex-shrink: 0;
+    }
+    .overview-card-icon svg { width: 18px; height: 18px; }
+    .overview-card h3 {
+      font-family: var(--heading);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin: 0 0 0.2rem;
+      line-height: 1.3;
+    }
+    .overview-card p {
+      margin: 0;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .big-picture {
+      flex: 0 0 auto;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: visible;
+    }
+    .big-picture h3 {
+      font-family: var(--heading);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 0 0 0.55rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .flow-pipeline {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      overflow: hidden;
+      padding: 0;
+    }
+    .flow-stage {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .flow-stage:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 1.5rem;
+      width: 16px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.5), rgba(34,197,94,0.5));
+    }
+    .flow-stage-icon {
+      width: 2.75rem; height: 2.75rem;
+      border-radius: 11px;
+      display: grid; place-items: center;
+      margin-bottom: 0.4rem;
+      border: 1px solid var(--border);
+    }
+    .flow-stage-icon svg { width: 22px; height: 22px; }
+    .flow-stage-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.12rem;
+    }
+    .flow-stage-desc {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.35;
+      padding: 0 0.1rem;
+    }
+
+    .overview-formula {
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-soft), var(--success-bg));
+      border: 1px solid var(--primary-border);
+      text-align: center;
+    }
+    .of-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--primary-text);
+      margin-bottom: 0.35rem;
+    }
+    .of-main {
+      font-family: var(--mono);
+      font-size: clamp(0.82rem, 1.5vh, 1rem);
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .of-fn { color: var(--fg); font-weight: 700; }
+    .of-q { color: var(--c-query); }
+    .of-k { color: var(--c-key); }
+    .of-v { color: var(--c-value); }
+    .of-softmax { color: var(--c-norm); font-weight: 700; }
+    .of-steps {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem 0.65rem;
+      margin-top: 0.4rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .of-steps span {
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+    }
+    .of-legend {
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .overview-glossary {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.95rem 0.85rem;
+      gap: 0.55rem;
+    }
+    .overview-glossary h3 {
+      font-family: var(--heading);
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--fg);
+      text-align: left;
+    }
+    .glossary-hint-bar {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+    .glossary-scroll {
+      overflow: visible;
+      padding-right: 0;
+      margin-right: 0;
+    }
+    .glossary-group + .glossary-group {
+      margin-top: 0.7rem;
+      padding-top: 0.65rem;
+      border-top: 1px dashed var(--border);
+    }
+    .glossary-group-label {
+      font-family: var(--heading);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 0.45rem;
+    }
+    .glossary-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: flex-start;
+    }
+    .glossary-term {
+      position: relative;
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.35rem;
+      padding: 0.42rem 0.72rem;
+      border-radius: 999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.25;
+      white-space: nowrap;
+      transition: border-color 0.22s, background 0.22s, box-shadow 0.22s, transform 0.22s;
+    }
+    .glossary-term::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.22s;
+      pointer-events: none;
+    }
+    .glossary-term:hover,
+    .glossary-term.is-active {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+    .glossary-term.is-active {
+      border-color: var(--success-border);
+      background: var(--success-bg);
+    }
+    .glossary-term.gt-blue::before { background: linear-gradient(135deg, rgba(37,99,235,0.08), transparent); }
+    .glossary-term.gt-purple::before { background: linear-gradient(135deg, rgba(147,51,234,0.08), transparent); }
+    .glossary-term.gt-cyan::before { background: linear-gradient(135deg, rgba(8,145,178,0.08), transparent); }
+    .glossary-term.gt-orange::before { background: linear-gradient(135deg, rgba(234,88,12,0.08), transparent); }
+    .glossary-term.gt-green::before { background: linear-gradient(135deg, rgba(5,150,105,0.08), transparent); }
+    .glossary-term.gt-yellow::before { background: linear-gradient(135deg, rgba(202,138,4,0.08), transparent); }
+    .glossary-term:hover::before,
+    .glossary-term.is-active::before { opacity: 1; }
+    .glossary-term.gt-blue:hover, .glossary-term.gt-blue.is-active { border-color: rgba(37,99,235,0.35); }
+    .glossary-term.gt-purple:hover, .glossary-term.gt-purple.is-active { border-color: rgba(147,51,234,0.35); }
+    .glossary-term.gt-cyan:hover, .glossary-term.gt-cyan.is-active { border-color: rgba(8,145,178,0.35); }
+    .glossary-term.gt-orange:hover, .glossary-term.gt-orange.is-active { border-color: rgba(234,88,12,0.35); }
+    .glossary-term.gt-green:hover, .glossary-term.gt-green.is-active { border-color: rgba(5,150,105,0.35); }
+    .glossary-term.gt-yellow:hover, .glossary-term.gt-yellow.is-active { border-color: rgba(202,138,4,0.35); }
+    .gt-name {
+      font-family: var(--heading);
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .gt-zh {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.2;
+      font-weight: 500;
+    }
+    .gt-zh::before {
+      content: '·';
+      margin-right: 0.3rem;
+      opacity: 0.45;
+    }
+    .glossary-term.gt-wide {
+      white-space: normal;
+      border-radius: 10px;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+    .glossary-term.gt-wide .gt-name {
+      font-size: 0.76rem;
+    }
+    .gt-blue .gt-name { color: #2563eb; }
+    .gt-purple .gt-name { color: #9333ea; }
+    .gt-cyan .gt-name { color: #0891b2; }
+    .gt-orange .gt-name { color: #ea580c; }
+    .gt-green .gt-name { color: var(--success); }
+    .gt-yellow .gt-name { color: #ca8a04; }
+    [data-theme="dark"] .gt-blue .gt-name { color: #60a5fa; }
+    [data-theme="dark"] .gt-purple .gt-name { color: #c084fc; }
+    [data-theme="dark"] .gt-cyan .gt-name { color: #22d3ee; }
+    [data-theme="dark"] .gt-orange .gt-name { color: #fb923c; }
+
+    .glossary-detail {
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      min-height: 4.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .glossary-detail.has-active {
+      border-color: var(--success-border);
+      background: var(--success-bg);
+    }
+    .gd-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .gd-title {
+      font-family: var(--heading);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--fg);
+      margin: 0;
+    }
+    .gd-chapter {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--success);
+      background: var(--bg-panel);
+      border: 1px solid var(--success-border);
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .gd-chapter:hover { background: var(--success-bg); }
+    .gd-body {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .gd-body strong { color: var(--fg); font-weight: 600; }
+    .gd-example {
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--primary-text);
+      font-family: var(--mono);
+      line-height: 1.45;
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+    }
+    .gd-placeholder {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .overview-grid { grid-template-columns: 1fr; }
+      .flow-pipeline { overflow-x: auto; justify-content: flex-start; }
+      .flow-stage { flex: 0 0 100px; max-width: none; }
+      .glossary-chips { gap: 0.4rem; }
+      .glossary-term { padding: 0.38rem 0.62rem; }
+    }
+    @media (max-height: 720px) {
+      .overview-intro { padding: 0.45rem 0.65rem; }
+      .overview-intro h2 { font-size: 1rem; }
+      .overview-card { padding: 0.5rem 0.65rem; }
+      .overview-card p { font-size: 0.68rem; }
+      .flow-stage-icon { width: 2.35rem; height: 2.35rem; }
+      .flow-stage-desc { font-size: 0.62rem; }
+      .overview-formula { margin-top: 0.4rem; padding: 0.45rem 0.6rem; }
+      .of-main { font-size: 0.72rem; }
+      .of-steps { font-size: 0.62rem; gap: 0.25rem 0.4rem; }
+      .glossary-term { padding: 0.34rem 0.58rem; }
+      .gt-name { font-size: 0.74rem; }
+      .gt-zh { font-size: 0.68rem; }
+      .glossary-detail { min-height: 3.75rem; padding: 0.5rem 0.65rem; }
+      .gd-body { font-size: 0.72rem; }
+    }
+
+    /* ── 一屏一步：左图解 50% · 右说明 50% ── */
+    .lesson-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .flow-canvas {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .step-strip { display: none !important; }
+
+    .flow-stage-body {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      padding: 0.5rem 0.65rem;
+      font-size: 1.05rem;
+    }
+
+    .explain-anchor {
+      display: none;
+      height: 100%;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      padding: 0;
+      margin: 0;
+    }
+    .explain-anchor.is-active {
+      display: grid;
+    }
+
+    /* 左：图解区 50% */
+    .anchor-body {
+      order: 1;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.5rem 0.6rem;
+      overflow: hidden;
+      container-type: size;
+      container-name: diagram-pane;
+    }
+    .diagram-fit {
+      flex-shrink: 0;
+      max-width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+    }
+    .diagram-scaler {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform-origin: top left;
+    }
+    #panel-attn .diagram-scaler { gap: 0.35rem; }
+    .anchor-body .fc-row {
+      justify-content: center;
+      flex-wrap: nowrap;
+      width: max-content;
+      margin: 0 auto;
+    }
+
+    /* 右：说明区 50% */
+    .explain-slot {
+      order: 2;
+      min-width: 0;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .explain-box {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 900px) {
+      .explain-anchor.is-active {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+
+    .explain-step-num { display: none; }
+    .explain-title {
+      font-family: var(--heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin: 0;
+    }
+    .explain-plain {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--plain-fg);
+      line-height: 1.45;
+      padding: 0.45rem 0.65rem;
+      border-radius: 8px;
+      background: var(--plain-bg);
+      border-left: 3px solid var(--primary);
+    }
+    #panel-attn .anchor-body {
+      min-height: 0;
+      padding: 0.35rem 0.5rem;
+      flex-direction: column;
+      justify-content: center;
+    }
+    #panel-attn .anchor-body .fc-row {
+      justify-content: center;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 0;
+    }
+    @container diagram-pane (max-width: 480px) {
+      #panel-attn .fc-row { gap: 0.45rem; }
+      #panel-attn .fc-op { font-size: 1.85rem; }
+    }
+    #panel-attn .explain-anchor.is-active .anchor-body .fc-row {
+      min-height: 0;
+    }
+    /* Attention 矮屏略缩小，避免溢出 */
+    @media (max-height: 720px) {
+      :root { --cell-size-attn: 26px; --cell-gap-attn: 4px; }
+      #panel-attn .heatmap .hc { font-size: 0.62rem; }
+    }
+    .anchor-body .stack-block {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 12px;
+    }
+    .anchor-body .stack-connector { margin: 0 auto; }
+
+    .explain-analogy {
+      margin: 0;
+      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
+      background: var(--analogy-bg);
+      border: 1px solid var(--analogy-border);
+      font-size: 0.82rem;
+      color: var(--analogy-fg);
+      line-height: 1.55;
+    }
+    .explain-analogy b {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--analogy-label);
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+    .explain-body {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .explain-body strong { color: var(--fg); font-weight: 600; }
+    .explain-bullets {
+      margin: 0;
+      padding: 0.25rem 0 0.25rem 1rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .explain-bullets li { margin: 0.45rem 0; }
+    .explain-bullets li::marker { color: var(--success); }
+    .explain-dims {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      border: 1px dashed var(--border);
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      color: var(--fg);
+      line-height: 1.65;
+    }
+    .explain-dims b { color: var(--muted); font-weight: 600; display: block; margin-bottom: 0.35rem; font-family: var(--font); font-size: 0.75rem; letter-spacing: 0.04em; }
+    .dim-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      margin: 0.15rem 0.2rem 0.15rem 0;
+    }
+    .la-note {
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: var(--la-bg);
+      border: 1px solid var(--la-border);
+      font-size: 0.92rem;
+      color: var(--la-fg);
+      line-height: 1.7;
+    }
+    .la-heading {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--success);
+      margin-bottom: 0.35rem;
+    }
+    .la-note .la-body { padding: 0; }
+
+    /* ── 流转画布 ── */
+    .flow-canvas {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      overflow-x: auto;
+    }
+    .canvas-zone-label { display: none; }
+    .canvas-zone-label.lit { opacity: 1; color: var(--success); }
+
+    .fc-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 1.35rem;
+      min-height: 130px;
+      padding: 0.5rem 0;
+      position: relative;
+    }
+    .fc-row + .fc-row { margin-top: 0.25rem; }
+
+    .fc-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.12;
+      filter: grayscale(0.6);
+      transform: scale(0.96);
+      transition: opacity 0.45s, transform 0.45s, filter 0.45s, box-shadow 0.45s;
+    }
+    .fc-node.revealed { opacity: 0.45; filter: grayscale(0.3); transform: scale(0.98); }
+    .fc-node.active {
+      opacity: 1; filter: none; transform: scale(1);
+      box-shadow: 0 0 28px var(--success-glow);
+    }
+    .fc-node.done { opacity: 0.7; filter: grayscale(0.1); transform: scale(0.99); }
+
+    .fc-op {
+      font-family: var(--mono);
+      font-size: 2rem;
+      color: var(--muted);
+      opacity: 0.12;
+      transition: opacity 0.4s, color 0.4s;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .fc-op.lit { opacity: 1; color: var(--fg); }
+    .fc-op.active { opacity: 1; color: var(--success); }
+
+    .fc-box {
+      padding: 0.85rem 1.4rem;
+      border-radius: 12px;
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .matrix {
+      display: inline-grid;
+      gap: var(--cell-gap);
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--matrix-bg);
+      border: 1px solid var(--border);
+    }
+    .matrix .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border-radius: 2px;
+    }
+    #panel-attn .matrix {
+      gap: var(--cell-gap-attn);
+      padding: 16px;
+    }
+    #panel-attn .matrix .cell {
+      width: var(--cell-size-attn);
+      height: var(--cell-size-attn);
+      border-radius: 4px;
+    }
+    #panel-attn .matrix.matrix-values .cell {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--matrix-cell-fg);
+      display: grid;
+      place-items: center;
+    }
+    #panel-attn .fc-node .matrix-label {
+      font-size: 1.2rem;
+      margin-top: 0.7rem;
+    }
+    #panel-attn .fc-node .dim-hint {
+      font-size: 0.92rem;
+    }
+    #panel-attn .fc-op {
+      font-size: 2.5rem;
+    }
+    .matrix-label {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+    .dim-hint {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--c-dim);
+      margin-top: 0.2rem;
+    }
+
+    .c-input .cell { background: var(--c-input); }
+    .c-query .cell { background: var(--c-query); }
+    .c-key   .cell { background: var(--c-key); }
+    .c-value .cell { background: var(--c-value); }
+    .c-cache .cell { background: var(--c-cache); }
+    .c-ffn   .cell { background: var(--c-ffn); }
+    .c-norm  .cell { background: var(--c-norm); }
+
+    .fc-node.active .matrix { animation: mxGlow 1.5s ease-in-out infinite; }
+    @keyframes mxGlow {
+      0%, 100% { box-shadow: 0 0 0 transparent; }
+      50% { box-shadow: 0 0 20px var(--success-glow); }
+    }
+
+    .kv-cache-box {
+      padding: 1.25rem 1.65rem;
+      border-radius: 14px;
+      border: 2px solid var(--success-border);
+      background: var(--success-bg);
+      min-width: 180px;
+      text-align: center;
+    }
+    .kv-cache-box .kv-title {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 0.65rem;
+    }
+    .kv-inner { display: flex; gap: 0.75rem; justify-content: center; }
+
+    .token-row {
+      display: flex; gap: 0.65rem; flex-wrap: wrap; justify-content: center;
+    }
+    .token {
+      padding: 0.85rem 1.35rem;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.4);
+      color: #60a5fa;
+    }
+
+    /* SVG 连接箭头层 */
+    .fc-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .fc-svg path {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    .fc-svg .track { stroke: var(--link-track); }
+    .fc-svg .flow-line {
+      stroke-dasharray: 10 7;
+      stroke-dashoffset: 60;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .fc-svg .flow-line.lit {
+      opacity: 1;
+      animation: flowDraw 0.7s ease forwards, flowMove 1.1s linear 0.7s infinite;
+    }
+    @keyframes flowDraw {
+      from { stroke-dashoffset: 120; opacity: 0; }
+      to { stroke-dashoffset: 0; opacity: 1; }
+    }
+    @keyframes flowMove { to { stroke-dashoffset: -34; } }
+
+    .flow-purple { stroke: var(--c-query); }
+    .flow-cyan   { stroke: var(--c-key); }
+    .flow-orange { stroke: var(--c-value); }
+    .flow-green  { stroke: var(--c-cache); }
+    .flow-blue   { stroke: var(--c-input); }
+    .flow-white  { stroke: rgba(255,255,255,0.5); }
+
+    /* ── Attention 全局流程图 + 动画连线 ── */
+    .attn-flow-map {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.1rem 1.25rem 1.25rem;
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+    .afm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .afm-title {
+      font-family: var(--heading);
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--fg);
+    }
+    .afm-step-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--success);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+    }
+    .afm-wrap {
+      position: relative;
+      min-height: 200px;
+    }
+    .afm-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 1;
+    }
+    .afm-svg .link-track {
+      fill: none;
+      stroke: var(--link-track);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    .afm-svg .link-flow {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 8 6;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .afm-svg .link-flow.lit {
+      opacity: 1;
+      animation: flowDraw 0.65s ease forwards, flowMove 1.2s linear 0.65s infinite;
+    }
+    .afm-svg .link-flow.done {
+      opacity: 0.45;
+      stroke-dasharray: none;
+      animation: none;
+    }
+    .afm-svg marker path { fill: context-stroke; }
+
+    .afm-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 0.75rem 1rem;
+      align-items: stretch;
+      min-height: 200px;
+    }
+    @media (max-width: 720px) {
+      .afm-grid { grid-template-columns: 1fr; min-height: auto; }
+      .afm-wrap { min-height: 480px; }
+    }
+    .afm-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      padding: 0.65rem 0.55rem;
+      border-radius: 12px;
+      border: 1px dashed var(--afm-col-border);
+      background: var(--afm-col-bg);
+      transition: border-color 0.35s, background 0.35s;
+    }
+    .afm-col.lit {
+      border-color: var(--success-border);
+      background: var(--success-bg);
+    }
+    .afm-col-title {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 0.15rem;
+    }
+    .afm-col.lit .afm-col-title { color: var(--success); }
+    .afm-col-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+      justify-content: center;
+    }
+    .afm-branch {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      width: 100%;
+      justify-content: center;
+    }
+    .afm-branch-arrow {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      opacity: 0.5;
+    }
+    .afm-node {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.4rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+      opacity: 0.28;
+      transform: scale(0.94);
+      transition: opacity 0.4s, transform 0.4s, box-shadow 0.4s, border-color 0.4s;
+    }
+    .afm-node.revealed { opacity: 0.55; transform: scale(0.97); }
+    .afm-node.active {
+      opacity: 1;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--success-glow);
+    }
+    .afm-node.done { opacity: 0.65; transform: scale(0.98); }
+    .afm-n-blue   { background: rgba(37,99,235,0.12); color: #2563eb; border-color: rgba(37,99,235,0.3); }
+    .afm-n-purple { background: rgba(147,51,234,0.12); color: #9333ea; border-color: rgba(147,51,234,0.3); }
+    .afm-n-cyan   { background: rgba(8,145,178,0.12); color: #0891b2; border-color: rgba(8,145,178,0.3); }
+    .afm-n-orange { background: rgba(234,88,12,0.12); color: #ea580c; border-color: rgba(234,88,12,0.3); }
+    .afm-n-yellow { background: rgba(202,138,4,0.12); color: #ca8a04; border-color: rgba(202,138,4,0.3); }
+    .afm-n-green  { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+    .afm-n-pink   { background: rgba(219,39,119,0.1); color: #db2777; border-color: rgba(219,39,119,0.28); }
+    [data-theme="dark"] .afm-n-blue   { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.35); }
+    [data-theme="dark"] .afm-n-purple { background: rgba(168,85,247,0.15); color: #c084fc; border-color: rgba(168,85,247,0.35); }
+    [data-theme="dark"] .afm-n-cyan   { background: rgba(34,211,238,0.12); color: #22d3ee; border-color: rgba(34,211,238,0.35); }
+    [data-theme="dark"] .afm-n-orange { background: rgba(249,115,22,0.12); color: #fb923c; border-color: rgba(249,115,22,0.35); }
+    [data-theme="dark"] .afm-n-yellow { background: rgba(234,179,8,0.12); color: #facc15; border-color: rgba(234,179,8,0.35); }
+    [data-theme="dark"] .afm-n-green  { background: rgba(34,197,94,0.12); color: #4ade80; border-color: rgba(34,197,94,0.35); }
+    [data-theme="dark"] .afm-n-pink   { background: rgba(236,72,153,0.1); color: #f472b6; border-color: rgba(236,72,153,0.3); }
+    .afm-score-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 词与词注意力弧线（嵌入当前步骤图解区） */
+    .attn-token-viz {
+      width: 100%;
+      max-width: 420px;
+      margin-top: 0.35rem;
+      padding-top: 0.35rem;
+      border-top: 1px dashed var(--border);
+      display: none;
+      flex-shrink: 0;
+    }
+    .attn-token-viz.show { display: block; }
+    .atv-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 0.35rem;
+      text-align: center;
+    }
+    .atv-label em {
+      font-style: normal;
+      color: #c084fc;
+      font-weight: 700;
+    }
+    .atv-wrap {
+      position: relative;
+      height: 88px;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+    .atv-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .atv-svg .atv-link {
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 6 5;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .atv-svg .atv-link.lit {
+      opacity: 1;
+      animation: flowMove 1.4s linear infinite;
+    }
+    .atv-tokens {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 0.25rem;
+    }
+    .atv-token {
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      transition: all 0.35s;
+      position: relative;
+      z-index: 2;
+    }
+    .atv-token.query {
+      color: var(--c-query);
+      border-color: rgba(147,51,234,0.4);
+      background: rgba(147,51,234,0.1);
+      box-shadow: 0 0 16px rgba(147,51,234,0.15);
+    }
+    [data-theme="dark"] .atv-token.query {
+      border-color: rgba(168,85,247,0.5);
+      background: rgba(168,85,247,0.15);
+      box-shadow: 0 0 16px rgba(168,85,247,0.25);
+    }
+    .atv-token.target {
+      color: var(--success);
+      border-color: var(--success-border);
+      background: var(--success-bg);
+    }
+    .atv-pct {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      font-weight: 500;
+    }
+
+    /* 步骤内横向连线 */
+    #panel-attn .attn-row-wrap {
+      position: relative;
+    }
+    #panel-attn .attn-row-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 3;
+    }
+    #panel-attn .attn-row-svg .row-link-track {
+      fill: none;
+      stroke: var(--link-track);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    #panel-attn .attn-row-svg .row-link-flow {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 8 6;
+      animation: flowMove 1s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .afm-svg .link-flow.lit,
+      .atv-svg .atv-link.lit,
+      #panel-attn .attn-row-svg .row-link-flow {
+        animation: none;
+        stroke-dasharray: none;
+      }
+    }
+
+    /* 架构竖条 */
+    .stack-v {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; width: 100%;
+    }
+    .stack-block {
+      width: min(300px, 100%);
+      padding: 0.9rem 1.1rem;
+      text-align: center;
+      font-size: 0.92rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      opacity: 0.12;
+      transform: translateY(8px);
+      transition: all 0.45s;
+    }
+    .stack-block.revealed { opacity: 0.5; transform: translateY(0); }
+    .stack-block.active { opacity: 1; box-shadow: 0 0 24px var(--success-glow); }
+    .stack-block.done { opacity: 0.75; }
+    .stack-block + .stack-block { border-top: none; }
+    .stack-block:first-child { border-radius: 12px 12px 0 0; }
+    .stack-block:last-child { border-radius: 0 0 12px 12px; }
+    .sb-blue   { background: rgba(59,130,246,0.12); color: #60a5fa; border-color: rgba(59,130,246,0.35); }
+    .sb-purple { background: rgba(168,85,247,0.14); color: #c084fc; border-color: rgba(168,85,247,0.35); }
+    .sb-yellow { background: rgba(234,179,8,0.12); color: #facc15; border-color: rgba(234,179,8,0.35); }
+    .sb-pink   { background: rgba(236,72,153,0.1); color: #f472b6; border-color: rgba(236,72,153,0.3); font-size: 0.82rem; }
+    .sb-green  { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+    .stack-connector {
+      width: 2px; height: 28px;
+      background: linear-gradient(var(--c-arrow, rgba(255,255,255,0.3)), transparent);
+      opacity: 0.12;
+      transition: opacity 0.4s;
+    }
+    .stack-connector.lit { opacity: 1; }
+
+    /* ④ 拼成一层：每步显示完整竖条 + 当前位置 */
+    #panel-block .explain-anchor:not(.is-active) .anchor-body { display: none; }
+    #panel-block .explain-anchor.is-active .anchor-body { display: flex; }
+    #panel-block .anchor-body {
+      min-height: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 0.35rem 0.5rem;
+    }
+    #panel-block .block-diagram {
+      transform: none;
+      transform-origin: center center;
+    }
+    @media (max-height: 720px) {
+      #panel-block .block-diagram { transform: scale(0.92); }
+    }
+    .block-diagram {
+      width: min(100%, 480px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .block-diagram-head {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.65rem 0.95rem;
+      border-radius: 10px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      font-size: 1rem;
+    }
+    .block-now-badge {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--success);
+      background: var(--success-bg);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .block-now-title {
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .stack-layout {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .stack-rail {
+      list-style: none;
+      margin: 0;
+      padding: 0.35rem 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .stack-rail::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 8%;
+      bottom: 8%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      z-index: 0;
+    }
+    .rail-item {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.35rem 0;
+      opacity: 0.35;
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .rail-item span {
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      color: var(--muted);
+      transition: all 0.35s;
+    }
+    .rail-item small {
+      font-size: 0.58rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.2;
+      max-width: 4.5rem;
+    }
+    .rail-item.done { opacity: 0.7; }
+    .rail-item.done span {
+      border-color: var(--success-border);
+      color: var(--success-light);
+      background: var(--success-bg);
+    }
+    .rail-item.active {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+    .rail-item.active span {
+      border-color: var(--success);
+      background: var(--success-bg);
+      color: var(--success);
+      box-shadow: 0 0 16px var(--success-glow);
+    }
+    .rail-item.active small { color: var(--success-light); font-weight: 600; }
+    .rail-item.pending { opacity: 0.3; }
+
+    #panel-block .stack-v.stack-full {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    #panel-block .stack-full .stack-block {
+      width: 100%;
+      opacity: 1;
+      transform: none;
+      position: relative;
+      padding: 1rem 1.15rem 1rem 2.6rem;
+      font-size: 1rem;
+      transition: opacity 0.4s, box-shadow 0.4s, border-color 0.4s, filter 0.4s;
+    }
+    #panel-block .stack-full .stack-block .stage-num {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+    #panel-block .stack-full .stack-block .here-tag {
+      display: none;
+      position: absolute;
+      right: 0.55rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--success);
+      background: var(--success-bg);
+      padding: 0.15rem 0.45rem;
+      border-radius: 5px;
+      letter-spacing: 0.04em;
+    }
+    #panel-block .stack-full .stack-block.done {
+      opacity: 0.72;
+      filter: saturate(0.85);
+    }
+    #panel-block .stack-full .stack-block.pending {
+      opacity: 0.38;
+      filter: saturate(0.5);
+    }
+    #panel-block .stack-full .stack-block.active {
+      opacity: 1;
+      filter: none;
+      border-color: var(--success-border) !important;
+      box-shadow: 0 0 28px var(--success-glow), inset 0 0 0 1px var(--success-border);
+    }
+    #panel-block .stack-full .stack-block.active .stage-num {
+      color: var(--success);
+      opacity: 1;
+    }
+    #panel-block .stack-full .stack-block.active .here-tag { display: inline-block; }
+    #panel-block .stack-full .stack-block.active::before {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 7px solid transparent;
+      border-right-color: var(--success);
+      filter: drop-shadow(0 0 6px var(--success-glow));
+    }
+    #panel-block .stack-full .stack-connector {
+      height: 22px;
+      opacity: 0.25;
+    }
+    #panel-block .stack-full .stack-connector.lit { opacity: 0.55; }
+    #panel-block .stack-full .stack-connector.active {
+      opacity: 1;
+      width: 3px;
+      background: linear-gradient(180deg, var(--success), transparent);
+    }
+    #panel-block .stack-full .stack-connector.pending { opacity: 0.15; }
+
+    .heatmap-wrap { display: flex; flex-direction: column; align-items: center; }
+    .heat-tokens {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.02em;
+    }
+    .heatmap {
+      display: grid; gap: 4px;
+    }
+    .heatmap .hc {
+      width: 54px; height: 54px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      display: grid; place-items: center;
+      color: var(--matrix-cell-fg);
+      font-weight: 600;
+    }
+    #panel-attn .heatmap .hc {
+      width: var(--cell-size-attn);
+      height: var(--cell-size-attn);
+      font-size: 0.68rem;
+      border-radius: 4px;
+    }
+    #panel-attn .heat-tokens {
+      font-size: 0.82rem;
+      margin-bottom: 0.35rem;
+    }
+    #panel-attn .heat-meta {
+      font-size: 0.75rem;
+      margin-top: 0.35rem;
+    }
+    #panel-attn .canvas-zone-label {
+      text-align: center;
+      width: 100%;
+    }
+    .heatmap .hc.col-head {
+      height: auto;
+      min-height: 1.2rem;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 500;
+    }
+    .heatmap .hc.row-head {
+      width: auto;
+      min-width: 1.5rem;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 500;
+    }
+    .heat-meta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--success);
+      margin-top: 0.4rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .heat-meta.scores-note { color: var(--muted); }
+    .matrix .cell[title] { cursor: help; }
+
+    #panel-attn .lesson-wrap { gap: 0.45rem; }
+    #panel-attn .attn-flow-map {
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0.5rem 0.65rem;
+      border-radius: 12px;
+    }
+    #panel-attn .afm-wrap { min-height: 120px; }
+    #panel-attn .afm-grid { min-height: 120px; gap: 0.5rem; }
+    #panel-attn .attn-token-viz { margin-top: 0.5rem; padding-top: 0.5rem; }
+    #panel-attn .atv-wrap { height: 90px; }
+    .afm-fold > summary {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      list-style: none;
+      padding: 0.35rem 0;
+    }
+    .afm-fold > summary::-webkit-details-marker { display: none; }
+    .afm-fold[open] > summary { color: var(--success); margin-bottom: 0.35rem; }
+
+    /* 底部控制 */
+    .step-controls {
+      flex-shrink: 0;
+      position: relative; z-index: 999;
+      height: var(--ctrl-h);
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 1rem;
+      background: var(--ctrl-bg);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+    }
+    .step-controls-inner {
+      width: min(960px, 100%);
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 0.65rem 0.85rem;
+    }
+    .step-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    @media (max-width: 640px) {
+      .step-controls-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .step-center { grid-column: 1 / -1; order: -1; }
+      #btn-prev { justify-self: start; }
+      #btn-next { justify-self: end; }
+      #btn-play { grid-column: 1 / -1; width: 100%; }
+    }
+    .step-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 0;
+    }
+    .step-meta-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .step-meta-sub {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .step-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      justify-content: center;
+    }
+    .ctrl-btn {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--fg);
+      font: inherit; font-size: 0.95rem; font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover:not(:disabled) { border-color: var(--success-border); color: var(--success); }
+    .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .ctrl-btn.play { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+    .ctrl-btn.play.on { background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.4); color: #ca8a04; }
+    [data-theme="dark"] .ctrl-btn.play.on { color: #facc15; }
+    .step-dots { display: flex; gap: 0.45rem; }
+    .step-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border); border: none; cursor: pointer; padding: 0;
+      transition: all 0.3s;
+    }
+    .step-dot.active { width: 28px; border-radius: 5px; background: var(--c-cache); }
+    .step-dot.done { background: var(--success-border); }
+    .step-counter { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); min-width: 4.5rem; text-align: center; }
+
+    footer { display: none; }
+  </style>
+</head>
+<body>
+  <header class="doc-top">
+    <div class="brand">
+      <div class="logo">TF</div>
+      <div>
+        <h1 class="doc-title">Transformer 可视化</h1>
+        <p class="doc-subtitle">零基础 · 一屏一步</p>
+      </div>
+    </div>
+    <nav class="chapter-pills" id="chapter-pills" aria-label="章节导航">
+      <button class="chapter-pill active" type="button" data-panel="panel-overview">全局地图</button>
+      <button class="chapter-pill" type="button" data-panel="panel-la">矩阵入门</button>
+      <button class="chapter-pill" type="button" data-panel="panel-embed">词变数字</button>
+      <button class="chapter-pill" type="button" data-panel="panel-attn">Attention</button>
+      <button class="chapter-pill" type="button" data-panel="panel-block">一层积木</button>
+      <button class="chapter-pill" type="button" data-panel="panel-kv">KV Cache</button>
+    </nav>
+    <div class="header-actions">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色/深色主题">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span class="theme-label">深色</span>
+    </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+  <div class="layout">
+
+    <!-- ⓪ 全局概览 -->
+    <section class="panel active" id="panel-overview" data-step-count="1">
+      <div class="overview-shell">
+        <header class="overview-intro">
+          <h2>Transformer 是什么？一张图先看全貌</h2>
+          <p>文字 → 矩阵 → Attention → 叠层 → 预测下一词。GPT、BERT 等大模型都基于此。</p>
+        </header>
+
+        <div class="big-picture">
+          <h3>一句话在模型里怎么流动？</h3>
+          <div class="flow-pipeline">
+            <div class="flow-stage">
+              <div class="flow-stage-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
+              </div>
+              <div class="flow-stage-title">输入文字</div>
+              <div class="flow-stage-desc">切成词</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-icon" style="background:rgba(99,102,241,0.15);color:#a5b4fc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </div>
+              <div class="flow-stage-title">变成矩阵</div>
+              <div class="flow-stage-desc">一词一行</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-icon" style="background:rgba(168,85,247,0.15);color:#c084fc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </div>
+              <div class="flow-stage-title">Attention</div>
+              <div class="flow-stage-desc">词看全句</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-icon" style="background:rgba(234,179,8,0.12);color:#facc15">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              </div>
+              <div class="flow-stage-title">叠 N 层</div>
+              <div class="flow-stage-desc">Attn + FFN</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-icon" style="background:rgba(34,197,94,0.12);color:#4ade80">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div class="flow-stage-title">输出预测</div>
+              <div class="flow-stage-desc">生成下一词</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overview-formula" aria-label="Transformer 核心 Attention 公式">
+          <div class="of-label">核心公式 · Scaled Dot-Product Attention</div>
+          <div class="of-main">
+            <span class="of-fn">Attention</span>(<span class="of-q">Q</span>, <span class="of-k">K</span>, <span class="of-v">V</span>)
+            = <span class="of-softmax">softmax</span>(<span class="of-q">Q</span><span class="of-k">K</span><sup>T</sup> / √d<sub>k</sub>) · <span class="of-v">V</span>
+          </div>
+          <div class="of-steps">
+            <span><span class="of-q">Q</span>=X·W<sub>Q</sub></span>
+            <span><span class="of-k">K</span>=X·W<sub>K</sub></span>
+            <span><span class="of-v">V</span>=X·W<sub>V</sub></span>
+            <span>打分 → 归一化 → 混合 V</span>
+          </div>
+          <p class="of-legend">W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>：可学习的投影矩阵 · d<sub>k</sub>：单头 Key 维度 · softmax：把分数变成权重（和为 1）</p>
+        </div>
+
+        <div class="overview-grid">
+          <div class="overview-card">
+            <div class="overview-card-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <h3>为什么叫 Transformer？</h3>
+            <p>变换输入：词向量经 Attention + FFN 变成富含上下文的新向量。</p>
+          </div>
+          <div class="overview-card">
+            <div class="overview-card-icon" style="background:rgba(168,85,247,0.15);color:#c084fc">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <h3>Attention 做什么？</h3>
+            <p>算词与词的相关度，按权重混合上下文信息。</p>
+          </div>
+          <div class="overview-card">
+            <div class="overview-card-icon" style="background:rgba(34,197,94,0.12);color:#4ade80">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3>需要什么基础？</h3>
+            <p>知道矩阵能相乘即可，后续用动画 + 白话讲清。</p>
+          </div>
+        </div>
+
+        <div class="overview-glossary">
+          <h3>核心术语速查</h3>
+          <p class="glossary-hint-bar">按主题分组；悬停或点击术语，下方显示白话解释与教程章节</p>
+          <div class="glossary-scroll" id="glossary-grid">
+            <div class="glossary-group">
+              <h4 class="glossary-group-label">输入与表示</h4>
+              <div class="glossary-chips">
+                <button type="button" class="glossary-term gt-blue" data-term="token"><span class="gt-name">Token</span><span class="gt-zh">词片段</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="embedding"><span class="gt-name">Embedding</span><span class="gt-zh">词向量</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="tokenizer"><span class="gt-name">Tokenizer</span><span class="gt-zh">分词器</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="logits"><span class="gt-name">logits</span><span class="gt-zh">原始得分</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="hidden-states"><span class="gt-name">hidden states</span><span class="gt-zh">隐状态</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="lm-head"><span class="gt-name">LM Head</span><span class="gt-zh">词表输出层</span></button>
+              </div>
+            </div>
+            <div class="glossary-group">
+              <h4 class="glossary-group-label">Attention 机制</h4>
+              <div class="glossary-chips">
+                <button type="button" class="glossary-term gt-purple" data-term="q"><span class="gt-name">Q</span><span class="gt-zh">Query 查询</span></button>
+                <button type="button" class="glossary-term gt-cyan" data-term="k"><span class="gt-name">K</span><span class="gt-zh">Key 键</span></button>
+                <button type="button" class="glossary-term gt-orange" data-term="v"><span class="gt-name">V</span><span class="gt-zh">Value 值</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="self-attn"><span class="gt-name">Self-Attention</span><span class="gt-zh">自注意力</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="multi-head"><span class="gt-name">Multi-Head</span><span class="gt-zh">多头</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="softmax"><span class="gt-name">softmax</span><span class="gt-zh">归一化</span></button>
+                <button type="button" class="glossary-term gt-cyan" data-term="rope"><span class="gt-name">RoPE</span><span class="gt-zh">位置编码</span></button>
+                <button type="button" class="glossary-term gt-orange" data-term="causal-mask"><span class="gt-name">Causal Mask</span><span class="gt-zh">因果掩码</span></button>
+                <button type="button" class="glossary-term gt-cyan gt-wide" data-term="w-proj"><span class="gt-name">W<sub>Q</sub> W<sub>K</sub> W<sub>V</sub></span><span class="gt-zh">投影矩阵</span></button>
+              </div>
+            </div>
+            <div class="glossary-group">
+              <h4 class="glossary-group-label">层内结构</h4>
+              <div class="glossary-chips">
+                <button type="button" class="glossary-term gt-green" data-term="residual"><span class="gt-name">残差连接</span><span class="gt-zh">Residue</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="layernorm"><span class="gt-name">LayerNorm</span><span class="gt-zh">层归一化</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="rmsnorm"><span class="gt-name">RMSNorm</span><span class="gt-zh">层归一化</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="ffn"><span class="gt-name">FFN</span><span class="gt-zh">前馈网络</span></button>
+              </div>
+            </div>
+            <div class="glossary-group">
+              <h4 class="glossary-group-label">推理与生成</h4>
+              <div class="glossary-chips">
+                <button type="button" class="glossary-term gt-green" data-term="kv-cache"><span class="gt-name">KV Cache</span><span class="gt-zh">推理缓存</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="prefill"><span class="gt-name">Prefill</span><span class="gt-zh">预填充</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="decode"><span class="gt-name">Decode</span><span class="gt-zh">逐词生成</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="glossary-detail" id="glossary-detail">
+            <p class="gd-placeholder">例如：悬停 <strong>Q / K / V</strong>，看 Attention 里「问 → 匹配 → 搬运」三步分别对应什么</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ① 矩阵先修 -->
+    <section class="panel" id="panel-la" data-step-count="4">
+      <div class="panel-head">
+        <h2 class="panel-title">第 ① 章：你只需要懂矩阵乘法</h2>
+        <p class="panel-sub">Transformer 里没有神秘操作，本质就是一连串<strong style="color:var(--fg)">形状合法的矩阵乘法</strong>。先建立这套直觉，后面每张图都能看懂。</p>
+        <div class="panel-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>把矩阵想成 Excel 表格：行 × 列。两个表格能相乘，当且仅当「左边列数 = 右边行数」。</span>
+        </div>
+      </div>
+      <div class="lesson-wrap">
+        <div class="flow-canvas" id="canvas-la">
+          <div class="explain-anchor" data-explain-step="0">
+            <div class="explain-slot"></div>
+            <div class="anchor-body"><div class="fc-row">
+              <div class="fc-node" data-step="0">
+                <div class="token-row"><span class="token">词₁</span><span class="token">词₂</span><span class="token">词₃</span></div>
+                <span class="matrix-label">一句话 = 一排词</span>
+              </div>
+            </div></div>
+          </div>
+          <div class="explain-anchor" data-explain-step="1">
+            <div class="explain-slot"></div>
+            <div class="anchor-body"><div class="fc-row">
+              <div class="fc-op" data-step="1">→</div>
+              <div class="fc-node" data-step="1">
+                <div class="matrix c-input" data-r="3" data-c="6"></div>
+                <span class="matrix-label">矩阵 X</span>
+                <span class="dim-hint">3 行 × 6 列</span>
+              </div>
+            </div></div>
+          </div>
+          <div class="explain-anchor" data-explain-step="2">
+            <div class="explain-slot"></div>
+            <div class="anchor-body"><div class="fc-row">
+              <div class="fc-node" data-step="2"><div class="matrix c-input" data-r="3" data-c="6"></div><span class="matrix-label">X</span><span class="dim-hint">3×6</span></div>
+              <div class="fc-op" data-step="2">×</div>
+              <div class="fc-node" data-step="2"><div class="matrix c-query" data-r="6" data-c="4"></div><span class="matrix-label">W</span><span class="dim-hint">6×4</span></div>
+              <div class="fc-op" data-step="2">=</div>
+              <div class="fc-node" data-step="2"><div class="matrix c-cache" data-r="3" data-c="4"></div><span class="matrix-label">结果</span><span class="dim-hint">3×4 ✓</span></div>
+            </div></div>
+          </div>
+          <div class="explain-anchor" data-explain-step="3">
+            <div class="explain-slot"></div>
+            <div class="anchor-body"><div class="fc-row">
+              <div class="fc-node" data-step="3" style="max-width:100%">
+                <div style="font-size:1.1rem;line-height:2;color:var(--muted);text-align:left;padding:0.25rem 0">
+                  <div>① 左矩阵<strong style="color:var(--fg)">列数</strong> = 右矩阵<strong style="color:var(--fg)">行数</strong></div>
+                  <div>② 结果 = <span class="dim-tag">左行 × 右列</span></div>
+                  <div>③ 全文套路：<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d'</span> = <span class="dim-tag">seq×d'</span></div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ② 词 → X -->
+    <section class="panel" id="panel-embed" data-step-count="4">
+      <div class="panel-head">
+        <h2 class="panel-title">第 ② 章：词怎么变成矩阵 X？</h2>
+        <p class="panel-sub">模型不认识汉字，只认识数字向量。整句话最终变成<strong style="color:var(--fg)">一个矩阵</strong>：每一行是一个词，每一列是一个特征。</p>
+        <div class="panel-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Embedding 就像查字典：每个词对应一行数字。位置编码告诉模型「这个词在第几位」。</span>
+        </div>
+      </div>
+      <div class="lesson-wrap">
+        <div class="flow-canvas" id="canvas-embed">
+          <div class="explain-anchor" data-explain-step="0">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="0">文本</div>
+              <div class="fc-row"><div class="fc-node" data-step="0">
+                <div class="token-row"><span class="token">我</span><span class="token">爱</span><span class="token">学习</span></div>
+              </div></div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="1">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="1">查表成向量</div>
+              <div class="fc-row">
+                <div class="fc-op" data-step="1">→</div>
+                <div class="fc-node" data-step="1">
+                  <div class="matrix c-input" data-r="3" data-c="8"></div>
+                  <span class="matrix-label">Embedding</span><span class="dim-hint">3×d</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="2">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="2">加位置</div>
+              <div class="fc-row">
+                <div class="fc-node" data-step="2"><div class="matrix c-input" data-r="3" data-c="8"></div><span class="matrix-label">Embedding</span></div>
+                <div class="fc-op" data-step="2">+</div>
+                <div class="fc-node" data-step="2"><div class="matrix c-norm" data-r="3" data-c="8"></div><span class="matrix-label">PE</span><span class="dim-hint">同形状相加</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="3">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="3">送入 Attention</div>
+              <div class="fc-row">
+                <div class="fc-op" data-step="3">=</div>
+                <div class="fc-node" data-step="3">
+                  <div class="matrix c-cache" data-r="3" data-c="8"></div>
+                  <span class="matrix-label">X</span><span class="dim-hint">3×d</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ Attention 流转（核心大图，仿 KV Cache 风格）-->
+    <section class="panel" id="panel-attn" data-step-count="8">
+      <div class="panel-head">
+        <h2 class="panel-title">第 ③ 章：Self-Attention — 让每个词「看到」全句</h2>
+        <p class="panel-sub">这是 Transformer 的<strong style="color:var(--fg)">心脏</strong>。同一矩阵 X 分别乘以三个权重，得到 Q、K、V；再用 Q 和 K 算「谁和谁相关」，最后加权混合 V。</p>
+        <div class="panel-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>类比：Q 是「寻人启事」，K 是「门牌号」，V 是「要搬的内容」。先匹配，再搬运。</span>
+        </div>
+      </div>
+      <div class="lesson-wrap">
+        <div class="flow-canvas" id="canvas-attn">
+          <div class="explain-anchor" data-explain-step="0">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="0">区域 A · 起点</div>
+              <div class="fc-row"><div class="fc-node" data-step="0">
+                <div class="matrix c-input" data-mx="X"></div>
+                <span class="matrix-label">X</span><span class="dim-hint">4×4 · 我/爱/学习/。</span>
+              </div></div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="1">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
+                <div class="fc-op" data-step="1">×</div>
+                <div class="fc-node" data-step="1"><div class="matrix c-query" data-mx="WQ"></div><span class="matrix-label">W<sub>Q</sub></span><span class="dim-hint">4×4 I</span></div>
+                <div class="fc-op" data-step="1">=</div>
+                <div class="fc-node" data-step="1"><div class="matrix c-query" data-mx="Q"></div><span class="matrix-label">Q</span><span class="dim-hint">4×4</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="2">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
+                <div class="fc-op" data-step="2">×</div>
+                <div class="fc-node" data-step="2"><div class="matrix c-key" data-mx="WK"></div><span class="matrix-label">W<sub>K</sub></span><span class="dim-hint">4×4 I</span></div>
+                <div class="fc-op" data-step="2">=</div>
+                <div class="fc-node" data-step="2"><div class="matrix c-key" data-mx="K"></div><span class="matrix-label">K</span><span class="dim-hint">4×4</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="3">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="0"><div class="matrix c-input" data-mx="X"></div><span class="matrix-label">X</span></div>
+                <div class="fc-op" data-step="3">×</div>
+                <div class="fc-node" data-step="3"><div class="matrix c-value" data-mx="WV"></div><span class="matrix-label">W<sub>V</sub></span><span class="dim-hint">4×4 I</span></div>
+                <div class="fc-op" data-step="3">=</div>
+                <div class="fc-node" data-step="3"><div class="matrix c-value" data-mx="V"></div><span class="matrix-label">V</span><span class="dim-hint">4×4</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="4">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="4"><div class="matrix c-query" data-mx="Q"></div><span class="matrix-label">Q</span></div>
+                <div class="fc-op" data-step="4">×</div>
+                <div class="fc-node" data-step="4"><div class="matrix c-key" data-mx="KT"></div><span class="matrix-label">K<sup>T</sup></span><span class="dim-hint">4×4</span></div>
+                <div class="fc-op" data-step="4">=</div>
+                <div class="fc-node" data-step="4">
+                  <div class="heatmap-wrap">
+                    <div class="heat-tokens">S = QK<sup>T</sup>/√4（未归一化）</div>
+                    <div class="heatmap" id="heat-attn" data-n="4" data-heat="scores"></div>
+                    <div class="heat-meta scores-note"></div>
+                  </div>
+                  <span class="matrix-label">分数 S</span><span class="dim-hint">4×4</span>
+                </div>
+              </div>
+              <div class="attn-token-viz">
+                <div class="atv-label"></div>
+                <div class="atv-wrap">
+                  <svg class="atv-svg" aria-hidden="true"></svg>
+                  <div class="atv-tokens"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="5">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-op" data-step="5">→</div>
+                <div class="fc-node" data-step="5"><span class="fc-box" style="background:rgba(168,85,247,0.15);color:#c084fc;border-color:rgba(168,85,247,0.4)">softmax（每行和为 1）</span></div>
+                <div class="fc-op" data-step="5">→</div>
+                <div class="fc-node" data-step="5">
+                  <div class="heatmap-wrap">
+                    <div class="heat-tokens">A = softmax(S)，每行和 = 1</div>
+                    <div class="heatmap" id="heat-soft" data-n="4" data-heat="weights"></div>
+                    <div class="heat-meta"></div>
+                  </div>
+                  <span class="matrix-label">权重 A</span>
+                </div>
+              </div>
+              <div class="attn-token-viz">
+                <div class="atv-label"></div>
+                <div class="atv-wrap">
+                  <svg class="atv-svg" aria-hidden="true"></svg>
+                  <div class="atv-tokens"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="6">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="6">
+                  <div class="heatmap-wrap">
+                    <div class="heatmap" id="heat-final" data-n="4" data-heat="weights"></div>
+                    <div class="heat-meta"></div>
+                  </div>
+                  <span class="matrix-label">A</span>
+                </div>
+                <div class="fc-op" data-step="6">×</div>
+                <div class="fc-node" data-step="6"><div class="matrix c-value" data-mx="V"></div><span class="matrix-label">V</span></div>
+                <div class="fc-op" data-step="6">=</div>
+                <div class="fc-node" data-step="7"><div class="matrix c-cache" data-mx="OUT"></div><span class="matrix-label">输出</span><span class="dim-hint">4×4</span></div>
+              </div>
+              <div class="attn-token-viz">
+                <div class="atv-label"></div>
+                <div class="atv-wrap">
+                  <svg class="atv-svg" aria-hidden="true"></svg>
+                  <div class="atv-tokens"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="7">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="fc-row">
+                <div class="fc-node" data-step="7"><div class="matrix c-cache" data-mx="OUT"></div><span class="matrix-label">Attention 输出</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ④ 拼成一层 -->
+    <section class="panel" id="panel-block" data-step-count="6">
+      <div class="panel-head">
+        <h2 class="panel-title">第 ④ 章：把 Attention 和 FFN 拼成「一层积木」</h2>
+        <p class="panel-sub">一层 Encoder = Attention 块 + FFN 块，每块外面都有<strong style="color:var(--fg)">残差（把输入加回来）+ LayerNorm</strong>。堆 N 层就是完整 Transformer。</p>
+        <div class="panel-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>残差连接像「抄近路」：即使中间算错了，原始信息也能直接传下去，训练更稳定。</span>
+        </div>
+      </div>
+      <div class="lesson-wrap">
+        <div class="flow-canvas" id="canvas-block">
+          <div class="explain-anchor" data-explain-step="0"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="1"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="2"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="3"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="4"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+          <div class="explain-anchor" data-explain-step="5"><div class="explain-slot"></div><div class="anchor-body"><div class="block-diagram-mount"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑤ KV Cache -->
+    <section class="panel" id="panel-kv" data-step-count="5">
+      <div class="panel-head">
+        <h2 class="panel-title">第 ⑤ 章：KV Cache — 为什么生成越来越快？</h2>
+        <p class="panel-sub">生成文本分两段：<strong style="color:var(--fg)">Prefill</strong> 一次性处理 prompt，<strong style="color:var(--fg)">Decode</strong> 每次只算一个新词。Cache 避免重复矩阵乘法。</p>
+        <div class="panel-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>老词的 K、V 不会变，存起来下次直接用。这就是为什么 ChatGPT 第一个字慢、后面越出越快。</span>
+        </div>
+      </div>
+      <div class="lesson-wrap">
+        <div class="flow-canvas" id="canvas-kv">
+          <div class="explain-anchor" data-explain-step="0">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div style="font-size:1.1rem;color:var(--muted);padding:0.5rem 0">生成时分两阶段：<strong style="color:#4ade80">Prefill</strong> 处理 prompt，<strong style="color:#4ade80">Decode</strong> 逐词生成</div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="1">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="1">Prefill · 算 K</div>
+              <div class="fc-row">
+                <div class="fc-node" data-step="1"><div class="matrix c-input" data-r="5" data-c="8"></div><span class="matrix-label">prompt</span><span class="dim-hint">N×d</span></div>
+                <div class="fc-op" data-step="1">×</div>
+                <div class="fc-node" data-step="1"><div class="matrix c-key" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>K</sub></span></div>
+                <div class="fc-op" data-step="1">→</div>
+                <div class="fc-node" data-step="2"><div class="matrix c-key" data-r="5" data-c="6"></div><span class="matrix-label">K</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="2">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="2">Prefill · 算 V 并写入 Cache</div>
+              <div class="fc-row">
+                <div class="fc-node" data-step="1"><div class="matrix c-input" data-r="5" data-c="8"></div><span class="matrix-label">prompt</span></div>
+                <div class="fc-op" data-step="1">×</div>
+                <div class="fc-node" data-step="1"><div class="matrix c-value" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>V</sub></span></div>
+                <div class="fc-op" data-step="2">→</div>
+                <div class="fc-node" data-step="2">
+                  <div class="kv-cache-box">
+                    <div class="kv-title">KV Cache</div>
+                    <div class="kv-inner">
+                      <div><div class="matrix c-key" data-r="5" data-c="4"></div><span class="dim-hint">cached K</span></div>
+                      <div><div class="matrix c-value" data-r="5" data-c="4"></div><span class="dim-hint">cached V</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="3">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="3">Decode · 新词算 q</div>
+              <div class="fc-row">
+                <div class="fc-node" data-step="3"><div class="matrix c-input" data-r="1" data-c="8"></div><span class="matrix-label">new token</span><span class="dim-hint">1×d</span></div>
+                <div class="fc-op" data-step="3">×</div>
+                <div class="fc-node" data-step="3"><div class="matrix c-query" data-r="8" data-c="6"></div><span class="matrix-label">W<sub>Q</sub></span></div>
+                <div class="fc-op" data-step="3">=</div>
+                <div class="fc-node" data-step="3"><div class="matrix c-query" data-r="1" data-c="6"></div><span class="matrix-label">q</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="explain-anchor" data-explain-step="4">
+            <div class="explain-slot"></div>
+            <div class="anchor-body">
+              <div class="canvas-zone-label" data-zone="4">Decode · 追加 K/V，读 Cache 出词</div>
+              <div class="fc-row">
+                <div class="fc-node" data-step="4"><div class="matrix c-query" data-r="1" data-c="6"></div><span class="matrix-label">q</span></div>
+                <div class="fc-op" data-step="4">×</div>
+                <div class="fc-node" data-step="4"><div class="matrix c-key" data-r="6" data-c="4"></div><span class="matrix-label">cached K<sup>T</sup></span></div>
+                <div class="fc-op" data-step="4">→</div>
+                <div class="fc-node" data-step="4"><span class="fc-box" style="background:rgba(168,85,247,0.15);color:#c084fc;border-color:rgba(168,85,247,0.4)">softmax</span></div>
+                <div class="fc-op" data-step="4">×</div>
+                <div class="fc-node" data-step="4"><div class="matrix c-value" data-r="6" data-c="4"></div><span class="matrix-label">cached V</span></div>
+                <div class="fc-op" data-step="4">→</div>
+                <div class="fc-node" data-step="4"><span class="fc-box" style="background:rgba(34,197,94,0.15);color:#4ade80;border-color:rgba(34,197,94,0.45)">下一个词</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer aria-hidden="true"></footer>
+  </div>
+  </main>
+
+  <div class="step-controls">
+    <div class="step-controls-inner">
+      <button class="ctrl-btn" id="btn-prev" disabled>← 上一步</button>
+      <div class="step-center">
+        <div class="step-meta">
+          <span class="step-meta-title" id="step-title">全局地图</span>
+          <span class="step-meta-sub" id="step-meta-sub"><span id="step-counter">概览</span></span>
+        </div>
+        <div class="step-dots" id="step-dots"></div>
+      </div>
+      <button class="ctrl-btn" id="btn-next">下一步 →</button>
+      <button class="ctrl-btn play" id="btn-play">▶ 播放</button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    /* ── 每章解释文案（线性代数视角）── */
+    var EXPLAIN = {
+      'panel-la': [
+        {
+          title: '一句话 = 多个词排成序列',
+          plain: '先别管矩阵——把句子想成「从左到右一排词」。',
+          analogy: '就像排队买奶茶：「我 → 爱 → 学习」，顺序不能乱，模型也需要知道谁先谁后。',
+          body: '自然语言有顺序。「我 → 爱 → 学习」不能打乱。神经网络也需要保留这个顺序感，所以我们先把每个词编号，再按顺序排成序列。',
+          bullets: ['每个词叫一个 <strong>Token</strong>（词或子词片段）', 'Token 个数记作 <strong>seq</strong>（sequence length）', '右边三个蓝框 = 3 个 Token，seq = 3'],
+          dims: '此步还没有矩阵，只有 seq = 3',
+          la: '序列 = 有序列表。后面会把每个 Token 变成一行数字，再纵向叠成矩阵。'
+        },
+        {
+          title: '每个词 → 一行数字 → 拼成矩阵 X',
+          plain: '一个词 = 一行数字；多行叠起来就是矩阵。',
+          analogy: '每个词像一张「成绩单」，上面有一堆分数描述它的含义。3 个词 = 3 张成绩单叠成表格 = 矩阵。',
+          body: '模型不认识汉字，只认识浮点数。每个词用 d 个数字描述它的含义（语义特征）。3 个词、每个 6 维，就得到一个 3 行 6 列的矩阵 X。',
+          bullets: ['<strong>一行 = 一个词</strong> 的向量表示', '行数 = 词数 seq，列数 = 特征维度 d', '矩阵里每个小格子就是一个数字'],
+          dims: 'X 的形状：<span class="dim-tag">3×6</span> = <span class="dim-tag">seq×d</span>',
+          la: 'X ∈ ℝ<sup>seq×d</sup>。第 i 行 x<sub>i</sub> ∈ ℝ<sup>d</sup> 是第 i 个词的向量。'
+        },
+        {
+          title: '核心操作：矩阵乘法',
+          plain: '左矩阵的列数必须等于右矩阵的行数，否则乘不了。',
+          analogy: '像两个齿轮咬合：左边齿轮的齿数（列）必须等于右边齿轮的齿数（行），才能转起来。',
+          body: '这是整章最重要的规则。两个矩阵相乘，结果第 (i,j) 元素 = 左矩阵第 i 行与右矩阵第 j 列的内积。结果的行数取左边，列数取右边。',
+          bullets: ['判据：<strong>左列数 = 右行数</strong>（这里是 6 = 6 ✓）', '结果行数 = 左行数（3），列数 = 右列数（4）', '所以 <span class="dim-tag">3×6</span> × <span class="dim-tag">6×4</span> = <span class="dim-tag">3×4</span>'],
+          dims: '(seq×d) · (d×d\') = (seq×d\')<br>例：3×6 · 6×4 → 3×4',
+          la: '若 A 是 m×n，B 是 n×p，则 AB 是 m×p。n 是「中间维度」，必须对齐。'
+        },
+        {
+          title: '记住这条流水线',
+          plain: 'Transformer 就是反复做「seq×d 左乘 d×d\'」。',
+          analogy: '像工厂流水线：原材料（句子矩阵）进，经过一道工序（乘权重 W），变成新产品（新矩阵）出。反复加工 N 次。',
+          body: '后面 Attention、FFN 本质都是这个模式：输入是整句矩阵 X，乘以一个权重矩阵 W，得到新的句子矩阵。W 是训练学出来的参数。',
+          bullets: ['输入永远是 <strong>seq 行</strong>（一句里的每个词）', '权重 W 是 <strong>d 行</strong> 开头（特征维度对齐）', '输出还是 seq 行，但列数可能变（d\'）'],
+          dims: '通用式：<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d\'</span> → <span class="dim-tag">seq×d\'</span>',
+          la: '把 W 想成线性变换：对每个词向量 x<sub>i</sub>，做 x<sub>i</sub>·W 得到新向量。所有词并行做。'
+        }
+      ],
+      'panel-embed': [
+        {
+          title: '模型输入是文字',
+          plain: '计算机只处理数字，文字要先变成编号。',
+          analogy: '像给每个词发学号：「我=101，爱=205，学习=388」。模型只认编号，不认汉字。',
+          body: '「我爱学习」在模型眼里不是汉字，而是 3 个整数 ID（类似字典里的页码）。这一步叫 Tokenization（分词/切词）。',
+          bullets: ['中文常切成子词，不一定整词', '3 个 Token → seq = 3', 'ID 本身没语义，只是索引'],
+          dims: 'seq = 3（三个 Token）',
+          la: 'Token ID 是离散索引，还不能直接做矩阵运算，需要下一步查表。'
+        },
+        {
+          title: 'Embedding = 查字典',
+          plain: '每个 ID 查一张表，得到一串 d 个浮点数。',
+          analogy: '像查新华字典：输入「爱」这个字，字典返回一页详细解释（一串数字）。每个词都有一页专属解释。',
+          body: 'Embedding 是一张巨大的查找表：第 k 个 Token 对应第 k 行向量。查完 3 个词，把 3 个行向量上下拼起来，就是 Embedding 矩阵。',
+          bullets: ['不是矩阵乘法，是<strong>按行查表</strong>', '每个词变成 d 维向量（论文里 d=512）', '拼起来 → <span class="dim-tag">seq×d</span> 矩阵'],
+          dims: 'Embedding 输出：<span class="dim-tag">3×d</span>（示意 d=8）',
+          la: 'E ∈ ℝ<sup>seq×d</sup>，第 i 行 e<sub>i</sub> = EmbeddingTable[token<sub>i</sub>]。'
+        },
+        {
+          title: '位置编码：同形状矩阵相加',
+          plain: 'Attention 看不出谁先谁后，要手动加上位置信息。',
+          analogy: 'Embedding 只告诉你「是什么词」，位置编码告诉你「排第几位」。像给排队的人发号码牌。',
+          body: 'Embedding 只告诉模型「是什么词」，没告诉「在第几位」。位置编码 PE 也是 seq×d 矩阵，与 Embedding <strong>逐元素相加</strong>（对应格子相加，不是乘法）。',
+          bullets: ['PE 第 0 行给第 1 个词的位置信号', 'PE 第 1 行给第 2 个词……依此类推', '相加要求两矩阵<strong>形状完全相同</strong>'],
+          dims: 'E + PE，两者都是 <span class="dim-tag">seq×d</span>，结果仍是 <span class="dim-tag">seq×d</span>',
+          la: 'X = E + PE，同型矩阵加法：X[i,j] = E[i,j] + PE[i,j]。'
+        },
+        {
+          title: '得到 X，进入 Attention',
+          plain: 'X 是 Attention 的唯一输入，形状固定 seq×d。',
+          analogy: 'X 就像一份「全句信息包」，接下来 Attention 会打开它，让每个词互相「交流」。',
+          body: '加完位置信息后，矩阵 X 就准备好了。接下来第三章会从同一个 X 出发，分别乘以三个不同的权重矩阵，得到 Q、K、V。',
+          bullets: ['X 的行数 = 句子长度 seq', 'X 的列数 = 模型维度 d', '右边绿色矩阵就是送入 Attention 的 X'],
+          dims: '最终输入 X：<span class="dim-tag">seq×d</span>（例 3×8）',
+          la: 'Attention 全部计算从 X 开始：Q = XW<sub>Q</sub>，K = XW<sub>K</sub>，V = XW<sub>V</sub>。'
+        }
+      ],
+      'panel-attn': [
+        {
+          title: '起点：输入矩阵 X',
+          plain: '所有 Attention 计算都从这一个矩阵出发。',
+          analogy: 'X 是一班同学的名单，接下来每个同学都要看看全班，决定和谁交流最多。',
+          body: '右边蓝色矩阵 X 有 seq 行（每个词一行）、d 列（每个特征一列）。你可以把每一行单独看成「这个词的向量」。',
+          bullets: ['行数 seq = 句子里的词数', '列数 d = 每个词用多少维描述', 'X 会被<strong>重复使用三次</strong>（算 Q、K、V）'],
+          dims: 'X：<span class="dim-tag">seq×d</span>（图中示意 <span class="dim-tag">4×4</span>，4 个词 × 4 维特征）',
+          la: 'X 的每一行 x<sub>i</sub> ∈ ℝ<sup>d</sup>。整矩阵表示整句话。'
+        },
+        {
+          title: '第一支路：X × W<sub>Q</sub> = Q',
+          plain: 'Q =「查询」：每个词想问全句要什么信息。',
+          analogy: '每个词发一张「寻人启事」：「我想找和爱情相关的词」。W<sub>Q</sub> 帮它把启事写清楚。',
+          body: '同一个 X 左乘权重 W<sub>Q</sub>，得到 Q。可以类比：每个词拿一张「寻人启事」去全句里找相关词。W<sub>Q</sub> 是训练学到的参数矩阵。',
+          bullets: ['W<sub>Q</sub> 把 d 维映射到 d<sub>k</sub> 维（通常 d<sub>k</sub> < d）', 'Q 的每一行 = 该词的查询向量', '紫色矩阵就是 Q'],
+          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">seq×d<sub>k</sub></span>',
+          la: 'Q = X · W<sub>Q</sub>。W<sub>Q</sub> ∈ ℝ<sup>d×d<sub>k</sub></sup>，Q 的第 i 行 q<sub>i</sub> = x<sub>i</sub> · W<sub>Q</sub>。'
+        },
+        {
+          title: '第二支路：X × W<sub>K</sub> = K',
+          plain: 'K =「键」：每个词亮出自己的「门牌号」供别人匹配。',
+          analogy: '每个词在门口挂一块牌子（K），上面写着「我是动词」「我是名词」等标签，供 Q 来匹配。',
+          body: '还是同一个 X，换一块权重 W<sub>K</sub>，得到 K。Q 和 K 后面要配对算相似度——所以它们的行数都是 seq，每行维度都是 d<sub>k</sub>。',
+          bullets: ['K 与 Q <strong>形状必须一致</strong>（都是 seq×d<sub>k</sub>）', '第 i 行 k<sub>i</sub> 代表第 i 个词的「可被匹配特征」', '青色矩阵就是 K'],
+          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">seq×d<sub>k</sub></span>',
+          la: 'K = X · W<sub>K</sub>。Q 和 K 同形，才能做 Q·K<sup>T</sup> 得到 seq×seq 的打分矩阵。'
+        },
+        {
+          title: '第三支路：X × W<sub>V</sub> = V',
+          plain: 'V =「值」：真正要被搬运、混合的语义内容。',
+          analogy: 'Q 和 K 只负责「配对」，V 才是要搬的「货物」。匹配成功后，把 V 里的内容按权重搬过来。',
+          body: '第三次用 X 乘 W<sub>V</sub> 得 V。前面 Q、K 只负责算「该看谁」；算完权重后，真正加权求和的是 V 里的内容。',
+          bullets: ['V 行数仍是 seq（每个词一份内容）', '列数 d<sub>v</sub> 可与 d<sub>k</sub> 不同', '橙色矩阵就是 V'],
+          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>v</sub></span> → <span class="dim-tag">seq×d<sub>v</sub></span>',
+          la: 'V = X · W<sub>V</sub>。Attention 最后一步用权重矩阵 A 左乘 V。'
+        },
+        {
+          title: 'Q × K<sup>T</sup>：两两打分',
+          plain: '每个词问全句：我和其他每个词有多相关？',
+          analogy: '像相亲配对：每个 Q 和每个 K 碰一下，算「匹配度分数」。分数越高 = 越相关。',
+          body: 'Q 乘 K 的转置，得到 seq×seq 的分数矩阵。第 i 行第 j 列 = 词 i 对词 j 的原始关注度。K<sup>T</sup> 是把 K 的行和列互换，这样才能合法相乘。',
+          bullets: ['K<sup>T</sup> 形状：<span class="dim-tag">d<sub>k</sub>×seq</span>（转置行数列数对调）', '结果第 (i,j) 格 = q<sub>i</sub> 与 k<sub>j</sub> 的内积', '实际还会除以 √d<sub>k</sub> 防止数值过大'],
+          dims: '<span class="dim-tag">seq×d<sub>k</sub></span> × <span class="dim-tag">d<sub>k</sub>×seq</span> → <span class="dim-tag">seq×seq</span>',
+          la: 'S = Q · K<sup>T</sup>，S<sub>ij</sub> = ⟨q<sub>i</sub>, k<sub>j</sub>⟩。S 是「未归一化的注意力分数」。'
+        },
+        {
+          title: 'softmax：分数变权重',
+          plain: '把每行分数变成概率，一行加起来 = 1。',
+          analogy: '像分蛋糕：把每行的分数变成百分比，「我」看全句时 31.8% 关注自己、24.4% 关注「爱」……加起来 100%。',
+          body: '分数可正可负、可大可小。softmax 对<strong>每一行独立</strong>处理，让该行变成非负且和为 1 的概率分布。右侧热力图是<strong>真实算出的数值</strong>，不是随机数。',
+          bullets: [
+            '例：「我」行 → 0.318 + 0.244 + 0.214 + 0.223 = <strong>1.000</strong>',
+            '「爱」对自己列权重最高（0.313），符合语义相近性',
+            '底部绿色文字逐行验证 Σ = 1'
+          ],
+          dims: 'A 与 S 同形 <span class="dim-tag">4×4</span>，但 A 每行和 = 1',
+          la: 'A<sub>i,:</sub> = softmax(S<sub>i,:</sub>)。A 的每行是概率向量，Σ<sub>j</sub>A<sub>ij</sub> = 1（可逐行验算）。'
+        },
+        {
+          title: 'A × V：加权求和',
+          plain: '按注意力权重，把全句的 V 行向量混合成新向量。',
+          analogy: '像做加权平均：「我」的新含义 = 31.8%×我的V + 24.4%×爱的V + …… 把全句信息按比例混合。',
+          body: '权重矩阵 A 左乘 V：对第 i 个词，它的新向量 = 所有词的 V 行按 A 的第 i 行权重加权平均。这样每个词都「看到了」整句上下文。',
+          bullets: ['A 的第 i 行决定词 i 从哪些词取信息', 'V 的第 j 行是被取的「内容」', '输出每个词一行，形状 seq×d<sub>v</sub>'],
+          dims: '<span class="dim-tag">seq×seq</span> × <span class="dim-tag">seq×d<sub>v</sub></span> → <span class="dim-tag">seq×d<sub>v</sub></span>',
+          la: '输出第 i 行 = Σ<sub>j</sub> A<sub>ij</sub> · v<sub>j</sub>。这是矩阵乘法 AV 的第 i 行展开。'
+        },
+        {
+          title: 'Attention 输出完成',
+          plain: '每个词都融合了全句信息——Attention 算完了。',
+          analogy: '经过 Attention，每个词都「开完会」了——带着全句的上下文理解，准备进入下一道工序。',
+          body: '绿色输出矩阵与 V 同形。若用多头注意力，只是把 d 切成 h 份，每份独立做一遍上述流程，最后拼回来。但核心仍是矩阵乘 + softmax + 矩阵乘。',
+          bullets: ['输出形状 <span class="dim-tag">seq×d<sub>v</sub></span>，可再投影回 d 维', 'Self-Attention：Q、K、V 都来自同一个 X', 'Decoder 里还会对未来位置 Mask（不让偷看答案）'],
+          dims: 'Attention(Q,K,V)：<span class="dim-tag">seq×d<sub>v</sub></span>',
+          la: 'Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d<sub>k</sub>) · V。整式都是标准矩阵运算。'
+        }
+      ],
+      'panel-block': [
+        {
+          title: '一层从 x<sub>in</sub> 开始',
+          plain: '一层 Encoder = 固定形状的矩阵进、矩阵出。',
+          analogy: '像一层楼：人从一楼进，经过几个房间处理，还是从一楼出——形状不变，但内容被加工了。',
+          body: 'x<sub>in</sub> 是进入本层的矩阵，形状 seq×d。无论中间怎么做 Attention、FFN，出口 x<sub>out</sub> 会保持相同形状，才能叠下一层。',
+          bullets: ['一层 = 一个「积木块」', '入口出口形状一致：<span class="dim-tag">seq×d</span>', '整网堆 N 层（论文 N=6）'],
+          dims: 'x<sub>in</sub>：<span class="dim-tag">seq×d</span>',
+          la: 'f : ℝ<sup>seq×d</sup> → ℝ<sup>seq×d</sup>。一层是同一个函数，堆叠 N 次。'
+        },
+        {
+          title: 'Attention 块',
+          plain: '就是上一章整张图：从 X 算出带上下文的新矩阵。',
+          analogy: 'Attention 是这层的「会议室」——所有词在这里交流，互相获取上下文信息。',
+          body: 'Multi-Head Attention 把上一章的流程并行做 h 次（多个头），拼接后再乘 W<sub>O</sub> 投影。对本层而言，输入 x<sub>in</sub>，输出一个同样 seq 行的矩阵。',
+          bullets: ['全局混合：每个词看到所有词', '计算主体 = 矩阵乘 + softmax', '输出暂记为 Attention(x<sub>in</sub>)'],
+          dims: 'Attention 输出：<span class="dim-tag">seq×d</span>',
+          la: 'x\' = MultiHeadAttention(x<sub>in</sub>)，x\' 与 x<sub>in</sub> 同型。'
+        },
+        {
+          title: '残差 + LayerNorm',
+          plain: '把原始输入加回来，再对每行做归一化。',
+          analogy: '像写论文改稿：改完（Attention 输出）和原版（x_in）合并，再统一格式（LayerNorm），既保留原意又吸收新内容。',
+          body: '残差连接：Attention 输出与 x<sub>in</sub> <strong>逐元素相加</strong>（形状必须一样）。LayerNorm 再对结果每一行单独归一化，稳定训练。',
+          bullets: ['残差 = 同型矩阵加法：x<sub>in</sub> + Attention(x<sub>in</sub>)', '防止深层网络梯度消失', 'Norm 不是矩阵乘，是逐行缩放平移'],
+          dims: '相加要求两者都是 <span class="dim-tag">seq×d</span>',
+          la: 'y = LayerNorm(x<sub>in</sub> + SubLayer(x<sub>in</sub>))。加法是 Hadamard 同位相加。'
+        },
+        {
+          title: 'FFN：每个词独立处理',
+          plain: 'FFN 不混词，只对每个词的行向量做两次线性变换。',
+          analogy: 'Attention 是「开会交流」，FFN 是「各自回工位深度思考」——每个词单独加工，不和别人互动。',
+          body: 'FFN 把每个词的 d 维向量先升到 d_ff（如 2048），经过 GELU 激活，再压回 d 维。对矩阵而言，就是每行独立做 x·W₁·W₂。',
+          bullets: ['先升维再降维，增加表达能力', '参数量占模型约 2/3', '整矩阵行数始终 = seq'],
+          dims: '每行：d → d_ff → d（例 512 → 2048 → 512）',
+          la: 'FFN(x) = GELU(xW₁+b₁)W₂+b₂。对每一行 x<sub>i</sub> 独立作用，行与行之间无交互。'
+        },
+        {
+          title: '再次残差 + Norm',
+          plain: 'FFN 后面再来一遍「加回输入 + 归一化」。',
+          analogy: '和 Attention 后一样：改稿 + 合并 + 统一格式。两层保护，确保信息不丢失。',
+          body: '模式和 Attention 后完全一样：FFN 输出加回残差支路上的中间结果，再 LayerNorm。这样一层积木就收尾了。',
+          bullets: ['结构对称：Attention 后有残差，FFN 后也有', '两次残差让信息高速公路贯穿全层', '出口形状仍 <span class="dim-tag">seq×d</span>'],
+          dims: 'x<sub>out</sub>：<span class="dim-tag">seq×d</span>',
+          la: 'x<sub>out</sub> = LayerNorm(y + FFN(y))，y 是 Attention 后的中间结果。'
+        },
+        {
+          title: 'x<sub>out</sub> 送下一层',
+          plain: '同一套积木复制 N 遍，就是完整 Transformer。',
+          analogy: '像叠乐高：同一款积木块（Encoder Layer）复制 6 次（GPT-3 有 96 层！），越往上理解越深。',
+          body: 'x<sub>out</sub> 作为下一层的 x<sub>in</sub>，重复 Attention → 残差 → FFN → 残差。GPT 等生成模型本质上就是很多层这个结构（去掉 Encoder 部分）。',
+          bullets: ['深层 = 同一矩阵尺寸反复变换', '越深层，语义抽象程度越高', '参数主要在 W 矩阵里'],
+          dims: '每层：<span class="dim-tag">seq×d</span> → <span class="dim-tag">seq×d</span>，重复 N 次',
+          la: 'x<sup>(l+1)</sup> = EncoderBlock(x<sup>(l)</sup>)，l = 0…N−1。'
+        }
+      ],
+      'panel-kv': [
+        {
+          title: '为什么需要 Cache？',
+          plain: '生成时老词的 K、V 不变，没必要每步重算。',
+          analogy: '像考试开卷：第一遍把参考资料（K/V）整理好放桌上（Cache），后面每写一个字直接翻，不用重新整理。',
+          body: '大模型生成是一个词一个词往外吐。每吐一个新词，Attention 都要用<strong>全句所有词</strong>的 K、V。但历史词的 K、V 在生成过程中不会变——重复算浪费算力。',
+          bullets: ['Prefill：先处理用户输入的 prompt', 'Decode：再逐个生成新词', 'Cache = 把算过的 K、V 存起来'],
+          dims: '省掉的是重复的 (N×d)·W 矩阵乘法',
+          la: '缓存的是矩阵 K、V，不是原始 token。复用 = 少做矩阵乘。'
+        },
+        {
+          title: 'Prefill：prompt 整段算一次',
+          plain: '用户输入的 prompt 一次性算完 K。',
+          analogy: '像一口气读完题目（prompt），把所有关键信息（K）先提取出来，存进笔记本（Cache）。',
+          body: 'prompt 有 N 个词，组成 N×d 矩阵。左乘 W<sub>K</sub> 得到 K（N×d<sub>k</sub>）。这一步只在做 Prefill 时算一次，结果准备写入 Cache。',
+          bullets: ['prompt 行数 = N（可能几十到几千）', '一次性并行算完全部 K', '右边展示 K 的计算路径'],
+          dims: '<span class="dim-tag">N×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">N×d<sub>k</sub></span>',
+          la: 'Prefill 阶段：K = prompt · W<sub>K</sub>，整段 prompt 矩阵一次左乘。'
+        },
+        {
+          title: 'K、V 一起存入 Cache',
+          plain: 'K 和 V 都算好后，放进绿色 Cache 框保存。',
+          analogy: '笔记本分两栏：一栏存 K（门牌号），一栏存 V（内容）。以后每写一个字，直接翻笔记本。',
+          body: '同理用 W<sub>V</sub> 算 V。K、V 一起写入 KV Cache。之后 Decode 每步只需读 Cache，不必再对 prompt 做矩阵乘法。',
+          bullets: ['Cache 存的是<strong>矩阵</strong>，不是原始文字', 'cached K 有 N 行（每个 prompt 词一行）', 'cached V 同理，N 行'],
+          dims: 'Cache 中：K 为 <span class="dim-tag">N×d<sub>k</sub></span>，V 为 <span class="dim-tag">N×d<sub>v</sub></span>',
+          la: '存储 K<sup>cache</sup> ∈ ℝ<sup>N×d<sub>k</sub></sup>，V<sup>cache</sup> ∈ ℝ<sup>N×d<sub>v</sub></sup>。'
+        },
+        {
+          title: 'Decode：每次只来 1 个新词',
+          plain: '生成阶段每次只有一个新 token，矩阵只有 1 行。',
+          analogy: '像写作文：每次只新增一个字，只需给这个字算 q、k、v，老字的信息从 Cache 读。',
+          body: 'Decode 每步新来一个词，是 1×d 矩阵（一行）。只需算这个新词的 q、k<sub>new</sub>、v<sub>new</sub>。k<sub>new</sub> 会<strong>追加</strong>到 Cache 里 K 的末尾（多一行）。',
+          bullets: ['新词矩阵：<span class="dim-tag">1×d</span>（只有一行）', 'q = new · W<sub>Q</sub>，形状 <span class="dim-tag">1×d<sub>k</sub></span>', 'k<sub>new</sub> 追加后 Cache 行数 N→N+1'],
+          dims: '<span class="dim-tag">1×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">1×d<sub>k</sub></span>',
+          la: 'Decode 时 X 只有一行。K<sup>cache</sup> 按行追加：K<sup>cache</sup> ← stack(K<sup>cache</sup>, k<sub>new</sub>)。'
+        },
+        {
+          title: '追加 + 读 Cache，不重算历史',
+          plain: '用 q 乘完整 cached K<sup>T</sup>，再乘 cached V，得到下一个词。',
+          analogy: '新字只算自己的 q，然后和笔记本里所有老字的 K/V 配对——不用重新整理老字的信息。',
+          body: 'q 是 1×d<sub>k</sub>，cached K<sup>T</sup> 是 d<sub>k</sub>×(N+t)，乘得 1×(N+t) 的注意力权重，再乘 cached V 得 1×d<sub>v</sub> 的输出，最后预测下一个 token。历史 prompt 的 K、V 直接从 Cache 读，不重算。',
+          bullets: ['核心收益：避免每步对整段 prompt 重算 K、V', 'Cache 行数随生成逐渐变长', '所以首 token 慢（Prefill），后续快（Decode）'],
+          dims: '<span class="dim-tag">1×d<sub>k</sub></span> · <span class="dim-tag">d<sub>k</sub>×(N+t)</span> · softmax → × <span class="dim-tag">(N+t)×d<sub>v</sub></span>',
+          la: 'Decode 的 Attention 仍是矩阵乘，只是 X 只有 1 行，K/V 从缓存读取并逐行增长。'
+        }
+      ]
+    };
+
+    /* ── 全静态矩阵数据（硬编码，无运行时计算）── */
+    var STATIC = {
+      tokens: ['我', '爱', '学习', '。'],
+      X: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8]
+      ],
+      WQ: [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+      ],
+      WK: [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+      ],
+      WV: [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+      ],
+      Q: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8]
+      ],
+      K: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8]
+      ],
+      KT: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8]
+      ],
+      V: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8]
+      ],
+      scores: [
+        [0.55, 0.21, 0.04, 0.09],
+        [0.21, 0.60, 0.32, 0.05],
+        [0.04, 0.32, 0.60, 0.19],
+        [0.09, 0.05, 0.19, 0.37]
+      ],
+      scoreLabels: [
+        ['0.55', '0.21', '0.04', '0.09'],
+        ['0.21', '0.60', '0.32', '0.05'],
+        ['0.04', '0.32', '0.60', '0.19'],
+        ['0.09', '0.05', '0.19', '0.37']
+      ],
+      weights: [
+        [0.318, 0.244, 0.214, 0.223],
+        [0.232, 0.313, 0.251, 0.204],
+        [0.204, 0.252, 0.315, 0.229],
+        [0.234, 0.225, 0.252, 0.289]
+      ],
+      weightLabels: [
+        ['0.318', '0.244', '0.214', '0.223'],
+        ['0.232', '0.313', '0.251', '0.204'],
+        ['0.204', '0.252', '0.315', '0.229'],
+        ['0.234', '0.225', '0.252', '0.289']
+      ],
+      rowSumText: '我 Σ=1.000  |  爱 Σ=1.000  |  学习 Σ=1.000  |  。 Σ=1.000',
+      OUT: [
+        [0.389, 0.372, 0.332, 0.253],
+        [0.315, 0.435, 0.386, 0.237],
+        [0.277, 0.387, 0.436, 0.267],
+        [0.308, 0.347, 0.377, 0.305]
+      ],
+      /* 其他章节示意矩阵 */
+      g3x6: [
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2]
+      ],
+      g3x8: [
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1, 0.0, 0.0],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0, 0.1, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2, 0.0, 0.1]
+      ],
+      g5x8: [
+        [1.0, 0.2, 0.0, 0.1, 0.0, 0.0, 0.1, 0.0],
+        [0.2, 1.0, 0.3, 0.0, 0.1, 0.0, 0.0, 0.1],
+        [0.0, 0.3, 1.0, 0.2, 0.0, 0.1, 0.1, 0.0],
+        [0.1, 0.0, 0.2, 0.8, 0.1, 0.0, 0.0, 0.2],
+        [0.0, 0.1, 0.0, 0.1, 1.0, 0.2, 0.0, 0.0]
+      ],
+      g5x6: [
+        [1.0, 0.2, 0.0, 0.1, 0.0, 0.0],
+        [0.2, 1.0, 0.3, 0.0, 0.1, 0.0],
+        [0.0, 0.3, 1.0, 0.2, 0.0, 0.1],
+        [0.1, 0.0, 0.2, 0.8, 0.1, 0.0],
+        [0.0, 0.1, 0.0, 0.1, 1.0, 0.2]
+      ],
+      g1x8: [[0.3, 0.5, 0.1, 0.2, 0.0, 0.1, 0.0, 0.0]],
+      g1x6: [[0.3, 0.5, 0.1, 0.2, 0.0, 0.1]],
+      g6x4: [
+        [1.0, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.3, 0.0],
+        [0.0, 0.3, 1.0, 0.2],
+        [0.1, 0.0, 0.2, 0.8],
+        [0.0, 0.1, 0.0, 0.1],
+        [0.2, 0.0, 0.1, 0.0]
+      ]
+    };
+
+    var STATIC_FALLBACK = {
+      '3x6': 'g3x6', '3x8': 'g3x8', '5x8': 'g5x8', '5x6': 'g5x6',
+      '1x8': 'g1x8', '1x6': 'g1x6', '6x4': 'g6x4', '4x4': 'X', '4x6': 'Q'
+    };
+
+    function staticMatrix(key) {
+      return STATIC[key] || null;
+    }
+
+    function fmtCell(v) {
+      if (Math.abs(v - Math.round(v)) < 1e-6) return String(Math.round(v));
+      return (Math.abs(v) < 10 ? v.toFixed(1) : v.toFixed(2));
+    }
+
+    function matrixCellSize(el) {
+      return el.closest('#panel-attn') ? 'var(--cell-size-attn)' : 'var(--cell-size)';
+    }
+
+    function renderMatrix(el, data) {
+      var r = data.length, c = data[0].length;
+      var max = 0;
+      data.forEach(function (row) {
+        row.forEach(function (v) { if (v > max) max = v; });
+      });
+      var span = max || 1;
+      var showValues = el.closest('#panel-attn') && r <= 4 && c <= 4;
+      var cellSz = matrixCellSize(el);
+      el.style.gridTemplateColumns = 'repeat(' + c + ', ' + cellSz + ')';
+      el.classList.toggle('matrix-values', showValues);
+      el.innerHTML = '';
+      for (var i = 0; i < r; i++) {
+        for (var j = 0; j < c; j++) {
+          var v = data[i][j];
+          var cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.style.opacity = showValues ? '1' : (0.4 + (v / span) * 0.6).toFixed(2);
+          cell.title = String(v);
+          if (showValues) cell.textContent = fmtCell(v);
+          el.appendChild(cell);
+        }
+      }
+    }
+
+    function fillMatrix(el) {
+      if (!el || el.dataset.filled) return;
+      var data = null;
+      if (el.dataset.mx) {
+        data = staticMatrix(el.dataset.mx);
+      }
+      if (!data) {
+        var r = +el.dataset.r || 4, c = +el.dataset.c || 4;
+        var fb = STATIC_FALLBACK[r + 'x' + c];
+        data = fb ? staticMatrix(fb) : STATIC.X;
+      }
+      renderMatrix(el, data);
+      el.dataset.filled = '1';
+    }
+
+    /* 热力图颜色：按静态档位，不依赖动态 min/max */
+    var HEAT_SCORE_DARK = [
+      ['#1e3a5f', '#2a5080', '#3868a0', '#4080b8'],
+      ['#2a5080', '#3d72a8', '#5090c8', '#60a8d8'],
+      ['#3868a0', '#5090c8', '#68b0e0', '#78c0e8'],
+      ['#4080b8', '#60a8d8', '#78c0e8', '#90d0f0']
+    ];
+    var HEAT_WEIGHT_DARK = [
+      ['#2d4a3e', '#3a6850', '#4a8868', '#5aa880'],
+      ['#3a6850', '#5a9870', '#6ab888', '#7ad0a0'],
+      ['#4a8868', '#6ab888', '#7ad0a0', '#8ae8b8'],
+      ['#5aa880', '#7ad0a0', '#8ae8b8', '#a0f0c8']
+    ];
+    var HEAT_SCORE_LIGHT = [
+      ['#dbeafe', '#bfdbfe', '#93c5fd', '#7dd3fc'],
+      ['#bfdbfe', '#93c5fd', '#60a5fa', '#38bdf8'],
+      ['#93c5fd', '#60a5fa', '#3b82f6', '#0ea5e9'],
+      ['#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7']
+    ];
+    var HEAT_WEIGHT_LIGHT = [
+      ['#dcfce7', '#bbf7d0', '#86efac', '#6ee7b7'],
+      ['#bbf7d0', '#86efac', '#4ade80', '#34d399'],
+      ['#86efac', '#4ade80', '#22c55e', '#10b981'],
+      ['#6ee7b7', '#34d399', '#10b981', '#059669']
+    ];
+
+    function heatPalette() {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      return {
+        scores: dark ? HEAT_SCORE_DARK : HEAT_SCORE_LIGHT,
+        weights: dark ? HEAT_WEIGHT_DARK : HEAT_WEIGHT_LIGHT
+      };
+    }
+
+    function refillAllHeatmaps() {
+      document.querySelectorAll('.heatmap').forEach(function (el) {
+        el.dataset.filled = '';
+        fillHeatmap(el);
+      });
+    }
+
+    function fillHeatmap(el) {
+      if (!el || el.dataset.filled) return;
+      var mode = el.dataset.heat || 'weights';
+      var palette = heatPalette();
+      var labels = mode === 'scores' ? STATIC.scoreLabels : STATIC.weightLabels;
+      var colors = mode === 'scores' ? palette.scores : palette.weights;
+      var n = labels.length;
+      var wrap = el.closest('.heatmap-wrap');
+      var meta = wrap ? wrap.querySelector('.heat-meta') : null;
+
+      var cellPx = el.closest('#panel-attn') ? 58 : 46;
+      el.style.gridTemplateColumns = 'repeat(' + n + ', ' + cellPx + 'px)';
+      el.innerHTML = '';
+
+      for (var i = 0; i < n; i++) {
+        for (var j = 0; j < n; j++) {
+          var hc = document.createElement('div');
+          hc.className = 'hc';
+          hc.style.background = colors[i][j];
+          hc.textContent = labels[i][j];
+          hc.title = STATIC.tokens[i] + ' → ' + STATIC.tokens[j] + ' = ' + labels[i][j];
+          el.appendChild(hc);
+        }
+      }
+
+      if (meta) {
+        meta.textContent = mode === 'weights'
+          ? ('行和验证：' + STATIC.rowSumText)
+          : '公式：Sᵢⱼ = (qᵢ·kⱼ)/√4，尚未 softmax';
+      }
+
+      el.dataset.filled = '1';
+    }
+
+    function fillPanelMatrices(panel) {
+      panel.querySelectorAll('.matrix').forEach(fillMatrix);
+      panel.querySelectorAll('.heatmap').forEach(fillHeatmap);
+    }
+
+    /* ── Attention 动画连线引擎 ── */
+    var ATTN_LINKS = [
+      { from: 'X',  to: 'WQ', color: 'flow-blue',   step: 1 },
+      { from: 'WQ', to: 'Q',  color: 'flow-purple', step: 1 },
+      { from: 'X',  to: 'WK', color: 'flow-blue',   step: 2 },
+      { from: 'WK', to: 'K',  color: 'flow-cyan',   step: 2 },
+      { from: 'X',  to: 'WV', color: 'flow-blue',   step: 3 },
+      { from: 'WV', to: 'V',  color: 'flow-orange', step: 3 },
+      { from: 'Q',  to: 'Q2', color: 'flow-purple', step: 4 },
+      { from: 'K',  to: 'KT', color: 'flow-cyan',   step: 4 },
+      { from: 'Q2', to: 'KT', color: 'flow-purple', step: 4 },
+      { from: 'KT', to: 'S',  color: 'flow-cyan',   step: 4 },
+      { from: 'S',  to: 'A',  color: 'flow-purple', step: 5 },
+      { from: 'A',  to: 'A2', color: 'flow-purple', step: 6 },
+      { from: 'V',  to: 'V2', color: 'flow-orange', step: 6 },
+      { from: 'A2', to: 'V2', color: 'flow-purple', step: 6 },
+      { from: 'V2', to: 'OUT', color: 'flow-green', step: 6 }
+    ];
+
+    var ATTN_NODE_STEPS = {
+      X: [0,1,2,3], WQ: [1], Q: [1,4], WK: [2], K: [2,4], WV: [3], V: [3,6],
+      Q2: [4], KT: [4], S: [4,5], A: [5,6], A2: [6], V2: [6], OUT: [6,7]
+    };
+
+    var ATTN_STAGE_STEPS = { split: [1,2,3], score: [4,5], mix: [6,7] };
+
+    var ATTN_ROW_COLORS = ['flow-blue', 'flow-purple', 'flow-cyan', 'flow-orange', 'flow-purple', 'flow-purple', 'flow-green', 'flow-green'];
+
+    function afmNodeCenter(wrap, id) {
+      var el = wrap.querySelector('[data-afm-id="' + id + '"]');
+      if (!el) return null;
+      var wr = wrap.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      return { x: er.left + er.width / 2 - wr.left, y: er.top + er.height / 2 - wr.top };
+    }
+
+    function afmCurvePath(a, b) {
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      if (Math.abs(dy) < 8) {
+        return 'M' + a.x + ',' + a.y + ' L' + b.x + ',' + b.y;
+      }
+      var cx = (a.x + b.x) / 2;
+      var cy = (a.y + b.y) / 2 - Math.sign(dy || 1) * Math.min(36, Math.abs(dx) * 0.2);
+      return 'M' + a.x + ',' + a.y + ' Q' + cx + ',' + cy + ' ' + b.x + ',' + b.y;
+    }
+
+    function afmMarkerId(color) {
+      if (color === 'flow-purple') return 'url(#afm-arrow-purple)';
+      if (color === 'flow-cyan') return 'url(#afm-arrow-cyan)';
+      if (color === 'flow-orange') return 'url(#afm-arrow-orange)';
+      if (color === 'flow-green') return 'url(#afm-arrow-green)';
+      return 'url(#afm-arrow-blue)';
+    }
+
+    function drawAttnFlowPaths(step) {
+      var wrap = document.getElementById('attn-flow-map');
+      if (!wrap) return;
+      var svgWrap = wrap.querySelector('.afm-wrap');
+      var g = document.getElementById('afm-paths');
+      if (!g || !svgWrap) return;
+
+      var w = svgWrap.clientWidth;
+      var h = svgWrap.clientHeight;
+      var svg = document.getElementById('afm-svg');
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+      g.innerHTML = '';
+      ATTN_LINKS.forEach(function (link) {
+        var a = afmNodeCenter(svgWrap, link.from);
+        var b = afmNodeCenter(svgWrap, link.to);
+        if (!a || !b) return;
+        var d = afmCurvePath(a, b);
+        var track = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        track.setAttribute('d', d);
+        track.setAttribute('class', 'link-track');
+        g.appendChild(track);
+
+        if (link.step <= step) {
+          var flow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          flow.setAttribute('d', d);
+          var isLit = link.step === step;
+          flow.setAttribute('class', 'link-flow ' + link.color + (isLit ? ' lit' : ' done'));
+          if (isLit) flow.setAttribute('marker-end', afmMarkerId(link.color));
+          g.appendChild(flow);
+        }
+      });
+    }
+
+    function updateAttnFlowMap(step) {
+      var map = document.getElementById('attn-flow-map');
+      if (!map) return;
+
+      var badge = document.getElementById('afm-step-badge');
+      if (badge) badge.textContent = '步骤 ' + (step + 1) + ' / 8';
+
+      map.querySelectorAll('[data-afm-id]').forEach(function (node) {
+        var id = node.dataset.afmId;
+        var steps = ATTN_NODE_STEPS[id] || [];
+        node.classList.remove('revealed', 'active', 'done');
+        if (steps.indexOf(step) >= 0) {
+          node.classList.add('revealed', 'active');
+        } else if (steps.some(function (s) { return s < step; })) {
+          node.classList.add('revealed', 'done');
+        } else if (step >= 4 && ['Q','K','V'].indexOf(id) >= 0) {
+          node.classList.add('revealed', 'done');
+        }
+      });
+
+      map.querySelectorAll('[data-afm-stage]').forEach(function (col) {
+        var stage = col.dataset.afmStage;
+        var litSteps = ATTN_STAGE_STEPS[stage] || [];
+        col.classList.toggle('lit', litSteps.indexOf(step) >= 0);
+      });
+
+      drawAttnFlowPaths(step);
+      updateAttnTokenViz(step);
+    }
+
+    function updateAttnTokenViz(step) {
+      var panel = document.getElementById('panel-attn');
+      var anchor = panel ? panel.querySelector('.explain-anchor.is-active') : null;
+      var viz = anchor ? anchor.querySelector('.attn-token-viz') : null;
+      if (!viz) return;
+
+      panel.querySelectorAll('.attn-token-viz').forEach(function (v) { v.classList.remove('show'); });
+
+      var svg = viz.querySelector('.atv-svg');
+      var tokensEl = viz.querySelector('.atv-tokens');
+      var label = viz.querySelector('.atv-label');
+      if (!svg || !tokensEl) return;
+
+      if (step < 4 || step > 6) return;
+      viz.classList.add('show');
+
+      var queryIdx = 0;
+      var mode = step === 4 ? 'scores' : 'weights';
+      var data = mode === 'scores' ? STATIC.scores[queryIdx] : STATIC.weights[queryIdx];
+      var maxVal = Math.max.apply(null, data);
+
+      if (label) {
+        label.innerHTML = step === 4
+          ? '「<em>' + STATIC.tokens[queryIdx] + '</em>」对每个词的<strong style="color:#f472b6">原始分数</strong>（尚未归一化）'
+          : '「<em>' + STATIC.tokens[queryIdx] + '</em>」对每个词的<strong style="color:#4ade80">注意力权重</strong>（连线越粗 = 越关注）';
+      }
+
+      tokensEl.innerHTML = '';
+      STATIC.tokens.forEach(function (tok, i) {
+        var span = document.createElement('span');
+        span.className = 'atv-token' + (i === queryIdx ? ' query' : (data[i] / maxVal > 0.28 ? ' target' : ''));
+        var pct = step === 4 ? STATIC.scoreLabels[queryIdx][i] : STATIC.weightLabels[queryIdx][i];
+        span.innerHTML = tok + '<span class="atv-pct">' + pct + '</span>';
+        tokensEl.appendChild(span);
+      });
+
+      requestAnimationFrame(function () {
+        var wrap = viz.querySelector('.atv-wrap');
+        var wr = wrap.getBoundingClientRect();
+        svg.setAttribute('viewBox', '0 0 ' + wr.width + ' ' + wr.height);
+        svg.innerHTML = '';
+
+        var tokenEls = tokensEl.querySelectorAll('.atv-token');
+        var queryEl = tokenEls[queryIdx];
+        if (!queryEl) return;
+        var qr = queryEl.getBoundingClientRect();
+        var qx = qr.left + qr.width / 2 - wr.left;
+        var qy = qr.top - wr.top;
+
+        data.forEach(function (val, i) {
+          if (i === queryIdx) return;
+          var te = tokenEls[i];
+          if (!te) return;
+          var tr = te.getBoundingClientRect();
+          var tx = tr.left + tr.width / 2 - wr.left;
+          var ty = tr.top + tr.height / 2 - wr.top;
+          var norm = maxVal > 0 ? val / maxVal : 0;
+          var strokeW = 1.5 + norm * 5;
+          var opacity = 0.25 + norm * 0.75;
+          var color = step === 4
+            ? (document.documentElement.getAttribute('data-theme') === 'dark'
+              ? 'rgba(244,114,182,' + opacity + ')'
+              : 'rgba(219,39,119,' + opacity + ')')
+            : (document.documentElement.getAttribute('data-theme') === 'dark'
+              ? 'rgba(74,222,128,' + opacity + ')'
+              : 'rgba(5,150,105,' + opacity + ')');
+          var midY = Math.min(qy, ty) - 20 - norm * 25;
+          var d = 'M' + qx + ',' + qy + ' Q' + ((qx + tx) / 2) + ',' + midY + ' ' + tx + ',' + ty;
+
+          var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('class', 'atv-link lit');
+          path.setAttribute('stroke', color);
+          path.setAttribute('stroke-width', strokeW);
+          svg.appendChild(path);
+        });
+      });
+    }
+
+    function ensureAttnRowWrap(anchor) {
+      var body = anchor.querySelector('.anchor-body');
+      if (!body || body.classList.contains('attn-row-wrap')) return body;
+      body.classList.add('attn-row-wrap');
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'attn-row-svg');
+      svg.setAttribute('aria-hidden', 'true');
+      body.insertBefore(svg, body.firstChild);
+      return body;
+    }
+
+    function drawAttnRowLinks(panel, step) {
+      panel.querySelectorAll('.attn-row-svg').forEach(function (svg) { svg.innerHTML = ''; });
+      var anchor = panel.querySelector('.explain-anchor.is-active');
+      if (!anchor) return;
+      var body = ensureAttnRowWrap(anchor);
+      var svg = body.querySelector('.attn-row-svg');
+      var row = body.querySelector('.fc-row');
+      if (!svg || !row) return;
+
+      var colorClass = ATTN_ROW_COLORS[step] || 'flow-white';
+      var strokeColor = colorClass === 'flow-purple' ? '#a855f7'
+        : colorClass === 'flow-cyan' ? '#22d3ee'
+        : colorClass === 'flow-orange' ? '#f97316'
+        : colorClass === 'flow-green' ? '#22c55e'
+        : colorClass === 'flow-blue' ? '#3b82f6' : 'rgba(255,255,255,0.5)';
+
+      var items = [];
+      row.querySelectorAll('.fc-node, .fc-op').forEach(function (el) {
+        if (el.offsetParent === null) return;
+        if (el.classList.contains('fc-node') && !el.classList.contains('revealed') && !el.classList.contains('active') && !el.classList.contains('done')) return;
+        if (el.classList.contains('fc-op') && !el.classList.contains('lit')) return;
+        items.push(el);
+      });
+
+      if (items.length < 2) return;
+
+      var br = body.getBoundingClientRect();
+      svg.setAttribute('viewBox', '0 0 ' + body.clientWidth + ' ' + body.clientHeight);
+
+      for (var i = 0; i < items.length - 1; i++) {
+        var a = items[i].getBoundingClientRect();
+        var b = items[i + 1].getBoundingClientRect();
+        var x1 = a.right - br.left;
+        var y1 = a.top + a.height / 2 - br.top;
+        var x2 = b.left - br.left;
+        var y2 = b.top + b.height / 2 - br.top;
+        var d = 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2;
+
+        var track = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        track.setAttribute('d', d);
+        track.setAttribute('class', 'row-link-track');
+        svg.appendChild(track);
+
+        var flow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        flow.setAttribute('d', d);
+        flow.setAttribute('class', 'row-link-flow');
+        flow.setAttribute('stroke', strokeColor);
+        svg.appendChild(flow);
+      }
+    }
+
+    var attnResizeTimer;
+    function scheduleAttnRedraw(step) {
+      clearTimeout(attnResizeTimer);
+      attnResizeTimer = setTimeout(function () {
+        fitActiveDiagram();
+        updateAttnFlowMap(step);
+        var panel = document.getElementById('panel-attn');
+        if (panel && panel.classList.contains('active')) drawAttnRowLinks(panel, step);
+      }, 80);
+    }
+
+    /* ── 渐进点亮引擎（同一张图内）── */
+    var currentPanel = null;
+    var currentStep = 0;
+    var totalSteps = 0;
+    var playTimer = null;
+    var isPlaying = false;
+
+    var btnPrev = document.getElementById('btn-prev');
+    var btnNext = document.getElementById('btn-next');
+    var btnPlay = document.getElementById('btn-play');
+    var appMain = document.querySelector('.app-main');
+    var dotsEl = document.getElementById('step-dots');
+
+    var STACK_BLOCK_META = [
+      { num: '①', short: 'x_in 入口', rail: 'x_in' },
+      { num: '②', short: 'Multi-Head Attention', rail: 'Attn' },
+      { num: '③', short: '残差 + LayerNorm', rail: '残差①' },
+      { num: '④', short: 'FFN 前馈网络', rail: 'FFN' },
+      { num: '⑤', short: '再次残差 + Norm', rail: '残差②' },
+      { num: '⑥', short: 'x_out 送下一层', rail: 'x_out' }
+    ];
+
+    function buildBlockDiagramHTML() {
+      var rail = '<ol class="stack-rail">';
+      STACK_BLOCK_META.forEach(function (m, i) {
+        rail += '<li class="rail-item" data-step="' + i + '"><span>' + m.num + '</span><small>' + m.rail + '</small></li>';
+      });
+      rail += '</ol>';
+
+      var stack = '<div class="stack-v stack-full">' +
+        '<div class="stack-block sb-blue" data-step="0"><span class="stage-num">①</span>x<sub>in</sub> <span class="dim-tag">seq×d</span></div>' +
+        '<div class="stack-connector" data-step="1"></div>' +
+        '<div class="stack-block sb-purple" data-step="1"><span class="stage-num">②</span>Multi-Head Attention</div>' +
+        '<div class="stack-connector" data-step="2"></div>' +
+        '<div class="stack-block sb-pink" data-step="2"><span class="stage-num">③</span>+ x<sub>in</sub>（残差）→ LayerNorm</div>' +
+        '<div class="stack-connector" data-step="3"></div>' +
+        '<div class="stack-block sb-yellow" data-step="3"><span class="stage-num">④</span>FFN：seq×d → seq×2048 → seq×d</div>' +
+        '<div class="stack-connector" data-step="4"></div>' +
+        '<div class="stack-block sb-pink" data-step="4"><span class="stage-num">⑤</span>+ 残差 → LayerNorm</div>' +
+        '<div class="stack-connector" data-step="5"></div>' +
+        '<div class="stack-block sb-green" data-step="5"><span class="stage-num">⑥</span>x<sub>out</sub> → 下一层（重复 N 次）</div>' +
+        '</div>';
+
+      return '<div class="block-diagram">' +
+        '<div class="block-diagram-head">' +
+          '<span class="block-now-badge">步骤 1 / 6</span>' +
+          '<span class="block-now-title">x_in 入口</span>' +
+        '</div>' +
+        '<div class="stack-layout">' + rail + stack + '</div>' +
+        '</div>';
+    }
+
+    function injectBlockDiagrams(panel) {
+      if (panel.id !== 'panel-block') return;
+      var html = buildBlockDiagramHTML();
+      panel.querySelectorAll('.block-diagram-mount').forEach(function (mount) {
+        if (!mount.dataset.filled) {
+          mount.innerHTML = html;
+          mount.dataset.filled = '1';
+        }
+      });
+    }
+
+    function applyBlockStep(panel, step) {
+      var meta = STACK_BLOCK_META[step];
+      var total = STACK_BLOCK_META.length;
+
+      panel.querySelectorAll('.block-diagram').forEach(function (diag) {
+        var badge = diag.querySelector('.block-now-badge');
+        var title = diag.querySelector('.block-now-title');
+        if (badge) badge.textContent = '步骤 ' + (step + 1) + ' / ' + total;
+        if (title && meta) title.textContent = meta.short;
+      });
+
+      panel.querySelectorAll('[data-step]').forEach(function (el) {
+        var s = +el.dataset.step;
+        var isNode = el.classList.contains('stack-block');
+        var isConn = el.classList.contains('stack-connector');
+        var isRail = el.classList.contains('rail-item');
+
+        el.classList.remove('revealed', 'active', 'done', 'pending', 'lit');
+
+        if (s < step) {
+          if (isNode) el.classList.add('revealed', 'done');
+          if (isConn) el.classList.add('lit', 'done');
+          if (isRail) el.classList.add('done');
+        } else if (s === step) {
+          if (isNode) el.classList.add('revealed', 'active');
+          if (isConn) el.classList.add('lit', 'active');
+          if (isRail) el.classList.add('active');
+        } else {
+          if (isNode) el.classList.add('revealed', 'pending');
+          if (isConn) el.classList.add('pending');
+          if (isRail) el.classList.add('pending');
+        }
+      });
+    }
+
+    function buildExplainHTML(e, step, total) {
+      var html = '<div class="explain-box">' +
+        '<h3 class="explain-title">' + e.title + '</h3>';
+      if (e.plain) html += '<p class="explain-plain">' + e.plain + '</p>';
+      if (e.analogy) html += '<p class="explain-analogy"><b>生活类比</b>' + e.analogy + '</p>';
+      html += '<p class="explain-body">' + e.body + '</p>';
+      if (e.bullets && e.bullets.length) {
+        html += '<ul class="explain-bullets">';
+        e.bullets.forEach(function (b) { html += '<li>' + b + '</li>'; });
+        html += '</ul>';
+      }
+      if (e.dims) html += '<div class="explain-dims"><b>维度速查</b>' + e.dims + '</div>';
+      if (e.la) html += '<div class="la-note"><div class="la-heading">线性代数读法</div><div class="la-body">' + e.la + '</div></div>';
+      html += '</div>';
+      return html;
+    }
+
+    function setupFlowCanvas(panel) {
+      if (!panel || panel.id === 'panel-overview') return;
+      var canvas = panel.querySelector('.flow-canvas');
+      if (!canvas) return;
+      if (!canvas.querySelector('.flow-stage-body')) {
+        var body = document.createElement('div');
+        body.className = 'flow-stage-body';
+        canvas.querySelectorAll('.explain-anchor').forEach(function (a) {
+          body.appendChild(a);
+        });
+        canvas.appendChild(body);
+      }
+      panel.querySelectorAll('.anchor-body').forEach(ensureDiagramScaler);
+    }
+
+    function ensureDiagramScaler(body) {
+      if (!body) return null;
+      var fit = body.querySelector(':scope > .diagram-fit');
+      var scaler;
+      if (fit) {
+        return fit.querySelector('.diagram-scaler');
+      }
+      scaler = body.querySelector(':scope > .diagram-scaler');
+      if (scaler) {
+        fit = document.createElement('div');
+        fit.className = 'diagram-fit';
+        body.insertBefore(fit, scaler);
+        fit.appendChild(scaler);
+        return scaler;
+      }
+      fit = document.createElement('div');
+      fit.className = 'diagram-fit';
+      scaler = document.createElement('div');
+      scaler.className = 'diagram-scaler';
+      fit.appendChild(scaler);
+      Array.from(body.children).forEach(function (ch) {
+        if (!ch.classList.contains('attn-row-svg') && !ch.classList.contains('diagram-fit')) {
+          scaler.appendChild(ch);
+        }
+      });
+      body.appendChild(fit);
+      return scaler;
+    }
+
+    function ensureDiagramFit(body) {
+      ensureDiagramScaler(body);
+      return body.querySelector(':scope > .diagram-fit');
+    }
+
+    function fitActiveDiagram() {
+      if (!currentPanel || currentPanel.id === 'panel-overview') return;
+      var anchor = currentPanel.querySelector('.explain-anchor.is-active');
+      if (!anchor) return;
+      var body = anchor.querySelector('.anchor-body');
+      if (!body) return;
+      var fit = ensureDiagramFit(body);
+      var scaler = fit ? fit.querySelector('.diagram-scaler') : null;
+      if (!fit || !scaler) return;
+      scaler.style.transform = '';
+      scaler.style.zoom = '';
+      scaler.style.width = '';
+      scaler.style.height = '';
+      fit.style.width = '';
+      fit.style.height = '';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          var availW = Math.max(body.clientWidth - 8, 80);
+          var availH = Math.max(body.clientHeight - 8, 64);
+          var w = scaler.scrollWidth;
+          var h = scaler.scrollHeight;
+          if (!w || !h) return;
+          var scale = Math.min(1, availW / w, availH / h);
+          scale = Math.max(0.35, Math.round(scale * 1000) / 1000);
+          if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('zoom', '1')) {
+            scaler.style.zoom = String(scale);
+          } else {
+            scaler.style.width = w + 'px';
+            scaler.style.height = h + 'px';
+            scaler.style.transform = 'scale(' + scale + ')';
+            fit.style.width = Math.ceil(w * scale) + 'px';
+            fit.style.height = Math.ceil(h * scale) + 'px';
+          }
+          if (currentPanel.id === 'panel-attn') {
+            requestAnimationFrame(function () {
+              drawAttnRowLinks(currentPanel, currentStep);
+              updateAttnTokenViz(currentStep);
+            });
+          }
+        });
+      });
+    }
+
+    var CHAPTER_LABELS = {
+      'panel-overview': '全局地图',
+      'panel-la': '矩阵入门',
+      'panel-embed': '词变数字',
+      'panel-attn': 'Attention',
+      'panel-block': '一层积木',
+      'panel-kv': 'KV Cache'
+    };
+
+    function updateStepTitle(panel, step) {
+      var titleEl = document.getElementById('step-title');
+      var subEl = document.getElementById('step-meta-sub');
+      if (!titleEl) return;
+      if (panel.id === 'panel-overview') {
+        titleEl.textContent = '全局地图 · 先建立整体印象';
+        if (subEl) subEl.innerHTML = '<span id="step-counter">概览</span>';
+        return;
+      }
+      var items = EXPLAIN[panel.id];
+      if (items && items[step]) {
+        titleEl.textContent = items[step].title.replace(/<[^>]+>/g, '');
+      }
+      if (subEl) {
+        var chap = CHAPTER_LABELS[panel.id] || '';
+        subEl.innerHTML = chap + ' · 步骤 <span id="step-counter">' + (step + 1) + ' / ' + totalSteps + '</span>';
+      }
+    }
+
+    function injectExplains(panel) {
+      var items = EXPLAIN[panel.id];
+      if (!items) return;
+      panel.querySelectorAll('.explain-anchor').forEach(function (anchor) {
+        var s = +anchor.dataset.explainStep;
+        var slot = anchor.querySelector('.explain-slot');
+        if (!slot || !items[s]) return;
+        slot.innerHTML = buildExplainHTML(items[s], s, items.length);
+      });
+    }
+
+    function applyStep(panel, step) {
+      if (panel.id === 'panel-overview') {
+        updateChapterProgress();
+        return;
+      }
+      if (panel.id === 'panel-block') {
+        applyBlockStep(panel, step);
+      } else {
+        panel.querySelectorAll('[data-step]').forEach(function (el) {
+          var s = +el.dataset.step;
+          var isNode = el.classList.contains('fc-node') || el.classList.contains('stack-block');
+          var isOp = el.classList.contains('fc-op');
+          var isConn = el.classList.contains('stack-connector');
+
+          if (s > step) {
+            el.classList.remove('revealed', 'active', 'done', 'lit');
+          } else if (s < step) {
+            el.classList.remove('active');
+            if (isNode) { el.classList.add('revealed', 'done'); el.classList.remove('active'); }
+            if (isOp || isConn) el.classList.add('lit');
+          } else {
+            if (isNode) { el.classList.add('revealed', 'active'); el.classList.remove('done'); }
+            if (isOp || isConn) el.classList.add('lit', 'active');
+          }
+        });
+      }
+
+      panel.querySelectorAll('.canvas-zone-label').forEach(function (zl) {
+        var z = +zl.dataset.zone;
+        zl.classList.toggle('lit', z <= step);
+      });
+
+      panel.querySelectorAll('.explain-anchor').forEach(function (anchor) {
+        var s = +anchor.dataset.explainStep;
+        anchor.classList.toggle('is-active', s === step);
+        anchor.classList.remove('is-done', 'is-pending');
+      });
+
+      updateStepTitle(panel, step);
+
+      requestAnimationFrame(function () {
+        fitActiveDiagram();
+        if (panel.id === 'panel-attn') {
+          updateAttnFlowMap(step);
+        }
+      });
+    }
+
+    function buildDots(n) {
+      dotsEl.innerHTML = '';
+      for (var i = 0; i < n; i++) {
+        var dot = document.createElement('button');
+        dot.className = 'step-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', '步骤 ' + (i + 1));
+        (function (idx) { dot.addEventListener('click', function () { goToStep(idx); }); })(i);
+        dotsEl.appendChild(dot);
+      }
+    }
+
+    function updateControls() {
+      var isOverview = currentPanel && currentPanel.id === 'panel-overview';
+      var panelIdx = currentPanel ? PANEL_ORDER.indexOf(currentPanel.id) : -1;
+      var isLastChapter = panelIdx >= PANEL_ORDER.length - 1;
+      btnPrev.disabled = isOverview || currentStep <= 0;
+      btnNext.disabled = !isOverview && currentStep >= totalSteps - 1 && isLastChapter;
+      btnPlay.disabled = isOverview;
+      btnPlay.style.opacity = isOverview ? '0.35' : '1';
+      dotsEl.style.visibility = isOverview ? 'hidden' : 'visible';
+      if (!isOverview) {
+        dotsEl.querySelectorAll('.step-dot').forEach(function (d, i) {
+          d.classList.toggle('active', i === currentStep);
+          d.classList.toggle('done', i < currentStep);
+        });
+      }
+      updateChapterProgress();
+      if (currentPanel) updateStepTitle(currentPanel, currentStep);
+    }
+
+    var PANEL_ORDER = ['panel-overview', 'panel-la', 'panel-embed', 'panel-attn', 'panel-block', 'panel-kv'];
+
+    function updateChapterProgress() {
+      if (!currentPanel) return;
+      var idx = PANEL_ORDER.indexOf(currentPanel.id);
+      document.querySelectorAll('.chapter-pill').forEach(function (cp, i) {
+        cp.classList.toggle('active', PANEL_ORDER[i] === currentPanel.id);
+        cp.classList.toggle('done', i < idx);
+      });
+    }
+
+    function switchPanel(pid) {
+      document.querySelectorAll('.chapter-pill').forEach(function (cp) {
+        cp.classList.toggle('active', cp.dataset.panel === pid);
+      });
+      panels.forEach(function (p) { p.classList.toggle('active', p.id === pid); });
+      initPanel(document.getElementById(pid));
+    }
+
+    function goToStep(idx) {
+      if (!currentPanel || idx < 0 || idx >= totalSteps) return;
+      currentStep = idx;
+      applyStep(currentPanel, idx);
+      updateControls();
+    }
+
+    function nextStep() {
+      if (currentPanel && currentPanel.id === 'panel-overview') {
+        switchPanel('panel-la');
+        return;
+      }
+      if (currentStep < totalSteps - 1) goToStep(currentStep + 1);
+      else {
+        var idx = PANEL_ORDER.indexOf(currentPanel.id);
+        if (idx >= 0 && idx < PANEL_ORDER.length - 1) switchPanel(PANEL_ORDER[idx + 1]);
+        else stopPlay();
+      }
+    }
+
+    function prevStep() { if (currentStep > 0) goToStep(currentStep - 1); }
+
+    function stopPlay() {
+      isPlaying = false;
+      clearInterval(playTimer);
+      btnPlay.textContent = '▶ 自动播放';
+      btnPlay.classList.remove('on');
+    }
+
+    function togglePlay() {
+      if (isPlaying) { stopPlay(); return; }
+      isPlaying = true;
+      btnPlay.textContent = '⏸ 暂停';
+      btnPlay.classList.add('on');
+      if (currentStep >= totalSteps - 1) goToStep(0);
+      playTimer = setInterval(function () {
+        if (currentStep >= totalSteps - 1) stopPlay();
+        else nextStep();
+      }, 3200);
+    }
+
+    function syncPageScroll(panel) {
+      if (!appMain) return;
+      var isOverview = panel && panel.id === 'panel-overview';
+      appMain.classList.toggle('is-page-scroll', isOverview);
+      if (isOverview) appMain.scrollTop = 0;
+    }
+
+    function initPanel(panel) {
+      stopPlay();
+      currentPanel = panel;
+      syncPageScroll(panel);
+      totalSteps = +panel.dataset.stepCount || 1;
+      injectExplains(panel);
+      if (panel.id === 'panel-attn') {
+        panel.querySelectorAll('.explain-anchor .anchor-body').forEach(function (body) {
+          ensureAttnRowWrap(body.closest('.explain-anchor'));
+        });
+      }
+      setupFlowCanvas(panel);
+      injectBlockDiagrams(panel);
+      fillPanelMatrices(panel);
+      if (panel.id !== 'panel-overview') buildDots(totalSteps);
+      goToStep(0);
+      if (panel.id === 'panel-attn') scheduleAttnRedraw(0);
+    }
+
+    /* 术语速查 */
+    var GLOSSARY = {
+      token: {
+        title: 'Token · 词片段',
+        chapter: '词变数字',
+        panel: 'panel-embed',
+        body: '模型不直接读汉字，先把句子切成<strong>最小处理单位</strong>。可以是字、词或子词（如 BPE）。每个 Token 有固定顺序，后续矩阵的<strong>一行 = 一个 Token</strong>。',
+        example: '例：「我爱学习」→ Token 序列 [我, 爱, 学习, 。]，seq = 4'
+      },
+      embedding: {
+        title: 'Embedding · 词向量',
+        chapter: '词变数字',
+        panel: 'panel-embed',
+        body: '每个 Token 通过<strong>查表（Embedding 矩阵）</strong>变成 d 维浮点数向量。语义相近的词，向量在空间里也更接近——这是模型理解「含义」的起点。',
+        example: '形状：seq 个 Token → 矩阵 X，大小 seq × d'
+      },
+      q: {
+        title: 'Q · Query 查询向量',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '由 X·W<sub>Q</sub> 得到。想象当前词举起「<strong>寻人启事</strong>」：我要和句子里哪些词相关？Q 就是这份查询，维度与每个词的 K 对齐后才能算相似度。',
+        example: '公式：Q = X · WQ，形状 seq × d_k'
+      },
+      k: {
+        title: 'K · Key 键向量',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '由 X·W<sub>K</sub> 得到。每个词挂一块「<strong>门牌号</strong>」，供所有 Q 来匹配。Q 与 K 做点积 → 得到未归一化的<strong>相关分数</strong>（谁和谁更配）。',
+        example: '打分：S = Q · K^T，再 softmax 成行和为 1 的权重'
+      },
+      v: {
+        title: 'V · Value 值向量',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '由 X·W<sub>V</sub> 得到。匹配完成后，真正被<strong>加权搬运</strong>的语义内容在 V 里。Attention 输出 = 权重 A × V，相当于按相关度混合各词的信息。',
+        example: '输出：Attention(X) = softmax(QK^T/√d) · V'
+      },
+      'self-attn': {
+        title: 'Self-Attention · 自注意力',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: 'Q、K、V 都来自<strong>同一句</strong>的 X——词只和本句其他词互相关注（不是跨句子）。每个词输出一个新向量，已融入全句上下文，这是 Transformer 理解语法与语义的核心步骤。',
+        example: '「爱」的输出会混入「我」「学习」等信息，权重由 A 决定'
+      },
+      residual: {
+        title: '残差连接 · Residual',
+        chapter: '一层积木',
+        panel: 'panel-block',
+        body: '子层输出与<strong>子层输入相加</strong>：y = Sublayer(x) + x。像给信息开抄近路——即使中间算子学偏了，原始信号仍能传下去，深层网络更好训练，梯度不易消失。',
+        example: 'Attention 块：x → Attention → +x → LayerNorm → …'
+      },
+      layernorm: {
+        title: 'LayerNorm · 层归一化',
+        chapter: '一层积木',
+        panel: 'panel-block',
+        body: '对<strong>每个 Token 的向量</strong>独立做归一化（减均值、除标准差），再缩放平移。让各层输入数值尺度稳定，训练更快、更不容易发散。',
+        example: '通常放在残差相加之后：Norm(x + Sublayer(x))'
+      },
+      ffn: {
+        title: 'FFN · 前馈网络',
+        chapter: '一层积木',
+        panel: 'panel-block',
+        body: '对每个 Token 向量<strong>独立</strong>做两次线性变换，中间加 ReLU/GELU。先扩维（如 d→4d）再压回，引入非线性，让模型能表达更复杂的特征组合。',
+        example: 'FFN(x) = W2 · σ(W1 · x + b1) + b2，逐行计算'
+      },
+      'kv-cache': {
+        title: 'KV Cache · 推理缓存',
+        chapter: 'KV Cache',
+        panel: 'panel-kv',
+        body: '生成文本时，<strong>已生成词的 K、V 不会变</strong>。Prefill 阶段算完 prompt 的 K/V 后存入 Cache；Decode 每步只算新词的 q，与缓存的 K/V 做 Attention，避免重复矩阵乘法。',
+        example: '现象：ChatGPT 第一个字慢（Prefill），后面越出越快（Decode + Cache）'
+      },
+      softmax: {
+        title: 'softmax · 归一化',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '把任意实数向量变成<strong>非负且和为 1</strong>的概率分布。Attention 里对 Q·K<sup>T</sup> 的得分做 softmax，得到「每个词该分多少注意力权重」。',
+        example: '若某行权重 [0.6, 0.3, 0.1]，表示当前词 60% 关注词 A、30% 关注词 B…'
+      },
+      logits: {
+        title: 'logits · 原始得分',
+        chapter: '词变数字',
+        panel: 'panel-embed',
+        body: '模型最后一层（LM Head）输出的<strong>未归一化分数</strong>，词表每个 token 一个。经 softmax 后才变成「下一个词的概率」。',
+        example: 'logits 最大不一定总被选中——采样时还会用 temperature、top_p 等策略'
+      },
+      'multi-head': {
+        title: 'Multi-Head · 多头注意力',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '把 Q/K/V 拆成多组「头」，<strong>并行</strong>做 Attention 再拼接。每头可在不同子空间关注不同关系（语法、指代、远近等）。',
+        example: 'head 数 h；每头维度 d_k = d_model / h（需能整除）'
+      },
+      rmsnorm: {
+        title: 'RMSNorm · 层归一化',
+        chapter: '一层积木',
+        panel: 'panel-block',
+        body: 'LayerNorm 的简化版：用<strong>均方根</strong>缩放向量，不算均值。Llama、Qwen 等现代模型常用，计算更省、效果相当。',
+        example: 'Pre-Norm 结构：先 RMSNorm，再 Attention/FFN，最后残差相加'
+      },
+      rope: {
+        title: 'RoPE · 旋转位置编码',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: 'Rotary Position Embedding。用旋转矩阵把<strong>位置信息</strong>编进 Q、K，使模型知道 token 的先后顺序，且相对距离可外推。',
+        example: '相对位置 i−j 影响 Q·K 内积，因此「第 3 个词看第 1 个词」与绝对位置无关'
+      },
+      'causal-mask': {
+        title: 'Causal Mask · 因果掩码',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '上三角掩码：位置 t 只能 attend 到 ≤t 的 token，<strong>禁止偷看未来</strong>。这是 GPT 类自回归模型的硬性约束。',
+        example: '被 mask 的位置在 softmax 前设为 −∞，权重变为 0'
+      },
+      prefill: {
+        title: 'Prefill · 预填充',
+        chapter: 'KV Cache',
+        panel: 'panel-kv',
+        body: '用户 prompt 一次性并行送入模型，<strong>算完所有 token 的 K/V 并写入 Cache</strong>，同时得到第一个待生成 token 的 logits。通常较慢（TTFT 主要耗在这里）。',
+        example: '长 system prompt 的 RAG 场景，Prefill 越长，首字越慢'
+      },
+      decode: {
+        title: 'Decode · 逐词生成',
+        chapter: 'KV Cache',
+        panel: 'panel-kv',
+        body: '每步只输入<strong>新生成的一个 token</strong>，复用 Cache 里历史 K/V，只算新 token 的 Q/K/V。循环直到 EOS 或达到 max_tokens。',
+        example: '有 Cache 后单步计算量 ≈ O(序列长度)，而非 O(长度²)'
+      },
+      tokenizer: {
+        title: 'Tokenizer · 分词器',
+        chapter: '词变数字',
+        panel: 'panel-embed',
+        body: '把文本切成 token 并映射为<strong>整数 id</strong>。不同模型必须用配套 Tokenizer，否则乱码或性能骤降。',
+        example: '「学习」可能被切成 1～2 个 token；英文常按 BPE 子词切分'
+      },
+      'lm-head': {
+        title: 'LM Head · 词表输出层',
+        chapter: '词变数字',
+        panel: 'panel-embed',
+        body: '最后的线性层：hidden states [d_model] → logits [词表大小]。<strong>不负责理解语义</strong>，只负责「下一个 token 选谁」。',
+        example: '与 Embedding 矩阵常互为转置关系（权重 tying）以省参数'
+      },
+      'hidden-states': {
+        title: 'hidden states · 隐状态',
+        chapter: '一层积木',
+        panel: 'panel-block',
+        body: '每层输出的 token 向量表示，形状 seq × d_model。可理解为「<strong>已融入上下文语义的词向量</strong>」，层层传递、不断改写。',
+        example: '输入 Embedding 是第 0 层 hidden；经过 N 个 Decoder 块后送 LM Head'
+      },
+      'w-proj': {
+        title: 'W<sub>Q</sub> / W<sub>K</sub> / W<sub>V</sub> · 投影矩阵',
+        chapter: 'Attention',
+        panel: 'panel-attn',
+        body: '三个可学习的线性层权重，把同一 hidden states X 投影成 Q、K、V 三种不同用途的向量。<strong>训练学的就是这些矩阵里的参数</strong>（外加 FFN 等）。',
+        example: 'Q=X·W<sub>Q</sub>，K=X·W<sub>K</sub>，V=X·W<sub>V</sub>；形状需满足矩阵乘法规则'
+      }
+    };
+
+    function showGlossaryTerm(key) {
+      var item = GLOSSARY[key];
+      var detail = document.getElementById('glossary-detail');
+      if (!item || !detail) return;
+      document.querySelectorAll('.glossary-term').forEach(function (btn) {
+        btn.classList.toggle('is-active', btn.dataset.term === key);
+      });
+      detail.classList.add('has-active');
+      detail.innerHTML =
+        '<div class="gd-head">' +
+          '<h4 class="gd-title">' + item.title + '</h4>' +
+          '<button type="button" class="gd-chapter" data-goto-panel="' + item.panel + '">→ ' + item.chapter + '</button>' +
+        '</div>' +
+        '<p class="gd-body">' + item.body + '</p>' +
+        '<p class="gd-example">' + item.example + '</p>';
+      var gotoBtn = detail.querySelector('[data-goto-panel]');
+      if (gotoBtn) {
+        gotoBtn.addEventListener('click', function () {
+          switchPanel(gotoBtn.dataset.gotoPanel);
+        });
+      }
+    }
+
+    function initGlossary() {
+      var grid = document.getElementById('glossary-grid');
+      if (!grid) return;
+      grid.querySelectorAll('.glossary-term').forEach(function (btn) {
+        btn.addEventListener('mouseenter', function () { showGlossaryTerm(btn.dataset.term); });
+        btn.addEventListener('focus', function () { showGlossaryTerm(btn.dataset.term); });
+        btn.addEventListener('click', function () { showGlossaryTerm(btn.dataset.term); });
+      });
+      showGlossaryTerm('self-attn');
+    }
+
+    /* 章节切换 */
+    var panels = document.querySelectorAll('.panel');
+
+    document.querySelectorAll('.chapter-pill').forEach(function (cp) {
+      cp.addEventListener('click', function () {
+        switchPanel(cp.dataset.panel);
+      });
+    });
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('tf-viz-theme', theme);
+      var label = document.querySelector('.theme-label');
+      if (label) label.textContent = theme === 'dark' ? '浅色' : '深色';
+      refillAllHeatmaps();
+      if (currentPanel && currentPanel.id === 'panel-attn') {
+        scheduleAttnRedraw(currentStep);
+      }
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+    });
+
+    applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+    btnPrev.addEventListener('click', prevStep);
+    btnNext.addEventListener('click', nextStep);
+    btnPlay.addEventListener('click', togglePlay);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); nextStep(); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); prevStep(); }
+      if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var pills = document.querySelectorAll('.chapter-pill');
+        var idx = Array.from(pills).findIndex(function (t) { return t.classList.contains('active'); });
+        var n = e.key === 'ArrowDown' ? Math.min(idx + 1, pills.length - 1) : Math.max(idx - 1, 0);
+        pills[n].click();
+      }
+    });
+
+    panels.forEach(function (p) {
+      injectExplains(p);
+      if (p.id === 'panel-attn') {
+        p.querySelectorAll('.explain-anchor .anchor-body').forEach(function (body) {
+          ensureAttnRowWrap(body.closest('.explain-anchor'));
+        });
+      }
+      setupFlowCanvas(p);
+      injectBlockDiagrams(p);
+      fillPanelMatrices(p);
+    });
+
+    window.addEventListener('resize', function () {
+      fitActiveDiagram();
+      if (currentPanel && currentPanel.id === 'panel-attn') {
+        scheduleAttnRedraw(currentStep);
+      }
+    });
+
+    initGlossary();
+    initPanel(document.getElementById('panel-overview'));
+  })();
+  </script>
+</body>
+</html>
