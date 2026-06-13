@@ -3308,7 +3308,7 @@
     <section class="panel" id="panel-embed" data-step-count="4">
       <div class="panel-head">
         <h2 class="panel-title">第 ② 章：词怎么变成矩阵 X？</h2>
-        <p class="panel-sub">模型不认识汉字，只认识数字向量。整句话最终变成<strong style="color:var(--fg)">一个矩阵</strong>：每一行是一个词，每一列是一个特征。</p>
+        <p class="panel-sub">模型不认识汉字，只认识数字向量。本例 <strong style="color:var(--fg)">3 词 × 6 维</strong>，Embedding + 位置编码后得到矩阵 X。</p>
         <div class="panel-tip">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           <span>Embedding 就像查字典：每个词对应一行数字。位置编码告诉模型「这个词在第几位」。</span>
@@ -3343,8 +3343,8 @@
                   <div class="fc-node" data-step="1">
                     <div class="viz-mtx-inline m-input">
                       <span class="glabel">Embedding</span>
-                      <div class="matrix c-input" data-r="3" data-c="8"></div>
-                      <span class="viz-dim">3×d · 查表得向量</span>
+                      <div class="matrix c-input" data-mx="E"></div>
+                      <span class="viz-dim">3×6 · 查表得向量</span>
                     </div>
                   </div>
                 </div>
@@ -3359,15 +3359,16 @@
                   <div class="fc-node" data-step="2">
                     <div class="viz-mtx-inline m-input">
                       <span class="glabel">Embedding</span>
-                      <div class="matrix c-input" data-r="3" data-c="8"></div>
+                      <div class="matrix c-input" data-mx="E"></div>
+                      <span class="viz-dim">3×6</span>
                     </div>
                   </div>
                   <span class="viz-op fc-op" data-step="2">+</span>
                   <div class="fc-node" data-step="2">
                     <div class="viz-mtx-inline m-norm">
                       <span class="glabel">PE</span>
-                      <div class="matrix c-norm" data-r="3" data-c="8"></div>
-                      <span class="viz-dim">位置编码 · 同形状</span>
+                      <div class="matrix c-norm" data-mx="PE"></div>
+                      <span class="viz-dim">3×6 · 位置编码</span>
                     </div>
                   </div>
                 </div>
@@ -3383,8 +3384,8 @@
                   <div class="fc-node" data-step="3">
                     <div class="viz-mtx-inline m-cache">
                       <span class="glabel">X</span>
-                      <div class="matrix c-cache" data-r="3" data-c="8"></div>
-                      <span class="viz-dim">3×d · 送入 Attention</span>
+                      <div class="matrix c-cache" data-mx="X"></div>
+                      <span class="viz-dim">3×6 · 送入 Attention</span>
                     </div>
                   </div>
                 </div>
@@ -3399,7 +3400,7 @@
     <section class="panel" id="panel-attn" data-step-count="8">
       <div class="panel-head">
         <h2 class="panel-title">第 ③ 章：Self-Attention — 让每个词「看到」全句</h2>
-        <p class="panel-sub">这是 Transformer 的<strong style="color:var(--fg)">心脏</strong>。同一矩阵 X 分别乘以三个权重，得到 Q、K、V；再用 Q 和 K 算「谁和谁相关」，最后加权混合 V。</p>
+        <p class="panel-sub">与②章一致：<strong style="color:var(--fg)">3 词 × 6 维</strong> 的 X，经 W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub> 投影得同形的 Q、K、V（均为 3×6），再 softmax 归一化后混合。</p>
         <div class="panel-tip">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           <span>类比：Q 是「寻人启事」，K 是「门牌号」，V 是「要搬的内容」。先匹配，再搬运。</span>
@@ -3413,17 +3414,15 @@
               <div class="viz-panel">
                 <div class="viz-attn-demo">
                   <div class="viz-attn-demo-cap">预测「？」的下一个 token 时，<b>注意力会回头落在哪些词上</b></div>
-                  <svg class="viz-attn-arcs" viewBox="0 0 520 64" preserveAspectRatio="none">
+                  <svg class="viz-attn-arcs" viewBox="0 0 400 64" preserveAspectRatio="none">
                     <defs>
                       <marker id="viz-atn-arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
                         <path d="M0,0 L9,4.5 L0,9 Z" fill="var(--c-value)"/>
                       </marker>
                     </defs>
-                    <path d="M478,62 C478,4 40,4 40,56" fill="none" stroke="var(--c-value)" stroke-width="1.5" opacity="0.35" marker-end="url(#viz-atn-arr)"/>
-                    <path d="M478,62 C478,4 128,4 128,56" fill="none" stroke="var(--c-value)" stroke-width="3.2" opacity="0.88" marker-end="url(#viz-atn-arr)"/>
-                    <path d="M478,62 C478,4 216,4 216,56" fill="none" stroke="var(--c-value)" stroke-width="3.8" opacity="0.92" marker-end="url(#viz-atn-arr)"/>
-                    <path d="M478,62 C478,4 304,4 304,56" fill="none" stroke="var(--c-value)" stroke-width="3.4" opacity="0.85" marker-end="url(#viz-atn-arr)"/>
-                    <path d="M478,62 C478,4 392,4 392,56" fill="none" stroke="var(--c-value)" stroke-width="1.5" opacity="0.3" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M358,62 C358,4 40,4 40,56" fill="none" stroke="var(--c-value)" stroke-width="1.5" opacity="0.35" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M358,62 C358,4 160,4 160,56" fill="none" stroke="var(--c-value)" stroke-width="3.5" opacity="0.9" marker-end="url(#viz-atn-arr)"/>
+                    <path d="M358,62 C358,4 280,4 280,56" fill="none" stroke="var(--c-value)" stroke-width="3.2" opacity="0.85" marker-end="url(#viz-atn-arr)"/>
                   </svg>
                   <div class="viz-attn-tokens">
                     <span class="viz-chip viz-chip-input">我</span>
@@ -3437,7 +3436,7 @@
                     <div class="viz-mtx-inline m-input">
                       <span class="glabel">X</span>
                       <div class="matrix c-input" data-mx="X"></div>
-                      <span class="viz-dim">4×4 · 我/爱/学习/。</span>
+                      <span class="viz-dim">3×6 · 我/爱/学习</span>
                     </div>
                   </div>
                 </div>
@@ -3460,7 +3459,7 @@
                     <div class="viz-mtx-inline m-query">
                       <span class="glabel">W<sub>Q</sub></span>
                       <div class="matrix c-query" data-mx="WQ"></div>
-                      <span class="viz-dim">4×4</span>
+                      <span class="viz-dim">6×6</span>
                     </div>
                   </div>
                   <span class="viz-op fc-op" data-step="1">=</span>
@@ -3468,7 +3467,7 @@
                     <div class="viz-mtx-inline m-query">
                       <span class="glabel">Q</span>
                       <div class="matrix c-query" data-mx="Q"></div>
-                      <span class="viz-dim">4×4 · Query</span>
+                      <span class="viz-dim">3×6 · d<sub>k</sub>=6</span>
                     </div>
                   </div>
                 </div>
@@ -3491,7 +3490,7 @@
                     <div class="viz-mtx-inline m-key">
                       <span class="glabel">W<sub>K</sub></span>
                       <div class="matrix c-key" data-mx="WK"></div>
-                      <span class="viz-dim">4×4</span>
+                      <span class="viz-dim">6×6</span>
                     </div>
                   </div>
                   <span class="viz-op fc-op" data-step="2">=</span>
@@ -3499,7 +3498,7 @@
                     <div class="viz-mtx-inline m-key">
                       <span class="glabel">K</span>
                       <div class="matrix c-key" data-mx="K"></div>
-                      <span class="viz-dim">4×4 · Key</span>
+                      <span class="viz-dim">3×6 · Key</span>
                     </div>
                   </div>
                 </div>
@@ -3522,7 +3521,7 @@
                     <div class="viz-mtx-inline m-value">
                       <span class="glabel">W<sub>V</sub></span>
                       <div class="matrix c-value" data-mx="WV"></div>
-                      <span class="viz-dim">4×4</span>
+                      <span class="viz-dim">6×6</span>
                     </div>
                   </div>
                   <span class="viz-op fc-op" data-step="3">=</span>
@@ -3530,7 +3529,7 @@
                     <div class="viz-mtx-inline m-value">
                       <span class="glabel">V</span>
                       <div class="matrix c-value" data-mx="V"></div>
-                      <span class="viz-dim">4×4 · Value</span>
+                      <span class="viz-dim">3×6 · Value</span>
                     </div>
                   </div>
                 </div>
@@ -3556,17 +3555,17 @@
                     <div class="viz-mtx-inline m-key">
                       <span class="glabel">K<sup>T</sup></span>
                       <div class="matrix c-key" data-mx="KT"></div>
-                      <span class="viz-dim">4×4</span>
+                      <span class="viz-dim">6×3</span>
                     </div>
                   </div>
                   <span class="viz-op fc-op" data-step="4">=</span>
                   <div class="fc-node" data-step="4">
                     <div class="heatmap-wrap">
-                      <div class="heat-tokens">S = QK<sup>T</sup>/√4</div>
-                      <div class="heatmap" id="heat-attn" data-n="4" data-heat="scores"></div>
+                      <div class="heat-tokens">S = QK<sup>T</sup>/√6</div>
+                      <div class="heatmap" id="heat-attn" data-n="3" data-heat="scores"></div>
                       <div class="heat-meta scores-note"></div>
                     </div>
-                    <span class="viz-dim">分数 S · 4×4</span>
+                    <span class="viz-dim">分数 S · 3×3</span>
                   </div>
                 </div>
               </div>
@@ -3592,7 +3591,7 @@
                   <div class="fc-node" data-step="5">
                     <div class="heatmap-wrap">
                       <div class="heat-tokens">A = softmax(S)</div>
-                      <div class="heatmap" id="heat-soft" data-n="4" data-heat="weights"></div>
+                      <div class="heatmap" id="heat-soft" data-n="3" data-heat="weights"></div>
                       <div class="heat-meta"></div>
                     </div>
                     <span class="viz-dim">权重 A</span>
@@ -3615,7 +3614,7 @@
                 <div class="viz-flow-row fc-row">
                   <div class="fc-node" data-step="6">
                     <div class="heatmap-wrap">
-                      <div class="heatmap" id="heat-final" data-n="4" data-heat="weights"></div>
+                      <div class="heatmap" id="heat-final" data-n="3" data-heat="weights"></div>
                       <div class="heat-meta"></div>
                     </div>
                     <span class="viz-dim">A</span>
@@ -3632,7 +3631,7 @@
                     <div class="viz-mtx-inline m-cache">
                       <span class="glabel">输出</span>
                       <div class="matrix c-cache" data-mx="OUT"></div>
-                      <span class="viz-dim">4×4</span>
+                      <span class="viz-dim">3×6</span>
                     </div>
                   </div>
                 </div>
@@ -3655,7 +3654,7 @@
                     <div class="viz-mtx-inline m-cache">
                       <span class="glabel">Attention 输出</span>
                       <div class="matrix c-cache" data-mx="OUT"></div>
-                      <span class="viz-dim">4×4 · 融入上下文</span>
+                      <span class="viz-dim">3×6 · 融入上下文</span>
                     </div>
                   </div>
                 </div>
@@ -3857,105 +3856,105 @@
           plain: '每个 ID 查一张表，得到一串 d 个浮点数。',
           analogy: '像查新华字典：输入「爱」这个字，字典返回一页详细解释（一串数字）。每个词都有一页专属解释。',
           body: 'Embedding 是一张巨大的查找表：第 k 个 Token 对应第 k 行向量。查完 3 个词，把 3 个行向量上下拼起来，就是 Embedding 矩阵。',
-          bullets: ['不是矩阵乘法，是<strong>按行查表</strong>', '每个词变成 d 维向量（论文里 d=512）', '拼起来 → <span class="dim-tag">seq×d</span> 矩阵'],
-          dims: 'Embedding 输出：<span class="dim-tag">3×d</span>（示意 d=8）',
-          la: 'E ∈ ℝ<sup>seq×d</sup>，第 i 行 e<sub>i</sub> = EmbeddingTable[token<sub>i</sub>]。'
+          bullets: ['不是矩阵乘法，是<strong>按行查表</strong>', '每个词变成 d 维向量（本例 d=6）', '拼起来 → <span class="dim-tag">seq×d</span> = <span class="dim-tag">3×6</span>'],
+          dims: 'Embedding 输出：<span class="dim-tag">3×6</span>',
+          la: 'E ∈ ℝ<sup>3×6</sup>，第 i 行 e<sub>i</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
           title: '位置编码：同形状矩阵相加',
           plain: 'Attention 看不出谁先谁后，要手动加上位置信息。',
           analogy: 'Embedding 只告诉你「是什么词」，位置编码告诉你「排第几位」。像给排队的人发号码牌。',
           body: 'Embedding 只告诉模型「是什么词」，没告诉「在第几位」。位置编码 PE 也是 seq×d 矩阵，与 Embedding <strong>逐元素相加</strong>（对应格子相加，不是乘法）。',
-          bullets: ['PE 第 0 行给第 1 个词的位置信号', 'PE 第 1 行给第 2 个词……依此类推', '相加要求两矩阵<strong>形状完全相同</strong>'],
-          dims: 'E + PE，两者都是 <span class="dim-tag">seq×d</span>，结果仍是 <span class="dim-tag">seq×d</span>',
+          bullets: ['PE 第 0 行给第 1 个词的位置信号', 'PE 第 1 行给第 2 个词……依此类推', '相加要求两矩阵都是 <span class="dim-tag">3×6</span>'],
+          dims: 'E + PE，两者都是 <span class="dim-tag">3×6</span>，逐元素相加',
           la: 'X = E + PE，同型矩阵加法：X[i,j] = E[i,j] + PE[i,j]。'
         },
         {
           title: '得到 X，进入 Attention',
-          plain: 'X 是 Attention 的唯一输入，形状固定 seq×d。',
+          plain: 'X 是 Attention 的唯一输入，本例形状 3×6。',
           analogy: 'X 就像一份「全句信息包」，接下来 Attention 会打开它，让每个词互相「交流」。',
           body: '加完位置信息后，矩阵 X 就准备好了。接下来第三章会从同一个 X 出发，分别乘以三个不同的权重矩阵，得到 Q、K、V。',
-          bullets: ['X 的行数 = 句子长度 seq', 'X 的列数 = 模型维度 d', '右边绿色矩阵就是送入 Attention 的 X'],
-          dims: '最终输入 X：<span class="dim-tag">seq×d</span>（例 3×8）',
-          la: 'Attention 全部计算从 X 开始：Q = XW<sub>Q</sub>，K = XW<sub>K</sub>，V = XW<sub>V</sub>。'
+          bullets: ['X 的行数 = 句子长度 seq=3', 'X 的列数 = 模型维度 d=6', '右边绿色矩阵与③ Attention 输入一致'],
+          dims: '最终输入 X：<span class="dim-tag">3×6</span>',
+          la: 'X = E + PE ∈ ℝ<sup>3×6</sup>，与③章 Attention 的输入矩阵一致。'
         }
       ],
       'panel-attn': [
         {
           title: '起点：输入矩阵 X',
-          plain: '所有 Attention 计算都从这一个矩阵出发。',
+          plain: '与②词变数字衔接：3 个词，每个词 6 维向量。',
           analogy: 'X 是一班同学的名单，接下来每个同学都要看看全班，决定和谁交流最多。',
-          body: '右边蓝色矩阵 X 有 seq 行（每个词一行）、d 列（每个特征一列）。你可以把每一行单独看成「这个词的向量」。',
-          bullets: ['行数 seq = 句子里的词数', '列数 d = 每个词用多少维描述', 'X 会被<strong>重复使用三次</strong>（算 Q、K、V）'],
-          dims: 'X：<span class="dim-tag">seq×d</span>（图中示意 <span class="dim-tag">4×4</span>，4 个词 × 4 维特征）',
-          la: 'X 的每一行 x<sub>i</sub> ∈ ℝ<sup>d</sup>。整矩阵表示整句话。'
+          body: '右边蓝色矩阵 X 有 <strong>seq=3</strong> 行（我 / 爱 / 学习）、<strong>d=6</strong> 列（6 维词向量）。与②章 Embedding+PE 输出的形状一致。',
+          bullets: ['行数 seq = 句子里的词数（本例 3）', '列数 d = 每个词的向量维度（本例 6）', 'X 会被<strong>重复使用三次</strong>（算 Q、K、V）'],
+          dims: 'X：<span class="dim-tag">seq×d</span> = <span class="dim-tag">3×6</span>',
+          la: 'X ∈ ℝ<sup>3×6</sup>。每一行 x<sub>i</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
           title: '第一支路：X × W<sub>Q</sub> = Q',
           plain: 'Q =「查询」：每个词想问全句要什么信息。',
-          analogy: '每个词发一张「寻人启事」：「我想找和爱情相关的词」。W<sub>Q</sub> 帮它把启事写清楚。',
-          body: '同一个 X 左乘权重 W<sub>Q</sub>，得到 Q。可以类比：每个词拿一张「寻人启事」去全句里找相关词。W<sub>Q</sub> 是训练学到的参数矩阵。',
-          bullets: ['W<sub>Q</sub> 把 d 维映射到 d<sub>k</sub> 维（通常 d<sub>k</sub> < d）', 'Q 的每一行 = 该词的查询向量', '紫色矩阵就是 Q'],
-          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">seq×d<sub>k</sub></span>',
-          la: 'Q = X · W<sub>Q</sub>。W<sub>Q</sub> ∈ ℝ<sup>d×d<sub>k</sub></sup>，Q 的第 i 行 q<sub>i</sub> = x<sub>i</sub> · W<sub>Q</sub>。'
+          analogy: '每个词发一张「寻人启事」：「我想找和学习相关的词」。W<sub>Q</sub> 把 6 维词向量投影到 d<sub>k</sub>=6 维查询空间。',
+          body: 'X（3×6）左乘 W<sub>Q</sub>（6×6），得到 Q（3×6）。本例 W<sub>Q</sub> 示意为单位阵，故 Q 与 X 数值相同，但概念上是独立投影。',
+          bullets: ['W<sub>Q</sub>：<span class="dim-tag">6×6</span>，d → d<sub>k</sub>（本例 d<sub>k</sub>=d=6）', 'Q 每一行 = 该词在 d<sub>k</sub> 维里的查询向量', '紫色矩阵就是 Q'],
+          dims: '<span class="dim-tag">3×6</span> × <span class="dim-tag">6×6</span> → <span class="dim-tag">3×6</span>',
+          la: 'Q = X · W<sub>Q</sub>，W<sub>Q</sub> ∈ ℝ<sup>6×6</sup>，Q ∈ ℝ<sup>3×6</sup>。'
         },
         {
           title: '第二支路：X × W<sub>K</sub> = K',
           plain: 'K =「键」：每个词亮出自己的「门牌号」供别人匹配。',
-          analogy: '每个词在门口挂一块牌子（K），上面写着「我是动词」「我是名词」等标签，供 Q 来匹配。',
-          body: '还是同一个 X，换一块权重 W<sub>K</sub>，得到 K。Q 和 K 后面要配对算相似度——所以它们的行数都是 seq，每行维度都是 d<sub>k</sub>。',
-          bullets: ['K 与 Q <strong>形状必须一致</strong>（都是 seq×d<sub>k</sub>）', '第 i 行 k<sub>i</sub> 代表第 i 个词的「可被匹配特征」', '青色矩阵就是 K'],
-          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>k</sub></span> → <span class="dim-tag">seq×d<sub>k</sub></span>',
-          la: 'K = X · W<sub>K</sub>。Q 和 K 同形，才能做 Q·K<sup>T</sup> 得到 seq×seq 的打分矩阵。'
+          analogy: '每个词在门口挂一块牌子（K），供 Q 来匹配相似度。',
+          body: '同一 X 换 W<sub>K</sub> 得 K（3×6）。K 与 Q 同形；做 Q·K<sup>T</sup> 时 K 转置为 6×3，与 Q 的 3×6 相乘得 3×3 打分矩阵。',
+          bullets: ['K 与 Q 同形：<span class="dim-tag">3×6</span>', '第 i 行 k<sub>i</sub> 代表第 i 个词的可被匹配特征', '青色矩阵就是 K'],
+          dims: '<span class="dim-tag">3×6</span> × <span class="dim-tag">6×6</span> → <span class="dim-tag">3×6</span>',
+          la: 'K = X · W<sub>K</sub>。Q·K<sup>T</sup> → S ∈ ℝ<sup>3×3</sup>。'
         },
         {
           title: '第三支路：X × W<sub>V</sub> = V',
           plain: 'V =「值」：真正要被搬运、混合的语义内容。',
-          analogy: 'Q 和 K 只负责「配对」，V 才是要搬的「货物」。匹配成功后，把 V 里的内容按权重搬过来。',
-          body: '第三次用 X 乘 W<sub>V</sub> 得 V。前面 Q、K 只负责算「该看谁」；算完权重后，真正加权求和的是 V 里的内容。',
-          bullets: ['V 行数仍是 seq（每个词一份内容）', '列数 d<sub>v</sub> 可与 d<sub>k</sub> 不同', '橙色矩阵就是 V'],
-          dims: '<span class="dim-tag">seq×d</span> × <span class="dim-tag">d×d<sub>v</sub></span> → <span class="dim-tag">seq×d<sub>v</sub></span>',
-          la: 'V = X · W<sub>V</sub>。Attention 最后一步用权重矩阵 A 左乘 V。'
+          analogy: 'Q、K 只负责「配对」，V 才是要搬的「货物」——保留完整 6 维信息。',
+          body: 'W<sub>V</sub> 为 6×6（示意为单位阵），V 与 X 同形 <strong>3×6</strong>。权重算完后，按 A 对 V 的每一行加权求和。',
+          bullets: ['V 行数 seq=3，列数 d<sub>v</sub>=6', 'W<sub>V</sub>：<span class="dim-tag">6×6</span>（示意）', '橙色矩阵就是 V'],
+          dims: '<span class="dim-tag">3×6</span> × <span class="dim-tag">6×6</span> → <span class="dim-tag">3×6</span>',
+          la: 'V = X · W<sub>V</sub>，V ∈ ℝ<sup>3×6</sup>。'
         },
         {
           title: 'Q × K<sup>T</sup>：两两打分',
           plain: '每个词问全句：我和其他每个词有多相关？',
-          analogy: '像相亲配对：每个 Q 和每个 K 碰一下，算「匹配度分数」。分数越高 = 越相关。',
-          body: 'Q 乘 K 的转置，得到 seq×seq 的分数矩阵。第 i 行第 j 列 = 词 i 对词 j 的原始关注度。K<sup>T</sup> 是把 K 的行和列互换，这样才能合法相乘。',
-          bullets: ['K<sup>T</sup> 形状：<span class="dim-tag">d<sub>k</sub>×seq</span>（转置行数列数对调）', '结果第 (i,j) 格 = q<sub>i</sub> 与 k<sub>j</sub> 的内积', '实际还会除以 √d<sub>k</sub> 防止数值过大'],
-          dims: '<span class="dim-tag">seq×d<sub>k</sub></span> × <span class="dim-tag">d<sub>k</sub>×seq</span> → <span class="dim-tag">seq×seq</span>',
-          la: 'S = Q · K<sup>T</sup>，S<sub>ij</sub> = ⟨q<sub>i</sub>, k<sub>j</sub>⟩。S 是「未归一化的注意力分数」。'
+          analogy: 'Q 与 K 配对算匹配度。分数越高 = 越相关。',
+          body: 'Q（3×6）乘 K<sup>T</sup>（6×3）得分数矩阵 S（3×3）。再除以 √d<sub>k</sub>=√6 ≈ 2.449 做缩放。',
+          bullets: ['K<sup>T</sup>：<span class="dim-tag">6×3</span>（K 的转置）', 'S<sub>ij</sub> = (q<sub>i</sub>·k<sub>j</sub>)/√6', '热力图数字为<strong>真实算出的分数</strong>'],
+          dims: '<span class="dim-tag">3×6</span> × <span class="dim-tag">6×3</span> → <span class="dim-tag">3×3</span>',
+          la: 'S = QK<sup>T</sup>/√d<sub>k</sub>，本例 d<sub>k</sub>=6。'
         },
         {
           title: 'softmax：分数变权重',
           plain: '把每行分数变成概率，一行加起来 = 1。',
-          analogy: '像分蛋糕：把每行的分数变成百分比，「我」看全句时 31.8% 关注自己、24.4% 关注「爱」……加起来 100%。',
-          body: '分数可正可负、可大可小。softmax 对<strong>每一行独立</strong>处理，让该行变成非负且和为 1 的概率分布。右侧热力图是<strong>真实算出的数值</strong>，不是随机数。',
+          analogy: '像分蛋糕：「我」看全句时 42.5% 关注自己、30.8% 关注「爱」、26.7% 关注「学习」。',
+          body: '对 S 的<strong>每一行</strong>做 softmax。右侧 3×3 热力图是逐行 softmax 后的 A，底部文字可验算每行 Σ=1。',
           bullets: [
-            '例：「我」行 → 0.318 + 0.244 + 0.214 + 0.223 = <strong>1.000</strong>',
-            '「爱」对自己列权重最高（0.313），符合语义相近性',
-            '底部绿色文字逐行验证 Σ = 1'
+            '例：「我」行 → 0.399 + 0.313 + 0.288 = <strong>1.000</strong>',
+            '「爱」对自己列权重最高（0.389）',
+            '行和验证：我 / 爱 / 学习 各行 Σ 均为 1.000'
           ],
-          dims: 'A 与 S 同形 <span class="dim-tag">4×4</span>，但 A 每行和 = 1',
-          la: 'A<sub>i,:</sub> = softmax(S<sub>i,:</sub>)。A 的每行是概率向量，Σ<sub>j</sub>A<sub>ij</sub> = 1（可逐行验算）。'
+          dims: 'A 与 S 同形 <span class="dim-tag">3×3</span>，每行和 = 1',
+          la: 'A<sub>i,:</sub> = softmax(S<sub>i,:</sub>)。Σ<sub>j</sub>A<sub>ij</sub> = 1。'
         },
         {
           title: 'A × V：加权求和',
           plain: '按注意力权重，把全句的 V 行向量混合成新向量。',
-          analogy: '像做加权平均：「我」的新含义 = 31.8%×我的V + 24.4%×爱的V + …… 把全句信息按比例混合。',
-          body: '权重矩阵 A 左乘 V：对第 i 个词，它的新向量 = 所有词的 V 行按 A 的第 i 行权重加权平均。这样每个词都「看到了」整句上下文。',
-          bullets: ['A 的第 i 行决定词 i 从哪些词取信息', 'V 的第 j 行是被取的「内容」', '输出每个词一行，形状 seq×d<sub>v</sub>'],
-          dims: '<span class="dim-tag">seq×seq</span> × <span class="dim-tag">seq×d<sub>v</sub></span> → <span class="dim-tag">seq×d<sub>v</sub></span>',
-          la: '输出第 i 行 = Σ<sub>j</sub> A<sub>ij</sub> · v<sub>j</sub>。这是矩阵乘法 AV 的第 i 行展开。'
+          analogy: '「我」的新含义 = 39.9%×我的V + 31.3%×爱的V + 28.8%×学习的V。',
+          body: 'A（3×3）左乘 V（3×6）得输出（3×6）。每个词输出一行 6 维向量，已融入全句上下文。',
+          bullets: ['A 第 i 行 = 词 i 从哪些词取信息', 'V 第 j 行 = 被取的 6 维内容', '输出形状 <span class="dim-tag">3×6</span>'],
+          dims: '<span class="dim-tag">3×3</span> × <span class="dim-tag">3×6</span> → <span class="dim-tag">3×6</span>',
+          la: '输出第 i 行 = Σ<sub>j</sub> A<sub>ij</sub> v<sub>j</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
           title: 'Attention 输出完成',
           plain: '每个词都融合了全句信息——Attention 算完了。',
-          analogy: '经过 Attention，每个词都「开完会」了——带着全句的上下文理解，准备进入下一道工序。',
-          body: '绿色输出矩阵与 V 同形。若用多头注意力，只是把 d 切成 h 份，每份独立做一遍上述流程，最后拼回来。但核心仍是矩阵乘 + softmax + 矩阵乘。',
-          bullets: ['输出形状 <span class="dim-tag">seq×d<sub>v</sub></span>，可再投影回 d 维', 'Self-Attention：Q、K、V 都来自同一个 X', 'Decoder 里还会对未来位置 Mask（不让偷看答案）'],
-          dims: 'Attention(Q,K,V)：<span class="dim-tag">seq×d<sub>v</sub></span>',
-          la: 'Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d<sub>k</sub>) · V。整式都是标准矩阵运算。'
+          analogy: '每个词都「开完会」了，带着全句上下文，准备进入④一层积木。',
+          body: '绿色输出矩阵 3×6，与 V 同形。多头注意力是把 d 切成 h 份并行做上述流程再拼接；核心仍是矩阵乘 + softmax + 矩阵乘。',
+          bullets: ['输出 <span class="dim-tag">3×6</span>，可再经 W<sub>O</sub> 投影', 'Self-Attention：Q、K、V 都来自同一 X', 'Decoder 还会对未来位置做 Causal Mask'],
+          dims: 'Attention 输出：<span class="dim-tag">seq×d</span> = <span class="dim-tag">3×6</span>',
+          la: 'Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d<sub>k</sub>) · V ∈ ℝ<sup>3×6</sup>。'
         }
       ],
       'panel-block': [
@@ -4063,87 +4062,98 @@
       ]
     };
 
-    /* ── 全静态矩阵数据（硬编码，无运行时计算）── */
+    /* ── 全静态矩阵数据（③ Attention：3 词 × 6 维，d_k=d=6）── */
     var STATIC = {
-      tokens: ['我', '爱', '学习', '。'],
+      tokens: ['我', '爱', '学习'],
+      d: 6,
+      dk: 6,
       X: [
-        [1.0, 0.2, 0.0, 0.1],
-        [0.2, 1.0, 0.3, 0.0],
-        [0.0, 0.3, 1.0, 0.2],
-        [0.1, 0.0, 0.2, 0.8]
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2]
+      ],
+      E: [
+        [0.9, 0.2, 0.1, 0.15, 0.0, 0.05],
+        [0.1, 0.95, 0.35, 0.08, 0.15, 0.0],
+        [0.08, 0.28, 0.92, 0.12, 0.05, 0.15]
+      ],
+      PE: [
+        [0.1, 0.1, 0.0, 0.05, 0.0, 0.05],
+        [0.1, 0.05, 0.05, 0.02, 0.05, 0.0],
+        [0.02, 0.02, 0.08, 0.08, 0.05, 0.05]
       ],
       WQ: [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 1]
       ],
       WK: [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 1]
       ],
       WV: [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 1]
       ],
       Q: [
-        [1.0, 0.2, 0.0, 0.1],
-        [0.2, 1.0, 0.3, 0.0],
-        [0.0, 0.3, 1.0, 0.2],
-        [0.1, 0.0, 0.2, 0.8]
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2]
       ],
       K: [
-        [1.0, 0.2, 0.0, 0.1],
-        [0.2, 1.0, 0.3, 0.0],
-        [0.0, 0.3, 1.0, 0.2],
-        [0.1, 0.0, 0.2, 0.8]
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2]
       ],
       KT: [
-        [1.0, 0.2, 0.0, 0.1],
-        [0.2, 1.0, 0.3, 0.0],
-        [0.0, 0.3, 1.0, 0.2],
-        [0.1, 0.0, 0.2, 0.8]
+        [1.0, 0.2, 0.1],
+        [0.3, 1.0, 0.3],
+        [0.1, 0.4, 1.0],
+        [0.2, 0.1, 0.2],
+        [0.0, 0.2, 0.1],
+        [0.1, 0.0, 0.2]
       ],
       V: [
-        [1.0, 0.2, 0.0, 0.1],
-        [0.2, 1.0, 0.3, 0.0],
-        [0.0, 0.3, 1.0, 0.2],
-        [0.1, 0.0, 0.2, 0.8]
+        [1.0, 0.3, 0.1, 0.2, 0.0, 0.1],
+        [0.2, 1.0, 0.4, 0.1, 0.2, 0.0],
+        [0.1, 0.3, 1.0, 0.2, 0.1, 0.2]
       ],
       scores: [
-        [0.55, 0.21, 0.04, 0.09],
-        [0.21, 0.60, 0.32, 0.05],
-        [0.04, 0.32, 0.60, 0.19],
-        [0.09, 0.05, 0.19, 0.37]
+        [0.469, 0.229, 0.143],
+        [0.229, 0.510, 0.310],
+        [0.143, 0.310, 0.486]
       ],
       scoreLabels: [
-        ['0.55', '0.21', '0.04', '0.09'],
-        ['0.21', '0.60', '0.32', '0.05'],
-        ['0.04', '0.32', '0.60', '0.19'],
-        ['0.09', '0.05', '0.19', '0.37']
+        ['0.47', '0.23', '0.14'],
+        ['0.23', '0.51', '0.31'],
+        ['0.14', '0.31', '0.49']
       ],
       weights: [
-        [0.318, 0.244, 0.214, 0.223],
-        [0.232, 0.313, 0.251, 0.204],
-        [0.204, 0.252, 0.315, 0.229],
-        [0.234, 0.225, 0.252, 0.289]
+        [0.399, 0.313, 0.288],
+        [0.293, 0.389, 0.318],
+        [0.278, 0.329, 0.392]
       ],
       weightLabels: [
-        ['0.318', '0.244', '0.214', '0.223'],
-        ['0.232', '0.313', '0.251', '0.204'],
-        ['0.204', '0.252', '0.315', '0.229'],
-        ['0.234', '0.225', '0.252', '0.289']
+        ['0.399', '0.313', '0.288'],
+        ['0.293', '0.389', '0.318'],
+        ['0.278', '0.329', '0.392']
       ],
-      rowSumText: '我 Σ=1.000  |  爱 Σ=1.000  |  学习 Σ=1.000  |  。 Σ=1.000',
+      rowSumText: '我 Σ=1.000  |  爱 Σ=1.000  |  学习 Σ=1.000',
       OUT: [
-        [0.389, 0.372, 0.332, 0.253],
-        [0.315, 0.435, 0.386, 0.237],
-        [0.277, 0.387, 0.436, 0.267],
-        [0.308, 0.347, 0.377, 0.305]
+        [0.490, 0.519, 0.453, 0.169, 0.091, 0.097],
+        [0.403, 0.572, 0.503, 0.161, 0.110, 0.093],
+        [0.384, 0.530, 0.552, 0.167, 0.105, 0.106]
       ],
       /* 其他章节示意矩阵 */
       g3x6: [
@@ -4183,8 +4193,9 @@
     };
 
     var STATIC_FALLBACK = {
-      '3x6': 'g3x6', '3x8': 'g3x8', '5x8': 'g5x8', '5x6': 'g5x6',
-      '1x8': 'g1x8', '1x6': 'g1x6', '6x4': 'g6x4', '4x4': 'X', '4x6': 'Q'
+      '3x6': 'g3x6', '3x8': 'g3x8', '3x3': 'Q', '6x3': 'WQ', '6x6': 'WV',
+      '5x8': 'g5x8', '5x6': 'g5x6',
+      '1x8': 'g1x8', '1x6': 'g1x6', '6x4': 'g6x4', '4x4': 'Q', '4x6': 'V'
     };
 
     function staticMatrix(key) {
@@ -4207,10 +4218,11 @@
         row.forEach(function (v) { if (v > max) max = v; });
       });
       var span = max || 1;
-      var showValues = el.closest('#panel-attn') && r <= 4 && c <= 4;
+      var showValues = el.closest('#panel-attn') && ((r <= 3 && c <= 6) || (r <= 6 && c <= 3));
+      var showNumericW = el.closest('#panel-attn') && ['WV', 'WQ', 'WK'].indexOf(el.dataset.mx) >= 0;
       var cellSz = matrixCellSize(el);
       el.style.gridTemplateColumns = 'repeat(' + c + ', ' + cellSz + ')';
-      el.classList.toggle('matrix-values', showValues);
+      el.classList.toggle('matrix-values', showValues && !showNumericW);
       el.innerHTML = '';
       for (var i = 0; i < r; i++) {
         for (var j = 0; j < c; j++) {
@@ -4242,28 +4254,24 @@
 
     /* 热力图颜色：按静态档位，不依赖动态 min/max */
     var HEAT_SCORE_DARK = [
-      ['#1e3a5f', '#2a5080', '#3868a0', '#4080b8'],
-      ['#2a5080', '#3d72a8', '#5090c8', '#60a8d8'],
-      ['#3868a0', '#5090c8', '#68b0e0', '#78c0e8'],
-      ['#4080b8', '#60a8d8', '#78c0e8', '#90d0f0']
+      ['#1e3a5f', '#2a5080', '#3868a0'],
+      ['#2a5080', '#3d72a8', '#5090c8'],
+      ['#3868a0', '#5090c8', '#68b0e0']
     ];
     var HEAT_WEIGHT_DARK = [
-      ['#2d4a3e', '#3a6850', '#4a8868', '#5aa880'],
-      ['#3a6850', '#5a9870', '#6ab888', '#7ad0a0'],
-      ['#4a8868', '#6ab888', '#7ad0a0', '#8ae8b8'],
-      ['#5aa880', '#7ad0a0', '#8ae8b8', '#a0f0c8']
+      ['#2d4a3e', '#3a6850', '#4a8868'],
+      ['#3a6850', '#5a9870', '#6ab888'],
+      ['#4a8868', '#6ab888', '#7ad0a0']
     ];
     var HEAT_SCORE_LIGHT = [
-      ['#dbeafe', '#bfdbfe', '#93c5fd', '#7dd3fc'],
-      ['#bfdbfe', '#93c5fd', '#60a5fa', '#38bdf8'],
-      ['#93c5fd', '#60a5fa', '#3b82f6', '#0ea5e9'],
-      ['#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7']
+      ['#dbeafe', '#bfdbfe', '#93c5fd'],
+      ['#bfdbfe', '#93c5fd', '#60a5fa'],
+      ['#93c5fd', '#60a5fa', '#3b82f6']
     ];
     var HEAT_WEIGHT_LIGHT = [
-      ['#dcfce7', '#bbf7d0', '#86efac', '#6ee7b7'],
-      ['#bbf7d0', '#86efac', '#4ade80', '#34d399'],
-      ['#86efac', '#4ade80', '#22c55e', '#10b981'],
-      ['#6ee7b7', '#34d399', '#10b981', '#059669']
+      ['#dcfce7', '#bbf7d0', '#86efac'],
+      ['#bbf7d0', '#86efac', '#4ade80'],
+      ['#86efac', '#4ade80', '#22c55e']
     ];
 
     function heatPalette() {
@@ -4309,7 +4317,7 @@
       if (meta) {
         meta.textContent = mode === 'weights'
           ? ('行和验证：' + STATIC.rowSumText)
-          : '公式：Sᵢⱼ = (qᵢ·kⱼ)/√4，尚未 softmax';
+          : ('公式：Sᵢⱼ = (qᵢ·kⱼ)/√' + STATIC.dk + '，尚未 softmax');
       }
 
       el.dataset.filled = '1';
