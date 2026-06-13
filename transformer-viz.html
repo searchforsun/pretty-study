@@ -538,64 +538,6 @@
     }
     .overview-intro strong { color: var(--fg); }
 
-    /* 全景：6 模块学习路径条 */
-    .overview-learn-path {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem 0.5rem;
-      padding: 0.7rem 1.65rem;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-    }
-    .overview-learn-path-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin-right: 0.15rem;
-    }
-    .olp-item {
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      color: var(--muted);
-      font: inherit;
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 0.32rem 0.55rem 0.32rem 0.4rem;
-      border-radius: 999px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
-    }
-    .olp-item .olp-num {
-      width: 1.25rem;
-      height: 1.25rem;
-      border-radius: 5px;
-      display: grid;
-      place-items: center;
-      font-family: var(--heading);
-      font-size: 0.65rem;
-      font-weight: 800;
-      line-height: 1;
-      background: var(--chapter-badge-bg, var(--bg-elevated));
-      border: 1px solid var(--chapter-badge-border, var(--border));
-      color: var(--chapter-accent, var(--fg));
-    }
-    .olp-item:hover {
-      border-color: var(--chapter-badge-border, var(--border));
-      color: var(--chapter-accent, var(--fg));
-      box-shadow: 0 2px 10px var(--shadow);
-    }
-    .olp-item.ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
-    .olp-item.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
-    .olp-item.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
-    .olp-item.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
-    .olp-item.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
-    .olp-item.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
-
     .overview-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -806,6 +748,7 @@
       padding: 1.15rem 1.65rem 1.4rem;
       gap: 0.75rem;
       box-sizing: border-box;
+      overflow: visible;
     }
     .overview-glossary h3 {
       font-family: var(--heading);
@@ -822,33 +765,50 @@
       line-height: 1.45;
     }
     .glossary-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
       overflow: visible;
       padding-right: 0;
       margin-right: 0;
     }
-    .glossary-group + .glossary-group {
-      margin-top: 0.7rem;
-      padding-top: 0.65rem;
-      border-top: 1px dashed var(--border);
+    .glossary-group {
+      position: relative;
+      z-index: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      box-sizing: border-box;
     }
-    .glossary-group-tip {
-      margin: 0 0 0.45rem;
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.45;
+    .glossary-group.is-tip-open {
+      z-index: 30;
+    }
+    .glossary-group-body {
+      position: relative;
+    }
+    .glossary-group + .glossary-group {
+      margin-top: 0;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
     }
     .glossary-group-label {
       font-family: var(--heading);
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0 0 0.45rem;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--fg);
+      margin: 0 0 0.5rem;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.35rem 0.5rem;
+      gap: 0.4rem 0.55rem;
+    }
+    .glossary-group-label > span:last-child {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
     }
     .gg-module {
       display: inline-flex;
@@ -990,22 +950,66 @@
     [data-theme="dark"] .gt-orange .gt-name { color: #fb923c; }
 
     .glossary-detail {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: max-content;
+      max-width: min(22rem, calc(100vw - 2.5rem));
+      min-width: 14rem;
+      z-index: 1001;
       flex-shrink: 0;
-      margin-top: 0.2rem;
-      padding: 0.85rem 1rem;
+      margin-top: 0;
+      padding: 0;
       border-radius: 10px;
-      background: var(--bg-elevated);
+      background: var(--bg-panel);
       border: 1px solid var(--border);
-      min-height: 5.25rem;
-      display: flex;
+      min-height: 0;
+      display: none;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 0.35rem;
-      transition: border-color 0.25s, background 0.25s;
+      box-shadow: 0 12px 32px var(--shadow-lg);
+      transition: border-color 0.2s, box-shadow 0.2s, opacity 0.12s ease-out;
+    }
+    .glossary-detail.is-visible {
+      display: flex;
+      padding: 0.7rem 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .glossary-detail.is-positioned {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .glossary-detail.is-visible::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      right: -1.5rem;
+      bottom: 100%;
+      height: 0.5rem;
+    }
+    .glossary-detail.is-positioned.is-above::before {
+      display: none;
+    }
+    .glossary-detail.is-positioned.is-above::after {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      right: -1.5rem;
+      top: 100%;
+      height: 0.5rem;
     }
     .glossary-detail.has-active {
       border-color: var(--success-border);
-      background: var(--success-bg);
+      background: var(--bg-panel);
+      box-shadow: 0 12px 32px var(--shadow-lg), 0 0 0 1px var(--success-border);
+    }
+    [data-theme="light"] .glossary-detail.has-active {
+      background: #f8fafc;
+    }
+    [data-theme="dark"] .glossary-detail.has-active {
+      background: #141a24;
     }
     .gd-head {
       display: flex;
@@ -1059,7 +1063,7 @@
     .gd-body {
       margin: 0;
       font-size: 0.88rem;
-      color: var(--muted);
+      color: var(--fg);
       line-height: 1.55;
     }
     .gd-body strong { color: var(--fg); font-weight: 600; }
@@ -1073,6 +1077,12 @@
       border-radius: 6px;
       background: var(--primary-soft);
       border: 1px solid var(--primary-border);
+    }
+    [data-theme="light"] .glossary-detail .gd-example {
+      background: #eef2ff;
+    }
+    [data-theme="dark"] .glossary-detail .gd-example {
+      background: rgba(99, 102, 241, 0.14);
     }
     .gd-placeholder {
       margin: 0;
@@ -1099,19 +1109,6 @@
         justify-content: center;
         align-items: center;
         min-height: 100%;
-      }
-    }
-    @media (min-width: 1100px) {
-      .glossary-scroll {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.65rem 1.5rem;
-        align-items: start;
-      }
-      .glossary-group + .glossary-group {
-        margin-top: 0;
-        padding-top: 0;
-        border-top: none;
       }
     }
     @media (max-width: 768px) {
@@ -1144,7 +1141,7 @@
       .glossary-term { padding: 0.42rem 0.68rem; }
       .gt-name { font-size: 0.84rem; }
       .gt-zh { font-size: 0.76rem; }
-      .glossary-detail { min-height: 4.25rem; padding: 0.6rem 0.75rem; }
+      .glossary-detail.is-visible { padding: 0.6rem 0.75rem; }
       .gd-body { font-size: 0.8rem; }
     }
 
@@ -3037,18 +3034,8 @@
           <p>按 <strong>⓪→⑤</strong> 六个模块循序渐进：文字 → 矩阵 → Attention → 叠层 → 推理加速。GPT、BERT 等大模型都基于此。</p>
         </header>
 
-        <nav class="overview-learn-path" aria-label="6 模块学习路径">
-          <span class="overview-learn-path-label">学习路径</span>
-          <button type="button" class="olp-item ch-theme-overview" data-goto-panel="panel-overview"><span class="olp-num">⓪</span>全局地图</button>
-          <button type="button" class="olp-item ch-theme-la" data-goto-panel="panel-la"><span class="olp-num">①</span>矩阵入门</button>
-          <button type="button" class="olp-item ch-theme-embed" data-goto-panel="panel-embed"><span class="olp-num">②</span>词变数字</button>
-          <button type="button" class="olp-item ch-theme-attn" data-goto-panel="panel-attn"><span class="olp-num">③</span>Attention</button>
-          <button type="button" class="olp-item ch-theme-block" data-goto-panel="panel-block"><span class="olp-num">④</span>一层积木</button>
-          <button type="button" class="olp-item ch-theme-kv" data-goto-panel="panel-kv"><span class="olp-num">⑤</span>KV Cache</button>
-        </nav>
-
         <div class="overview-mid">
-        <div class="big-picture">
+          <div class="big-picture">
           <h3>一句话在模型里怎么流动？</h3>
           <div class="flow-pipeline">
             <div class="flow-stage fs-embed">
@@ -3092,9 +3079,9 @@
               <div class="flow-stage-desc">生成下一词</div>
             </div>
           </div>
-        </div>
+          </div>
 
-        <div class="overview-formula" aria-label="Transformer 核心 Attention 公式">
+          <div class="overview-formula" aria-label="Transformer 核心 Attention 公式">
           <div class="of-label">核心公式 · Scaled Dot-Product Attention</div>
           <div class="of-main">
             <span class="of-fn">Attention</span>(<span class="of-q">Q</span>, <span class="of-k">K</span>, <span class="of-v">V</span>)
@@ -3107,7 +3094,7 @@
             <span>打分 → 归一化 → 混合 V</span>
           </div>
           <p class="of-legend">W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>：可学习的投影矩阵 · d<sub>k</sub>：单头 Key 维度 · softmax：把分数变成权重（和为 1）</p>
-        </div>
+          </div>
         </div>
 
         <div class="overview-grid">
@@ -3136,20 +3123,29 @@
 
         <div class="overview-glossary">
           <h3>核心术语速查</h3>
-          <p class="glossary-hint-bar">术语按模块着色；悬停或点击术语，下方显示解释并跳转到对应模块（⓪～⑤）</p>
+          <p class="glossary-hint-bar">术语按模块着色；悬停术语时在<strong>该模块下方</strong>显示解释，移开即隐藏；可点击「去模块」跳转学习</p>
           <div class="glossary-scroll" id="glossary-grid">
             <div class="glossary-group">
               <h4 class="glossary-group-label">
                 <span class="gg-module ch-theme-la"><span class="gg-num">①</span>矩阵入门</span>
                 <span>形状与乘法</span>
               </h4>
-              <p class="glossary-group-tip">矩阵乘法规则是后续所有公式的地基 — 见模块 ①</p>
+              <div class="glossary-group-body">
+              <div class="glossary-chips">
+                <button type="button" class="glossary-term gt-blue" data-term="matrix"><span class="gt-name">Matrix</span><span class="gt-zh">矩阵</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="seq"><span class="gt-name">seq</span><span class="gt-zh">序列长度</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="dim"><span class="gt-name">d</span><span class="gt-zh">向量维度</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="matmul"><span class="gt-name">MatMul</span><span class="gt-zh">矩阵乘法</span></button>
+              </div>
+              <div class="glossary-detail" aria-hidden="true"></div>
+              </div>
             </div>
             <div class="glossary-group">
               <h4 class="glossary-group-label">
                 <span class="gg-module ch-theme-embed"><span class="gg-num">②</span>词变数字</span>
                 <span>输入与表示</span>
               </h4>
+              <div class="glossary-group-body">
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-blue" data-term="token"><span class="gt-name">Token</span><span class="gt-zh">词片段</span></button>
                 <button type="button" class="glossary-term gt-blue" data-term="embedding"><span class="gt-name">Embedding</span><span class="gt-zh">词向量</span></button>
@@ -3158,12 +3154,15 @@
                 <button type="button" class="glossary-term gt-yellow" data-term="hidden-states"><span class="gt-name">hidden states</span><span class="gt-zh">隐状态</span></button>
                 <button type="button" class="glossary-term gt-purple" data-term="lm-head"><span class="gt-name">LM Head</span><span class="gt-zh">词表输出层</span></button>
               </div>
+              <div class="glossary-detail" aria-hidden="true"></div>
+              </div>
             </div>
             <div class="glossary-group">
               <h4 class="glossary-group-label">
                 <span class="gg-module ch-theme-attn"><span class="gg-num">③</span>Attention</span>
                 <span>注意力机制</span>
               </h4>
+              <div class="glossary-group-body">
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-purple" data-term="q"><span class="gt-name">Q</span><span class="gt-zh">Query 查询</span></button>
                 <button type="button" class="glossary-term gt-cyan" data-term="k"><span class="gt-name">K</span><span class="gt-zh">Key 键</span></button>
@@ -3175,17 +3174,22 @@
                 <button type="button" class="glossary-term gt-orange" data-term="causal-mask"><span class="gt-name">Causal Mask</span><span class="gt-zh">因果掩码</span></button>
                 <button type="button" class="glossary-term gt-cyan gt-wide" data-term="w-proj"><span class="gt-name">W<sub>Q</sub> W<sub>K</sub> W<sub>V</sub></span><span class="gt-zh">投影矩阵</span></button>
               </div>
+              <div class="glossary-detail" aria-hidden="true"></div>
+              </div>
             </div>
             <div class="glossary-group">
               <h4 class="glossary-group-label">
                 <span class="gg-module ch-theme-block"><span class="gg-num">④</span>一层积木</span>
                 <span>层内结构</span>
               </h4>
+              <div class="glossary-group-body">
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-green" data-term="residual"><span class="gt-name">残差连接</span><span class="gt-zh">Residue</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="layernorm"><span class="gt-name">LayerNorm</span><span class="gt-zh">层归一化</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="rmsnorm"><span class="gt-name">RMSNorm</span><span class="gt-zh">层归一化</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="ffn"><span class="gt-name">FFN</span><span class="gt-zh">前馈网络</span></button>
+              </div>
+              <div class="glossary-detail" aria-hidden="true"></div>
               </div>
             </div>
             <div class="glossary-group">
@@ -3193,15 +3197,15 @@
                 <span class="gg-module ch-theme-kv"><span class="gg-num">⑤</span>KV Cache</span>
                 <span>推理与生成</span>
               </h4>
+              <div class="glossary-group-body">
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-green" data-term="kv-cache"><span class="gt-name">KV Cache</span><span class="gt-zh">推理缓存</span></button>
                 <button type="button" class="glossary-term gt-green" data-term="prefill"><span class="gt-name">Prefill</span><span class="gt-zh">预填充</span></button>
                 <button type="button" class="glossary-term gt-green" data-term="decode"><span class="gt-name">Decode</span><span class="gt-zh">逐词生成</span></button>
               </div>
+              <div class="glossary-detail" aria-hidden="true"></div>
+              </div>
             </div>
-          </div>
-          <div class="glossary-detail" id="glossary-detail">
-            <p class="gd-placeholder">例如：悬停 <strong>Q / K / V</strong>，看 Attention 里「问 → 匹配 → 搬运」三步分别对应什么</p>
           </div>
         </div>
       </div>
@@ -5211,6 +5215,34 @@
 
     /* 术语速查 */
     var GLOSSARY = {
+      matrix: {
+        title: 'Matrix · 矩阵',
+        chapter: '矩阵入门',
+        panel: 'panel-la',
+        body: '把一串 Token 排成<strong>行 × 列</strong>的表格：每一行是一个词的向量，每一列是一个特征维度。Transformer 里几乎所有运算都是矩阵及其乘法。',
+        example: '例：3 个词、每个 6 维 → 矩阵 X 的形状为 seq×d = 3×6'
+      },
+      seq: {
+        title: 'seq · 序列长度',
+        chapter: '矩阵入门',
+        panel: 'panel-la',
+        body: '句子中 Token 的个数，即矩阵的<strong>行数</strong>。seq 越大，Attention 打分矩阵越大（seq×seq），计算量也上升。',
+        example: '「我 爱 学习」→ seq = 3；batch 里还可再叠 batch 维'
+      },
+      dim: {
+        title: 'd · 向量维度',
+        chapter: '矩阵入门',
+        panel: 'panel-la',
+        body: '每个 Token 向量有多少个数字，即矩阵的<strong>列数</strong>。也叫 d_model / hidden size，决定模型「宽度」与参数量。',
+        example: '本教程示意 d = 6；真实模型常见 768、4096 等'
+      },
+      matmul: {
+        title: 'MatMul · 矩阵乘法',
+        chapter: '矩阵入门',
+        panel: 'panel-la',
+        body: '左矩阵<strong>列数 = 右矩阵行数</strong>才能相乘；结果形状 = 左行 × 右列。Attention、FFN、投影层全是这一套。',
+        example: '3×6 × 6×6 → 3×6；3×6 × 6×3 → 3×3（Q·Kᵀ）'
+      },
       token: {
         title: 'Token · 词片段',
         chapter: '词变数字',
@@ -5367,20 +5399,155 @@
       }
     };
 
-    function showGlossaryTerm(key) {
-      var item = GLOSSARY[key];
-      var detail = document.getElementById('glossary-detail');
-      if (!item || !detail) return;
-      document.querySelectorAll('.glossary-term').forEach(function (btn) {
-        btn.classList.toggle('is-active', btn.dataset.term === key);
+    var glossaryHideTimer = null;
+
+    function hideGlossaryGroup(group) {
+      if (!group) return;
+      group.classList.remove('is-tip-open');
+      var detail = group.querySelector('.glossary-detail');
+      if (detail) {
+        detail.classList.remove('is-visible', 'has-active', 'is-positioned', 'is-above');
+        detail.setAttribute('aria-hidden', 'true');
+        detail.innerHTML = '';
+        detail.style.left = '';
+        detail.style.top = '';
+      }
+      group.querySelectorAll('.glossary-term').forEach(function (btn) {
+        btn.classList.remove('is-active');
       });
+    }
+
+    function getGlossarySafeBounds() {
+      var pad = 10;
+      var bounds = {
+        top: pad,
+        bottom: window.innerHeight - pad,
+        left: pad,
+        right: window.innerWidth - pad
+      };
+      var header = document.querySelector('.doc-top');
+      var ctrl = document.querySelector('.step-controls');
+      if (header) bounds.top = Math.max(bounds.top, header.getBoundingClientRect().bottom + 6);
+      if (ctrl) bounds.bottom = Math.min(bounds.bottom, ctrl.getBoundingClientRect().top - 8);
+      return bounds;
+    }
+
+    function glossaryOverlapsBtn(top, height, btnRect, gap) {
+      return top < btnRect.bottom + gap && top + height > btnRect.top - gap;
+    }
+
+    function positionGlossaryDetail(detail, sourceBtn) {
+      if (!detail || !sourceBtn) return;
+      var gap = 8;
+      var bounds = getGlossarySafeBounds();
+      var btnRect = sourceBtn.getBoundingClientRect();
+      var width = detail.offsetWidth;
+      var height = detail.offsetHeight;
+      var left = btnRect.left;
+
+      if (left + width > bounds.right) left = bounds.right - width;
+      if (left < bounds.left) left = bounds.left;
+
+      var spaceBelow = bounds.bottom - btnRect.bottom - gap;
+      var spaceAbove = btnRect.top - bounds.top - gap;
+      var canBelow = height <= spaceBelow;
+      var canAbove = height <= spaceAbove;
+      var placeAbove = false;
+      var top;
+
+      if (canBelow && !canAbove) {
+        top = btnRect.bottom + gap;
+      } else if (canAbove && !canBelow) {
+        top = btnRect.top - height - gap;
+        placeAbove = true;
+      } else if (canBelow && canAbove) {
+        if (spaceAbove > spaceBelow) {
+          placeAbove = true;
+          top = btnRect.top - height - gap;
+        } else {
+          top = btnRect.bottom + gap;
+        }
+      } else {
+        placeAbove = spaceAbove > spaceBelow;
+        if (placeAbove) {
+          top = btnRect.top - height - gap;
+          if (top < bounds.top) top = bounds.top;
+        } else {
+          top = btnRect.bottom + gap;
+          if (top + height > bounds.bottom) top = bounds.bottom - height;
+        }
+      }
+
+      if (!placeAbove && glossaryOverlapsBtn(top, height, btnRect, gap)) {
+        if (canAbove || spaceAbove >= spaceBelow) {
+          placeAbove = true;
+          top = btnRect.top - height - gap;
+          if (top < bounds.top) top = bounds.top;
+        }
+      }
+      if (placeAbove && glossaryOverlapsBtn(top, height, btnRect, gap)) {
+        if (canBelow) {
+          placeAbove = false;
+          top = btnRect.bottom + gap;
+        }
+      }
+
+      if (top + height > bounds.bottom) top = bounds.bottom - height;
+      if (top < bounds.top) top = bounds.top;
+
+      detail.style.left = Math.round(left) + 'px';
+      detail.style.top = Math.round(top) + 'px';
+      detail.classList.toggle('is-above', placeAbove);
+    }
+
+    function nudgeGlossaryScroll(detail, bounds) {
+      if (!appMain || !appMain.classList.contains('is-page-scroll')) return false;
+      var rect = detail.getBoundingClientRect();
+      var delta = 0;
+      if (rect.bottom > bounds.bottom) delta = rect.bottom - bounds.bottom + 10;
+      else if (rect.top < bounds.top) delta = -(bounds.top - rect.top + 10);
+      if (!delta) return false;
+      appMain.scrollTop += delta;
+      return true;
+    }
+
+    function finalizeGlossaryDetail(detail, sourceBtn) {
+      positionGlossaryDetail(detail, sourceBtn);
+      var bounds = getGlossarySafeBounds();
+      if (nudgeGlossaryScroll(detail, bounds)) {
+        bounds = getGlossarySafeBounds();
+        positionGlossaryDetail(detail, sourceBtn);
+      }
+      detail.classList.add('is-positioned');
+    }
+
+    function showGlossaryTerm(key, sourceBtn) {
+      var item = GLOSSARY[key];
+      if (!item || !sourceBtn) return;
+      var group = sourceBtn.closest('.glossary-group');
+      if (!group) return;
+      var detail = group.querySelector('.glossary-detail');
+      if (!detail) return;
+
+      group.classList.add('is-tip-open');
+
+      document.querySelectorAll('.glossary-group').forEach(function (g) {
+        if (g !== group) hideGlossaryGroup(g);
+      });
+
+      group.querySelectorAll('.glossary-term').forEach(function (btn) {
+        btn.classList.toggle('is-active', btn === sourceBtn);
+      });
+
       var meta = CHAPTER_META[item.panel];
       var chapBtn = '';
       if (meta) {
         chapBtn = '<button type="button" class="gd-chapter ch-theme-' + meta.theme + '" data-goto-panel="' + item.panel + '">' +
           '<span class="gcc-num">' + meta.num + '</span>去模块 · ' + meta.label + '</button>';
       }
-      detail.classList.add('has-active');
+      detail.classList.remove('is-positioned', 'is-above');
+      detail.classList.add('is-visible', 'has-active');
+      detail.setAttribute('aria-hidden', 'false');
       detail.innerHTML =
         '<div class="gd-head">' +
           '<h4 class="gd-title">' + item.title + '</h4>' +
@@ -5394,11 +5561,30 @@
           switchPanel(gotoBtn.dataset.gotoPanel);
         });
       }
+      requestAnimationFrame(function () {
+        finalizeGlossaryDetail(detail, sourceBtn);
+      });
     }
 
     function initGlossary() {
       var grid = document.getElementById('glossary-grid');
       if (!grid) return;
+      grid.querySelectorAll('.glossary-group').forEach(function (group) {
+        group.addEventListener('mouseenter', function () {
+          if (glossaryHideTimer) clearTimeout(glossaryHideTimer);
+        });
+        group.addEventListener('mouseleave', function (e) {
+          if (group.contains(e.relatedTarget)) return;
+          if (glossaryHideTimer) clearTimeout(glossaryHideTimer);
+          glossaryHideTimer = setTimeout(function () {
+            hideGlossaryGroup(group);
+          }, 180);
+        });
+        group.addEventListener('focusout', function (e) {
+          if (e.relatedTarget && group.contains(e.relatedTarget)) return;
+          hideGlossaryGroup(group);
+        });
+      });
       grid.querySelectorAll('.glossary-term').forEach(function (btn) {
         var item = GLOSSARY[btn.dataset.term];
         if (item && item.panel && CHAPTER_META[item.panel]) {
@@ -5411,11 +5597,10 @@
             btn.insertBefore(mod, btn.firstChild);
           }
         }
-        btn.addEventListener('mouseenter', function () { showGlossaryTerm(btn.dataset.term); });
-        btn.addEventListener('focus', function () { showGlossaryTerm(btn.dataset.term); });
-        btn.addEventListener('click', function () { showGlossaryTerm(btn.dataset.term); });
+        btn.addEventListener('mouseenter', function () { showGlossaryTerm(btn.dataset.term, btn); });
+        btn.addEventListener('focus', function () { showGlossaryTerm(btn.dataset.term, btn); });
+        btn.addEventListener('click', function () { showGlossaryTerm(btn.dataset.term, btn); });
       });
-      showGlossaryTerm('self-attn');
     }
 
     function initOverviewNav() {
