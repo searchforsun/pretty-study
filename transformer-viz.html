@@ -461,6 +461,7 @@
     /* 概览页：滚动交给全宽 app-main，滚动条在视口最右侧 */
     #panel-overview {
       overflow: visible;
+      --chapter-accent: var(--primary);
     }
     #panel-overview .overview-shell {
       flex: 0 0 auto;
@@ -536,6 +537,64 @@
       line-height: 1.45;
     }
     .overview-intro strong { color: var(--fg); }
+
+    /* 全景：6 模块学习路径条 */
+    .overview-learn-path {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem 0.5rem;
+      padding: 0.7rem 1.65rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .overview-learn-path-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 0.15rem;
+    }
+    .olp-item {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.32rem 0.55rem 0.32rem 0.4rem;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .olp-item .olp-num {
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.65rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--chapter-badge-bg, var(--bg-elevated));
+      border: 1px solid var(--chapter-badge-border, var(--border));
+      color: var(--chapter-accent, var(--fg));
+    }
+    .olp-item:hover {
+      border-color: var(--chapter-badge-border, var(--border));
+      color: var(--chapter-accent, var(--fg));
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+    .olp-item.ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
+    .olp-item.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .olp-item.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .olp-item.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .olp-item.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .olp-item.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
 
     .overview-grid {
       display: grid;
@@ -628,6 +687,28 @@
       position: relative;
       padding: 0 0.25rem;
     }
+    .flow-stage-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      padding: 0 0.25rem;
+      margin-bottom: 0.35rem;
+      border-radius: 6px;
+      font-family: var(--heading);
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--fs-badge-bg, var(--bg-elevated));
+      border: 1px solid var(--fs-badge-border, var(--border));
+      color: var(--fs-accent, var(--muted));
+    }
+    .flow-stage.fs-la { --fs-accent: var(--c-input); --fs-badge-bg: rgba(59, 130, 246, 0.12); --fs-badge-border: rgba(37, 99, 235, 0.3); }
+    .flow-stage.fs-embed { --fs-accent: var(--c-key); --fs-badge-bg: rgba(8, 145, 178, 0.1); --fs-badge-border: rgba(8, 145, 178, 0.3); }
+    .flow-stage.fs-attn { --fs-accent: var(--c-query); --fs-badge-bg: rgba(147, 51, 234, 0.1); --fs-badge-border: rgba(147, 51, 234, 0.3); }
+    .flow-stage.fs-block { --fs-accent: var(--c-ffn); --fs-badge-bg: rgba(234, 179, 8, 0.12); --fs-badge-border: rgba(202, 138, 4, 0.35); }
+    .flow-stage.fs-out { --fs-accent: var(--success); --fs-badge-bg: var(--success-bg); --fs-badge-border: var(--success-border); }
     .flow-stage:not(:last-child)::after {
       content: '';
       position: absolute;
@@ -750,6 +831,12 @@
       padding-top: 0.65rem;
       border-top: 1px dashed var(--border);
     }
+    .glossary-group-tip {
+      margin: 0 0 0.45rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
     .glossary-group-label {
       font-family: var(--heading);
       font-size: 0.78rem;
@@ -758,7 +845,56 @@
       text-transform: uppercase;
       color: var(--muted);
       margin: 0 0 0.45rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.5rem;
     }
+    .gg-module {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: none;
+      border: 1px solid var(--chapter-badge-border, var(--border));
+      background: var(--chapter-badge-bg, var(--bg-card));
+      color: var(--chapter-accent, var(--fg));
+    }
+    .gg-module .gg-num {
+      font-family: var(--heading);
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+    .gg-module.ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
+    .gg-module.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .gg-module.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .gg-module.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .gg-module.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .gg-module.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
+    .glossary-term .gt-module {
+      flex-shrink: 0;
+      width: 1.15rem;
+      height: 1.15rem;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.58rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--chapter-badge-bg, var(--bg-elevated));
+      border: 1px solid var(--chapter-badge-border, var(--border));
+      color: var(--chapter-accent, var(--muted));
+    }
+    .glossary-term.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .glossary-term.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .glossary-term.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .glossary-term.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .glossary-term.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
     .glossary-chips {
       display: flex;
       flex-wrap: wrap;
@@ -887,17 +1023,39 @@
     }
     .gd-chapter {
       font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--success);
-      background: var(--bg-panel);
-      border: 1px solid var(--success-border);
-      padding: 0.2rem 0.55rem;
+      font-weight: 700;
+      background: var(--chapter-badge-bg, var(--bg-panel));
+      border: 1px solid var(--chapter-badge-border, var(--success-border));
+      color: var(--chapter-accent, var(--success));
+      padding: 0.22rem 0.55rem 0.22rem 0.4rem;
       border-radius: 999px;
       cursor: pointer;
       font-family: inherit;
-      transition: background 0.2s;
+      transition: background 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
-    .gd-chapter:hover { background: var(--success-bg); }
+    .gd-chapter .gcc-num {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.62rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--bg-panel);
+      border: 1px solid var(--chapter-badge-border, var(--border));
+    }
+    .gd-chapter:hover { box-shadow: 0 2px 10px var(--shadow); }
+    .gd-chapter.ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
+    .gd-chapter.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .gd-chapter.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .gd-chapter.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .gd-chapter.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .gd-chapter.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
     .gd-body {
       margin: 0;
       font-size: 0.88rem;
@@ -1871,16 +2029,17 @@
       gap: 0.65rem;
       padding: 0.65rem 0.95rem;
       border-radius: 10px;
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(202, 138, 4, 0.35);
       font-size: 1rem;
     }
     .block-now-badge {
       font-family: var(--mono);
       font-size: 0.82rem;
       font-weight: 700;
-      color: var(--success);
-      background: var(--success-bg);
+      color: var(--c-ffn);
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(202, 138, 4, 0.35);
       padding: 0.2rem 0.5rem;
       border-radius: 6px;
       white-space: nowrap;
@@ -2209,7 +2368,49 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
     }
+    .step-title-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .step-chapter-chip {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.18rem 0.45rem 0.18rem 0.3rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid var(--chapter-badge-border, var(--border));
+      background: var(--chapter-badge-bg, var(--bg-elevated));
+      color: var(--chapter-accent, var(--fg));
+    }
+    .step-chapter-chip .scc-num {
+      width: 1.15rem;
+      height: 1.15rem;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      font-family: var(--heading);
+      font-size: 0.62rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--bg-panel);
+      border: 1px solid var(--chapter-badge-border, var(--border));
+    }
+    .step-chapter-chip.ch-theme-overview { --chapter-accent: var(--primary-text); --chapter-badge-bg: var(--primary-soft); --chapter-badge-border: var(--primary-border); }
+    .step-chapter-chip.ch-theme-la { --chapter-accent: var(--c-input); --chapter-badge-bg: rgba(59, 130, 246, 0.12); --chapter-badge-border: rgba(37, 99, 235, 0.3); }
+    .step-chapter-chip.ch-theme-embed { --chapter-accent: var(--c-key); --chapter-badge-bg: rgba(8, 145, 178, 0.1); --chapter-badge-border: rgba(8, 145, 178, 0.3); }
+    .step-chapter-chip.ch-theme-attn { --chapter-accent: var(--c-query); --chapter-badge-bg: rgba(147, 51, 234, 0.1); --chapter-badge-border: rgba(147, 51, 234, 0.3); }
+    .step-chapter-chip.ch-theme-block { --chapter-accent: var(--c-ffn); --chapter-badge-bg: rgba(234, 179, 8, 0.12); --chapter-badge-border: rgba(202, 138, 4, 0.35); }
+    .step-chapter-chip.ch-theme-kv { --chapter-accent: var(--success); --chapter-badge-bg: var(--success-bg); --chapter-badge-border: var(--success-border); }
     .step-meta-sub {
       font-family: var(--mono);
       font-size: 0.82rem;
@@ -2231,9 +2432,9 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .ctrl-btn:hover:not(:disabled) { border-color: var(--success-border); color: var(--success); }
+    .ctrl-btn:hover:not(:disabled) { border-color: var(--chapter-accent, var(--success-border)); color: var(--chapter-accent, var(--success)); }
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .ctrl-btn.play { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+    .ctrl-btn.play { background: var(--chapter-badge-bg, var(--success-bg)); border-color: var(--chapter-badge-border, var(--success-border)); color: var(--chapter-accent, var(--success)); }
     .ctrl-btn.play.on { background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.4); color: #ca8a04; }
     [data-theme="dark"] .ctrl-btn.play.on { color: #facc15; }
     .step-dots { display: flex; gap: 0.45rem; }
@@ -2793,7 +2994,7 @@
       font-size: 0.92rem;
     }
     #panel-block .stack-block.active {
-      box-shadow: 0 0 16px var(--success-glow);
+      box-shadow: 0 0 16px rgba(234, 179, 8, 0.28);
     }
 
     footer { display: none; }
@@ -2833,42 +3034,57 @@
       <div class="overview-shell">
         <header class="overview-intro">
           <h2>Transformer 是什么？一张图先看全貌</h2>
-          <p>文字 → 矩阵 → Attention → 叠层 → 预测下一词。GPT、BERT 等大模型都基于此。</p>
+          <p>按 <strong>⓪→⑤</strong> 六个模块循序渐进：文字 → 矩阵 → Attention → 叠层 → 推理加速。GPT、BERT 等大模型都基于此。</p>
         </header>
+
+        <nav class="overview-learn-path" aria-label="6 模块学习路径">
+          <span class="overview-learn-path-label">学习路径</span>
+          <button type="button" class="olp-item ch-theme-overview" data-goto-panel="panel-overview"><span class="olp-num">⓪</span>全局地图</button>
+          <button type="button" class="olp-item ch-theme-la" data-goto-panel="panel-la"><span class="olp-num">①</span>矩阵入门</button>
+          <button type="button" class="olp-item ch-theme-embed" data-goto-panel="panel-embed"><span class="olp-num">②</span>词变数字</button>
+          <button type="button" class="olp-item ch-theme-attn" data-goto-panel="panel-attn"><span class="olp-num">③</span>Attention</button>
+          <button type="button" class="olp-item ch-theme-block" data-goto-panel="panel-block"><span class="olp-num">④</span>一层积木</button>
+          <button type="button" class="olp-item ch-theme-kv" data-goto-panel="panel-kv"><span class="olp-num">⑤</span>KV Cache</button>
+        </nav>
 
         <div class="overview-mid">
         <div class="big-picture">
           <h3>一句话在模型里怎么流动？</h3>
           <div class="flow-pipeline">
-            <div class="flow-stage">
+            <div class="flow-stage fs-embed">
+              <span class="flow-stage-num">②</span>
               <div class="flow-stage-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
               </div>
               <div class="flow-stage-title">输入文字</div>
               <div class="flow-stage-desc">切成词</div>
             </div>
-            <div class="flow-stage">
+            <div class="flow-stage fs-la">
+              <span class="flow-stage-num">①</span>
               <div class="flow-stage-icon" style="background:rgba(99,102,241,0.15);color:#a5b4fc">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
               </div>
               <div class="flow-stage-title">变成矩阵</div>
               <div class="flow-stage-desc">一词一行</div>
             </div>
-            <div class="flow-stage">
+            <div class="flow-stage fs-attn">
+              <span class="flow-stage-num">③</span>
               <div class="flow-stage-icon" style="background:rgba(168,85,247,0.15);color:#c084fc">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
               </div>
               <div class="flow-stage-title">Attention</div>
               <div class="flow-stage-desc">词看全句</div>
             </div>
-            <div class="flow-stage">
+            <div class="flow-stage fs-block">
+              <span class="flow-stage-num">④</span>
               <div class="flow-stage-icon" style="background:rgba(234,179,8,0.12);color:#facc15">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
               </div>
               <div class="flow-stage-title">叠 N 层</div>
               <div class="flow-stage-desc">Attn + FFN</div>
             </div>
-            <div class="flow-stage">
+            <div class="flow-stage fs-out">
+              <span class="flow-stage-num">出</span>
               <div class="flow-stage-icon" style="background:rgba(34,197,94,0.12);color:#4ade80">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
@@ -2920,10 +3136,20 @@
 
         <div class="overview-glossary">
           <h3>核心术语速查</h3>
-          <p class="glossary-hint-bar">按主题分组；悬停或点击术语，下方显示白话解释与教程章节</p>
+          <p class="glossary-hint-bar">术语按模块着色；悬停或点击术语，下方显示解释并跳转到对应模块（⓪～⑤）</p>
           <div class="glossary-scroll" id="glossary-grid">
             <div class="glossary-group">
-              <h4 class="glossary-group-label">输入与表示</h4>
+              <h4 class="glossary-group-label">
+                <span class="gg-module ch-theme-la"><span class="gg-num">①</span>矩阵入门</span>
+                <span>形状与乘法</span>
+              </h4>
+              <p class="glossary-group-tip">矩阵乘法规则是后续所有公式的地基 — 见模块 ①</p>
+            </div>
+            <div class="glossary-group">
+              <h4 class="glossary-group-label">
+                <span class="gg-module ch-theme-embed"><span class="gg-num">②</span>词变数字</span>
+                <span>输入与表示</span>
+              </h4>
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-blue" data-term="token"><span class="gt-name">Token</span><span class="gt-zh">词片段</span></button>
                 <button type="button" class="glossary-term gt-blue" data-term="embedding"><span class="gt-name">Embedding</span><span class="gt-zh">词向量</span></button>
@@ -2934,7 +3160,10 @@
               </div>
             </div>
             <div class="glossary-group">
-              <h4 class="glossary-group-label">Attention 机制</h4>
+              <h4 class="glossary-group-label">
+                <span class="gg-module ch-theme-attn"><span class="gg-num">③</span>Attention</span>
+                <span>注意力机制</span>
+              </h4>
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-purple" data-term="q"><span class="gt-name">Q</span><span class="gt-zh">Query 查询</span></button>
                 <button type="button" class="glossary-term gt-cyan" data-term="k"><span class="gt-name">K</span><span class="gt-zh">Key 键</span></button>
@@ -2948,7 +3177,10 @@
               </div>
             </div>
             <div class="glossary-group">
-              <h4 class="glossary-group-label">层内结构</h4>
+              <h4 class="glossary-group-label">
+                <span class="gg-module ch-theme-block"><span class="gg-num">④</span>一层积木</span>
+                <span>层内结构</span>
+              </h4>
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-green" data-term="residual"><span class="gt-name">残差连接</span><span class="gt-zh">Residue</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="layernorm"><span class="gt-name">LayerNorm</span><span class="gt-zh">层归一化</span></button>
@@ -2957,7 +3189,10 @@
               </div>
             </div>
             <div class="glossary-group">
-              <h4 class="glossary-group-label">推理与生成</h4>
+              <h4 class="glossary-group-label">
+                <span class="gg-module ch-theme-kv"><span class="gg-num">⑤</span>KV Cache</span>
+                <span>推理与生成</span>
+              </h4>
               <div class="glossary-chips">
                 <button type="button" class="glossary-term gt-green" data-term="kv-cache"><span class="gt-name">KV Cache</span><span class="gt-zh">推理缓存</span></button>
                 <button type="button" class="glossary-term gt-green" data-term="prefill"><span class="gt-name">Prefill</span><span class="gt-zh">预填充</span></button>
@@ -3555,7 +3790,7 @@
       <button class="ctrl-btn" id="btn-prev" disabled>← 上一步</button>
       <div class="step-center">
         <div class="step-meta">
-          <span class="step-meta-title" id="step-title">全局地图</span>
+          <span class="step-meta-title" id="step-title"><span class="step-chapter-chip ch-theme-overview"><span class="scc-num">⓪</span>全局地图</span><span class="step-title-text">先建立整体印象</span></span>
           <span class="step-meta-sub" id="step-meta-sub"><span id="step-counter">概览</span></span>
         </div>
         <div class="step-dots" id="step-dots"></div>
@@ -4426,7 +4661,7 @@
       panel.querySelectorAll('.block-diagram').forEach(function (diag) {
         var badge = diag.querySelector('.block-now-badge');
         var title = diag.querySelector('.block-now-title');
-        if (badge) badge.textContent = '步骤 ' + (step + 1) + ' / ' + total;
+        if (badge) badge.textContent = '④ · 步骤 ' + (step + 1) + ' / ' + total;
         if (title && meta) title.textContent = meta.short;
       });
 
@@ -4755,16 +4990,28 @@
       var subEl = document.getElementById('step-meta-sub');
       if (!titleEl) return;
       if (panel.id === 'panel-overview') {
-        titleEl.textContent = '⓪ 全局地图 · 先建立整体印象';
+        titleEl.innerHTML =
+          '<span class="step-chapter-chip ch-theme-overview"><span class="scc-num">⓪</span>全局地图</span>' +
+          '<span class="step-title-text">先建立整体印象</span>';
         if (subEl) subEl.innerHTML = '<span id="step-counter">6 模块学习路径 · 概览</span>';
         return;
       }
       var items = EXPLAIN[panel.id];
+      var stepTitle = '';
       if (items && items[step]) {
-        titleEl.textContent = items[step].title.replace(/<[^>]+>/g, '');
+        stepTitle = items[step].title.replace(/<[^>]+>/g, '');
+      }
+      var meta = CHAPTER_META[panel.id];
+      if (meta && stepTitle) {
+        titleEl.innerHTML =
+          '<span class="step-chapter-chip ch-theme-' + meta.theme + '">' +
+            '<span class="scc-num">' + meta.num + '</span>' + meta.label +
+          '</span>' +
+          '<span class="step-title-text">' + stepTitle + '</span>';
+      } else if (stepTitle) {
+        titleEl.textContent = stepTitle;
       }
       if (subEl) {
-        var meta = CHAPTER_META[panel.id];
         var prefix = meta ? meta.num + ' ' + meta.label : CHAPTER_LABELS[panel.id] || '';
         subEl.innerHTML = prefix + ' · 步骤 <span id="step-counter">' + (step + 1) + ' / ' + totalSteps + '</span>';
       }
@@ -5119,11 +5366,17 @@
       document.querySelectorAll('.glossary-term').forEach(function (btn) {
         btn.classList.toggle('is-active', btn.dataset.term === key);
       });
+      var meta = CHAPTER_META[item.panel];
+      var chapBtn = '';
+      if (meta) {
+        chapBtn = '<button type="button" class="gd-chapter ch-theme-' + meta.theme + '" data-goto-panel="' + item.panel + '">' +
+          '<span class="gcc-num">' + meta.num + '</span>去模块 · ' + meta.label + '</button>';
+      }
       detail.classList.add('has-active');
       detail.innerHTML =
         '<div class="gd-head">' +
           '<h4 class="gd-title">' + item.title + '</h4>' +
-          '<button type="button" class="gd-chapter" data-goto-panel="' + item.panel + '">→ ' + item.chapter + '</button>' +
+          chapBtn +
         '</div>' +
         '<p class="gd-body">' + item.body + '</p>' +
         '<p class="gd-example">' + item.example + '</p>';
@@ -5139,11 +5392,32 @@
       var grid = document.getElementById('glossary-grid');
       if (!grid) return;
       grid.querySelectorAll('.glossary-term').forEach(function (btn) {
+        var item = GLOSSARY[btn.dataset.term];
+        if (item && item.panel && CHAPTER_META[item.panel]) {
+          var m = CHAPTER_META[item.panel];
+          btn.classList.add('ch-theme-' + m.theme);
+          if (!btn.querySelector('.gt-module')) {
+            var mod = document.createElement('span');
+            mod.className = 'gt-module';
+            mod.textContent = m.num;
+            btn.insertBefore(mod, btn.firstChild);
+          }
+        }
         btn.addEventListener('mouseenter', function () { showGlossaryTerm(btn.dataset.term); });
         btn.addEventListener('focus', function () { showGlossaryTerm(btn.dataset.term); });
         btn.addEventListener('click', function () { showGlossaryTerm(btn.dataset.term); });
       });
       showGlossaryTerm('self-attn');
+    }
+
+    function initOverviewNav() {
+      document.querySelectorAll('[data-goto-panel]').forEach(function (el) {
+        if (el.classList.contains('gd-chapter')) return;
+        el.addEventListener('click', function () {
+          var pid = el.getAttribute('data-goto-panel');
+          if (pid) switchPanel(pid);
+        });
+      });
     }
 
     /* 章节切换 */
@@ -5212,6 +5486,7 @@
     });
 
     initGlossary();
+    initOverviewNav();
     initPanel(document.getElementById('panel-overview'));
   })();
   </script>
