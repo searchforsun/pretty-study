@@ -1025,6 +1025,17 @@
       color: var(--fg);
       margin: 0;
     }
+    .gd-formal-term {
+      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+    }
     .gd-chapter {
       font-size: 0.82rem;
       font-weight: 700;
@@ -1341,6 +1352,18 @@
       line-height: 1.38;
       margin: 0;
     }
+    .explain-terms {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 0.42rem 0.62rem;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+    }
+    .explain-terms strong { font-weight: 700; color: var(--primary-text); }
     .explain-plain {
       margin: 0;
       font-size: 1.12rem;
@@ -3009,9 +3032,9 @@
     <nav class="chapter-pills" id="chapter-pills" aria-label="章节导航（6 模块）">
       <button class="chapter-pill active" type="button" data-panel="panel-overview" data-chapter-theme="overview" title="⓪ 全局地图"><span class="chapter-pill-num">⓪</span><span class="chapter-pill-label">全局地图</span></button>
       <button class="chapter-pill" type="button" data-panel="panel-la" data-chapter-theme="la" title="① 矩阵入门"><span class="chapter-pill-num">①</span><span class="chapter-pill-label">矩阵入门</span></button>
-      <button class="chapter-pill" type="button" data-panel="panel-embed" data-chapter-theme="embed" title="② 词变数字"><span class="chapter-pill-num">②</span><span class="chapter-pill-label">词变数字</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-embed" data-chapter-theme="embed" title="② 词嵌入（Embedding）"><span class="chapter-pill-num">②</span><span class="chapter-pill-label">词嵌入</span></button>
       <button class="chapter-pill" type="button" data-panel="panel-attn" data-chapter-theme="attn" title="③ Attention"><span class="chapter-pill-num">③</span><span class="chapter-pill-label">Attention</span></button>
-      <button class="chapter-pill" type="button" data-panel="panel-block" data-chapter-theme="block" title="④ 一层积木"><span class="chapter-pill-num">④</span><span class="chapter-pill-label">一层积木</span></button>
+      <button class="chapter-pill" type="button" data-panel="panel-block" data-chapter-theme="block" title="④ 编码器层（Encoder Layer）"><span class="chapter-pill-num">④</span><span class="chapter-pill-label">编码器层</span></button>
       <button class="chapter-pill" type="button" data-panel="panel-kv" data-chapter-theme="kv" title="⑤ KV Cache"><span class="chapter-pill-num">⑤</span><span class="chapter-pill-label">KV Cache</span></button>
     </nav>
     <div class="header-actions">
@@ -3031,7 +3054,7 @@
       <div class="overview-shell">
         <header class="overview-intro">
           <h2>Transformer 是什么？一张图先看全貌</h2>
-          <p>按 <strong>⓪→⑤</strong> 六个模块循序渐进：文字 → 矩阵 → Attention → 叠层 → 推理加速。GPT、BERT 等大模型都基于此。</p>
+          <p>按 <strong>⓪→⑤</strong> 六个模块循序渐进：词嵌入 → 矩阵运算 → 自注意力 → 编码器层 → 推理加速。GPT、BERT 等大模型都基于此。</p>
         </header>
 
         <div class="overview-mid">
@@ -3043,8 +3066,8 @@
               <div class="flow-stage-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
               </div>
-              <div class="flow-stage-title">输入文字</div>
-              <div class="flow-stage-desc">切成词</div>
+              <div class="flow-stage-title">词嵌入</div>
+              <div class="flow-stage-desc">Embedding + PE</div>
             </div>
             <div class="flow-stage fs-la">
               <span class="flow-stage-num">①</span>
@@ -3067,8 +3090,8 @@
               <div class="flow-stage-icon" style="background:rgba(234,179,8,0.12);color:#facc15">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
               </div>
-              <div class="flow-stage-title">叠 N 层</div>
-              <div class="flow-stage-desc">Attn + FFN</div>
+              <div class="flow-stage-title">编码器层</div>
+              <div class="flow-stage-desc">堆叠 N 层</div>
             </div>
             <div class="flow-stage fs-out">
               <span class="flow-stage-num">出</span>
@@ -3093,7 +3116,7 @@
             <span><span class="of-v">V</span>=X·W<sub>V</sub></span>
             <span>打分 → 归一化 → 混合 V</span>
           </div>
-          <p class="of-legend">W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>：可学习的投影矩阵 · d<sub>k</sub>：单头 Key 维度 · softmax：把分数变成权重（和为 1）</p>
+          <p class="of-legend">W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>：查询/键/值投影矩阵 · d<sub>k</sub>：键向量维度 · Softmax：将分数归一化为注意力权重（行和为 1）</p>
           </div>
         </div>
 
@@ -3110,7 +3133,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
             <h3>Attention 做什么？</h3>
-            <p>算词与词的相关度，按权重混合上下文信息。</p>
+            <p>自注意力机制：计算词元间相关度，按权重融合上下文信息。</p>
           </div>
           <div class="overview-card">
             <div class="overview-card-icon" style="background:rgba(34,197,94,0.12);color:#4ade80">
@@ -3142,17 +3165,17 @@
             </div>
             <div class="glossary-group">
               <h4 class="glossary-group-label">
-                <span class="gg-module ch-theme-embed"><span class="gg-num">②</span>词变数字</span>
+                <span class="gg-module ch-theme-embed"><span class="gg-num">②</span>词嵌入</span>
                 <span>输入与表示</span>
               </h4>
               <div class="glossary-group-body">
               <div class="glossary-chips">
-                <button type="button" class="glossary-term gt-blue" data-term="token"><span class="gt-name">Token</span><span class="gt-zh">词片段</span></button>
-                <button type="button" class="glossary-term gt-blue" data-term="embedding"><span class="gt-name">Embedding</span><span class="gt-zh">词向量</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="token"><span class="gt-name">Token</span><span class="gt-zh">词元</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="embedding"><span class="gt-name">Embedding</span><span class="gt-zh">词嵌入</span></button>
                 <button type="button" class="glossary-term gt-blue" data-term="tokenizer"><span class="gt-name">Tokenizer</span><span class="gt-zh">分词器</span></button>
-                <button type="button" class="glossary-term gt-blue" data-term="logits"><span class="gt-name">logits</span><span class="gt-zh">原始得分</span></button>
-                <button type="button" class="glossary-term gt-yellow" data-term="hidden-states"><span class="gt-name">hidden states</span><span class="gt-zh">隐状态</span></button>
-                <button type="button" class="glossary-term gt-purple" data-term="lm-head"><span class="gt-name">LM Head</span><span class="gt-zh">词表输出层</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="logits"><span class="gt-name">logits</span><span class="gt-zh">未归一化分数</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="hidden-states"><span class="gt-name">hidden states</span><span class="gt-zh">隐层状态</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="lm-head"><span class="gt-name">LM Head</span><span class="gt-zh">语言模型头</span></button>
               </div>
               <div class="glossary-detail" aria-hidden="true"></div>
               </div>
@@ -3164,13 +3187,13 @@
               </h4>
               <div class="glossary-group-body">
               <div class="glossary-chips">
-                <button type="button" class="glossary-term gt-purple" data-term="q"><span class="gt-name">Q</span><span class="gt-zh">Query 查询</span></button>
-                <button type="button" class="glossary-term gt-cyan" data-term="k"><span class="gt-name">K</span><span class="gt-zh">Key 键</span></button>
-                <button type="button" class="glossary-term gt-orange" data-term="v"><span class="gt-name">V</span><span class="gt-zh">Value 值</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="q"><span class="gt-name">Q</span><span class="gt-zh">查询向量</span></button>
+                <button type="button" class="glossary-term gt-cyan" data-term="k"><span class="gt-name">K</span><span class="gt-zh">键向量</span></button>
+                <button type="button" class="glossary-term gt-orange" data-term="v"><span class="gt-name">V</span><span class="gt-zh">值向量</span></button>
                 <button type="button" class="glossary-term gt-purple" data-term="self-attn"><span class="gt-name">Self-Attention</span><span class="gt-zh">自注意力</span></button>
-                <button type="button" class="glossary-term gt-purple" data-term="multi-head"><span class="gt-name">Multi-Head</span><span class="gt-zh">多头</span></button>
-                <button type="button" class="glossary-term gt-blue" data-term="softmax"><span class="gt-name">softmax</span><span class="gt-zh">归一化</span></button>
-                <button type="button" class="glossary-term gt-cyan" data-term="rope"><span class="gt-name">RoPE</span><span class="gt-zh">位置编码</span></button>
+                <button type="button" class="glossary-term gt-purple" data-term="multi-head"><span class="gt-name">Multi-Head</span><span class="gt-zh">多头注意力</span></button>
+                <button type="button" class="glossary-term gt-blue" data-term="softmax"><span class="gt-name">softmax</span><span class="gt-zh">Softmax 函数</span></button>
+                <button type="button" class="glossary-term gt-cyan" data-term="rope"><span class="gt-name">RoPE</span><span class="gt-zh">旋转位置嵌入</span></button>
                 <button type="button" class="glossary-term gt-orange" data-term="causal-mask"><span class="gt-name">Causal Mask</span><span class="gt-zh">因果掩码</span></button>
                 <button type="button" class="glossary-term gt-cyan gt-wide" data-term="w-proj"><span class="gt-name">W<sub>Q</sub> W<sub>K</sub> W<sub>V</sub></span><span class="gt-zh">投影矩阵</span></button>
               </div>
@@ -3179,14 +3202,14 @@
             </div>
             <div class="glossary-group">
               <h4 class="glossary-group-label">
-                <span class="gg-module ch-theme-block"><span class="gg-num">④</span>一层积木</span>
+                <span class="gg-module ch-theme-block"><span class="gg-num">④</span>编码器层</span>
                 <span>层内结构</span>
               </h4>
               <div class="glossary-group-body">
               <div class="glossary-chips">
-                <button type="button" class="glossary-term gt-green" data-term="residual"><span class="gt-name">残差连接</span><span class="gt-zh">Residue</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="residual"><span class="gt-name">残差连接</span><span class="gt-zh">Residual</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="layernorm"><span class="gt-name">LayerNorm</span><span class="gt-zh">层归一化</span></button>
-                <button type="button" class="glossary-term gt-yellow" data-term="rmsnorm"><span class="gt-name">RMSNorm</span><span class="gt-zh">层归一化</span></button>
+                <button type="button" class="glossary-term gt-yellow" data-term="rmsnorm"><span class="gt-name">RMSNorm</span><span class="gt-zh">RMS 归一化</span></button>
                 <button type="button" class="glossary-term gt-yellow" data-term="ffn"><span class="gt-name">FFN</span><span class="gt-zh">前馈网络</span></button>
               </div>
               <div class="glossary-detail" aria-hidden="true"></div>
@@ -3199,9 +3222,9 @@
               </h4>
               <div class="glossary-group-body">
               <div class="glossary-chips">
-                <button type="button" class="glossary-term gt-green" data-term="kv-cache"><span class="gt-name">KV Cache</span><span class="gt-zh">推理缓存</span></button>
-                <button type="button" class="glossary-term gt-green" data-term="prefill"><span class="gt-name">Prefill</span><span class="gt-zh">预填充</span></button>
-                <button type="button" class="glossary-term gt-green" data-term="decode"><span class="gt-name">Decode</span><span class="gt-zh">逐词生成</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="kv-cache"><span class="gt-name">KV Cache</span><span class="gt-zh">键值缓存</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="prefill"><span class="gt-name">Prefill</span><span class="gt-zh">预填充阶段</span></button>
+                <button type="button" class="glossary-term gt-green" data-term="decode"><span class="gt-name">Decode</span><span class="gt-zh">解码阶段</span></button>
               </div>
               <div class="glossary-detail" aria-hidden="true"></div>
               </div>
@@ -3308,14 +3331,14 @@
       </div>
     </section>
 
-    <!-- ② 词 → X -->
+    <!-- ② 词嵌入与位置编码 -->
     <section class="panel" id="panel-embed" data-step-count="4">
       <div class="panel-head">
-        <h2 class="panel-title">第 ② 章：词怎么变成矩阵 X？</h2>
-        <p class="panel-sub">模型不认识汉字，只认识数字向量。本例 <strong style="color:var(--fg)">3 词 × 6 维</strong>，Embedding + 位置编码后得到矩阵 X。</p>
+        <h2 class="panel-title">第 ② 章：词嵌入与位置编码 — 得到输入矩阵 X</h2>
+        <p class="panel-sub">模型不认识汉字，只认识数字向量。本例 <strong style="color:var(--fg)">3 词 × 6 维</strong>：经<strong style="color:var(--fg)">词嵌入（Embedding）</strong>与<strong style="color:var(--fg)">位置编码（PE）</strong>后得到矩阵 X。</p>
         <div class="panel-tip">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span>Embedding 就像查字典：每个词对应一行数字。位置编码告诉模型「这个词在第几位」。</span>
+          <span>词嵌入把词元变成向量；位置编码（Positional Encoding）告诉模型「这个词在第几位」。</span>
         </div>
       </div>
       <div class="lesson-wrap">
@@ -3669,11 +3692,11 @@
       </div>
     </section>
 
-    <!-- ④ 拼成一层 -->
+    <!-- ④ 编码器层 -->
     <section class="panel" id="panel-block" data-step-count="6">
       <div class="panel-head">
-        <h2 class="panel-title">第 ④ 章：把 Attention 和 FFN 拼成「一层积木」</h2>
-        <p class="panel-sub">一层 Encoder = Attention 块 + FFN 块，每块外面都有<strong style="color:var(--fg)">残差（把输入加回来）+ LayerNorm</strong>。堆 N 层就是完整 Transformer。</p>
+        <h2 class="panel-title">第 ④ 章：编码器层（Encoder Layer）</h2>
+        <p class="panel-sub">标准 <strong style="color:var(--fg)">编码器层</strong> = 多头自注意力子层 + 前馈网络（FFN）子层，各配<strong style="color:var(--fg)">残差连接</strong>与<strong style="color:var(--fg)">层归一化（LayerNorm）</strong>。堆叠 N 层即完整 Transformer。</p>
         <div class="panel-tip">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           <span>残差连接像「抄近路」：即使中间算错了，原始信息也能直接传下去，训练更稳定。</span>
@@ -3809,7 +3832,8 @@
     var EXPLAIN = {
       'panel-la': [
         {
-          title: '一句话 = 多个词排成序列',
+          title: '词元序列：从左到右排好',
+          terms: '本步术语：<strong>词元（Token）</strong>、<strong>序列（Sequence）</strong>、<strong>序列长度 seq</strong>',
           plain: '先别管矩阵——把句子想成「从左到右一排词」。',
           analogy: '就像排队买奶茶：「我 → 爱 → 学习」，顺序不能乱，模型也需要知道谁先谁后。',
           body: '自然语言有顺序。「我 → 爱 → 学习」不能打乱。神经网络也需要保留这个顺序感，所以我们先把每个词编号，再按顺序排成序列。',
@@ -3818,7 +3842,8 @@
           la: '序列 = 有序列表。后面会把每个 Token 变成一行数字，再纵向叠成矩阵。'
         },
         {
-          title: '每个词 → 一行数字 → 拼成矩阵 X',
+          title: '拼成输入矩阵 X',
+          terms: '本步术语：<strong>矩阵（Matrix）</strong>、<strong>模型维度 d</strong>（d<sub>model</sub>）、<strong>输入矩阵 X</strong>',
           plain: '一个词 = 一行数字；多行叠起来就是矩阵。',
           analogy: '每个词像一张「成绩单」，上面有一堆分数描述它的含义。3 个词 = 3 张成绩单叠成表格 = 矩阵。',
           body: '模型不认识汉字，只认识浮点数。每个词用 d 个数字描述它的含义（语义特征）。3 个词、每个 6 维，就得到一个 3 行 6 列的矩阵 X。',
@@ -3827,7 +3852,8 @@
           la: 'X ∈ ℝ<sup>seq×d</sup>。第 i 行 x<sub>i</sub> ∈ ℝ<sup>d</sup> 是第 i 个词的向量。'
         },
         {
-          title: '核心操作：矩阵乘法',
+          title: '矩阵乘法（MatMul）',
+          terms: '本步术语：<strong>矩阵乘法（Matrix Multiplication）</strong>、<strong>内积</strong>、形状约束「左列 = 右行」',
           plain: '左矩阵的列数必须等于右矩阵的行数，否则乘不了。',
           analogy: '像两个齿轮咬合：左边齿轮的齿数（列）必须等于右边齿轮的齿数（行），才能转起来。',
           body: '这是整章最重要的规则。两个矩阵相乘，结果第 (i,j) 元素 = 左矩阵第 i 行与右矩阵第 j 列的内积。结果的行数取左边，列数取右边。',
@@ -3836,7 +3862,8 @@
           la: '若 A 是 m×n，B 是 n×p，则 AB 是 m×p。n 是「中间维度」，必须对齐。'
         },
         {
-          title: '记住这条流水线',
+          title: '通用流水线：seq×d 左乘 d×d′',
+          terms: '本步术语：<strong>线性投影</strong>、<strong>权重矩阵 W</strong>、<strong>可学习参数</strong>',
           plain: 'Transformer 就是反复做「seq×d 左乘 d×d\'」。',
           analogy: '像工厂流水线：原材料（句子矩阵）进，经过一道工序（乘权重 W），变成新产品（新矩阵）出。反复加工 N 次。',
           body: '后面 Attention、FFN 本质都是这个模式：输入是整句矩阵 X，乘以一个权重矩阵 W，得到新的句子矩阵。W 是训练学出来的参数。',
@@ -3847,7 +3874,8 @@
       ],
       'panel-embed': [
         {
-          title: '模型输入是文字',
+          title: '文本输入与分词',
+          terms: '本步术语：<strong>分词（Tokenization）</strong>、<strong>词元 id</strong>、<strong>分词器（Tokenizer）</strong>',
           plain: '计算机只处理数字，文字要先变成编号。',
           analogy: '像给每个词发学号：「我=101，爱=205，学习=388」。模型只认编号，不认汉字。',
           body: '「我爱学习」在模型眼里不是汉字，而是 3 个整数 ID（类似字典里的页码）。这一步叫 Tokenization（分词/切词）。',
@@ -3856,7 +3884,8 @@
           la: 'Token ID 是离散索引，还不能直接做矩阵运算，需要下一步查表。'
         },
         {
-          title: 'Embedding = 查字典',
+          title: '词嵌入（Embedding）查表',
+          terms: '本步术语：<strong>词嵌入（Word Embedding）</strong>、<strong>嵌入层</strong>、<strong>嵌入矩阵 E</strong>',
           plain: '每个 ID 查一张表，得到一串 d 个浮点数。',
           analogy: '像查新华字典：输入「爱」这个字，字典返回一页详细解释（一串数字）。每个词都有一页专属解释。',
           body: 'Embedding 是一张巨大的查找表：第 k 个 Token 对应第 k 行向量。查完 3 个词，把 3 个行向量上下拼起来，就是 Embedding 矩阵。',
@@ -3865,7 +3894,8 @@
           la: 'E ∈ ℝ<sup>3×6</sup>，第 i 行 e<sub>i</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
-          title: '位置编码：同形状矩阵相加',
+          title: '位置编码（PE）相加',
+          terms: '本步术语：<strong>位置编码（Positional Encoding, PE）</strong>、<strong>逐元素相加</strong>',
           plain: 'Attention 看不出谁先谁后，要手动加上位置信息。',
           analogy: 'Embedding 只告诉你「是什么词」，位置编码告诉你「排第几位」。像给排队的人发号码牌。',
           body: 'Embedding 只告诉模型「是什么词」，没告诉「在第几位」。位置编码 PE 也是 seq×d 矩阵，与 Embedding <strong>逐元素相加</strong>（对应格子相加，不是乘法）。',
@@ -3874,7 +3904,8 @@
           la: 'X = E + PE，同型矩阵加法：X[i,j] = E[i,j] + PE[i,j]。'
         },
         {
-          title: '得到 X，进入 Attention',
+          title: '得到输入矩阵 X',
+          terms: '本步术语：<strong>输入矩阵 X</strong>、<strong>隐层输入</strong>、送入 <strong>自注意力</strong>',
           plain: 'X 是 Attention 的唯一输入，本例形状 3×6。',
           analogy: 'X 就像一份「全句信息包」，接下来 Attention 会打开它，让每个词互相「交流」。',
           body: '加完位置信息后，矩阵 X 就准备好了。接下来第三章会从同一个 X 出发，分别乘以三个不同的权重矩阵，得到 Q、K、V。',
@@ -3886,7 +3917,8 @@
       'panel-attn': [
         {
           title: '起点：输入矩阵 X',
-          plain: '与②词变数字衔接：3 个词，每个词 6 维向量。',
+          terms: '本步术语：<strong>输入矩阵 X</strong>、<strong>序列长度 seq</strong>、<strong>模型维度 d</strong>',
+          plain: '与②词嵌入衔接：3 个词，每个词 6 维向量。',
           analogy: 'X 是一班同学的名单，接下来每个同学都要看看全班，决定和谁交流最多。',
           body: '右边蓝色矩阵 X 有 <strong>seq=3</strong> 行（我 / 爱 / 学习）、<strong>d=6</strong> 列（6 维词向量）。与②章 Embedding+PE 输出的形状一致。',
           bullets: ['行数 seq = 句子里的词数（本例 3）', '列数 d = 每个词的向量维度（本例 6）', 'X 会被<strong>重复使用三次</strong>（算 Q、K、V）'],
@@ -3894,7 +3926,8 @@
           la: 'X ∈ ℝ<sup>3×6</sup>。每一行 x<sub>i</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
-          title: '第一支路：X × W<sub>Q</sub> = Q',
+          title: '投影得查询向量 Q',
+          terms: '本步术语：<strong>查询向量（Query, Q）</strong>、<strong>投影矩阵 W<sub>Q</sub></strong>、<strong>键向量维度 d<sub>k</sub></strong>',
           plain: 'Q =「查询」：每个词想问全句要什么信息。',
           analogy: '每个词发一张「寻人启事」：「我想找和学习相关的词」。W<sub>Q</sub> 把 6 维词向量投影到 d<sub>k</sub>=6 维查询空间。',
           body: 'X（3×6）左乘 W<sub>Q</sub>（6×6），得到 Q（3×6）。本例 W<sub>Q</sub> 示意为单位阵，故 Q 与 X 数值相同，但概念上是独立投影。',
@@ -3903,7 +3936,8 @@
           la: 'Q = X · W<sub>Q</sub>，W<sub>Q</sub> ∈ ℝ<sup>6×6</sup>，Q ∈ ℝ<sup>3×6</sup>。'
         },
         {
-          title: '第二支路：X × W<sub>K</sub> = K',
+          title: '投影得键向量 K',
+          terms: '本步术语：<strong>键向量（Key, K）</strong>、<strong>投影矩阵 W<sub>K</sub></strong>',
           plain: 'K =「键」：每个词亮出自己的「门牌号」供别人匹配。',
           analogy: '每个词在门口挂一块牌子（K），供 Q 来匹配相似度。',
           body: '同一 X 换 W<sub>K</sub> 得 K（3×6）。K 与 Q 同形；做 Q·K<sup>T</sup> 时 K 转置为 6×3，与 Q 的 3×6 相乘得 3×3 打分矩阵。',
@@ -3912,7 +3946,8 @@
           la: 'K = X · W<sub>K</sub>。Q·K<sup>T</sup> → S ∈ ℝ<sup>3×3</sup>。'
         },
         {
-          title: '第三支路：X × W<sub>V</sub> = V',
+          title: '投影得值向量 V',
+          terms: '本步术语：<strong>值向量（Value, V）</strong>、<strong>投影矩阵 W<sub>V</sub></strong>、<strong>值向量维度 d<sub>v</sub></strong>',
           plain: 'V =「值」：真正要被搬运、混合的语义内容。',
           analogy: 'Q、K 只负责「配对」，V 才是要搬的「货物」——保留完整 6 维信息。',
           body: 'W<sub>V</sub> 为 6×6（示意为单位阵），V 与 X 同形 <strong>3×6</strong>。权重算完后，按 A 对 V 的每一行加权求和。',
@@ -3921,7 +3956,8 @@
           la: 'V = X · W<sub>V</sub>，V ∈ ℝ<sup>3×6</sup>。'
         },
         {
-          title: 'Q × K<sup>T</sup>：两两打分',
+          title: '缩放点积：Q × K<sup>T</sup>',
+          terms: '本步术语：<strong>注意力分数 S</strong>、<strong>缩放点积（Scaled Dot-Product）</strong>、<strong>QK<sup>T</sup></strong>',
           plain: '每个词问全句：我和其他每个词有多相关？',
           analogy: 'Q 与 K 配对算匹配度。分数越高 = 越相关。',
           body: 'Q（3×6）乘 K<sup>T</sup>（6×3）得分数矩阵 S（3×3）。再除以 √d<sub>k</sub>=√6 ≈ 2.449 做缩放。',
@@ -3930,7 +3966,8 @@
           la: 'S = QK<sup>T</sup>/√d<sub>k</sub>，本例 d<sub>k</sub>=6。'
         },
         {
-          title: 'softmax：分数变权重',
+          title: 'Softmax 得注意力权重 A',
+          terms: '本步术语：<strong>Softmax 函数</strong>、<strong>注意力权重矩阵 A</strong>、<strong>概率归一化</strong>（行和 = 1）',
           plain: '把每行分数变成概率，一行加起来 = 1。',
           analogy: '像分蛋糕：「我」看全句时 42.5% 关注自己、30.8% 关注「爱」、26.7% 关注「学习」。',
           body: '对 S 的<strong>每一行</strong>做 softmax。右侧 3×3 热力图是逐行 softmax 后的 A，底部文字可验算每行 Σ=1。',
@@ -3943,7 +3980,8 @@
           la: 'A<sub>i,:</sub> = softmax(S<sub>i,:</sub>)。Σ<sub>j</sub>A<sub>ij</sub> = 1。'
         },
         {
-          title: 'A × V：加权求和',
+          title: 'A × V：加权聚合',
+          terms: '本步术语：<strong>加权求和</strong>、<strong>上下文聚合</strong>、<strong>注意力输出</strong>',
           plain: '按注意力权重，把全句的 V 行向量混合成新向量。',
           analogy: '「我」的新含义 = 39.9%×我的V + 31.3%×爱的V + 28.8%×学习的V。',
           body: 'A（3×3）左乘 V（3×6）得输出（3×6）。每个词输出一行 6 维向量，已融入全句上下文。',
@@ -3952,9 +3990,10 @@
           la: '输出第 i 行 = Σ<sub>j</sub> A<sub>ij</sub> v<sub>j</sub> ∈ ℝ<sup>6</sup>。'
         },
         {
-          title: 'Attention 输出完成',
+          title: '自注意力输出完成',
+          terms: '本步术语：<strong>缩放点积注意力</strong>、<strong>自注意力机制（Self-Attention）</strong>、<strong>输出投影 W<sub>O</sub></strong>（多头时）',
           plain: '每个词都融合了全句信息——Attention 算完了。',
-          analogy: '每个词都「开完会」了，带着全句上下文，准备进入④一层积木。',
+          analogy: '每个词都「开完会」了，带着全句上下文，准备进入④编码器层。',
           body: '绿色输出矩阵 3×6，与 V 同形。多头注意力是把 d 切成 h 份并行做上述流程再拼接；核心仍是矩阵乘 + softmax + 矩阵乘。',
           bullets: ['输出 <span class="dim-tag">3×6</span>，可再经 W<sub>O</sub> 投影', 'Self-Attention：Q、K、V 都来自同一 X', 'Decoder 还会对未来位置做 Causal Mask'],
           dims: 'Attention 输出：<span class="dim-tag">seq×d</span> = <span class="dim-tag">3×6</span>',
@@ -3964,15 +4003,17 @@
       'panel-block': [
         {
           title: '一层从 x<sub>in</sub> 开始',
+          terms: '本步术语：<strong>Transformer 层</strong>、<strong>编码器层（Encoder Layer）</strong>、<strong>层输入 x<sub>in</sub></strong>',
           plain: '一层 Encoder = 固定形状的矩阵进、矩阵出。',
-          analogy: '像一层楼：人从一楼进，经过几个房间处理，还是从一楼出——形状不变，但内容被加工了。',
+          analogy: '编码器层是 seq×d 进、seq×d 出的固定流水线：内部经注意力与前馈子层加工，张量形状不变，语义逐层加深。',
           body: 'x<sub>in</sub> 是进入本层的矩阵，形状 seq×d。无论中间怎么做 Attention、FFN，出口 x<sub>out</sub> 会保持相同形状，才能叠下一层。',
-          bullets: ['一层 = 一个「积木块」', '入口出口形状一致：<span class="dim-tag">seq×d</span>', '整网堆 N 层（论文 N=6）'],
+          bullets: ['一层 = 一个<strong>编码器层（Encoder Layer）</strong>', '入口出口形状一致：<span class="dim-tag">seq×d</span>', '整网堆 N 层（论文 N=6）'],
           dims: 'x<sub>in</sub>：<span class="dim-tag">seq×d</span>',
           la: 'f : ℝ<sup>seq×d</sup> → ℝ<sup>seq×d</sup>。一层是同一个函数，堆叠 N 次。'
         },
         {
-          title: 'Attention 块',
+          title: '多头自注意力子层',
+          terms: '本步术语：<strong>多头注意力（Multi-Head Attention）</strong>、<strong>自注意力子层</strong>',
           plain: '就是上一章整张图：从 X 算出带上下文的新矩阵。',
           analogy: 'Attention 是这层的「会议室」——所有词在这里交流，互相获取上下文信息。',
           body: 'Multi-Head Attention 把上一章的流程并行做 h 次（多个头），拼接后再乘 W<sub>O</sub> 投影。对本层而言，输入 x<sub>in</sub>，输出一个同样 seq 行的矩阵。',
@@ -3981,7 +4022,8 @@
           la: 'x\' = MultiHeadAttention(x<sub>in</sub>)，x\' 与 x<sub>in</sub> 同型。'
         },
         {
-          title: '残差 + LayerNorm',
+          title: '残差连接 + 层归一化',
+          terms: '本步术语：<strong>残差连接（Residual Connection）</strong>、<strong>层归一化（Layer Normalization）</strong>、<strong>Post-Norm</strong>',
           plain: '把原始输入加回来，再对每行做归一化。',
           analogy: '像写论文改稿：改完（Attention 输出）和原版（x_in）合并，再统一格式（LayerNorm），既保留原意又吸收新内容。',
           body: '残差连接：Attention 输出与 x<sub>in</sub> <strong>逐元素相加</strong>（形状必须一样）。LayerNorm 再对结果每一行单独归一化，稳定训练。',
@@ -3990,7 +4032,8 @@
           la: 'y = LayerNorm(x<sub>in</sub> + SubLayer(x<sub>in</sub>))。加法是 Hadamard 同位相加。'
         },
         {
-          title: 'FFN：每个词独立处理',
+          title: '前馈神经网络（FFN）',
+          terms: '本步术语：<strong>前馈网络（Feed-Forward Network, FFN）</strong>、<strong>逐位置前馈（Position-wise FFN）</strong>、<strong>GELU 激活</strong>',
           plain: 'FFN 不混词，只对每个词的行向量做两次线性变换。',
           analogy: 'Attention 是「开会交流」，FFN 是「各自回工位深度思考」——每个词单独加工，不和别人互动。',
           body: 'FFN 把每个词的 d 维向量先升到 d_ff（如 2048），经过 GELU 激活，再压回 d 维。对矩阵而言，就是每行独立做 x·W₁·W₂。',
@@ -3999,18 +4042,20 @@
           la: 'FFN(x) = GELU(xW₁+b₁)W₂+b₂。对每一行 x<sub>i</sub> 独立作用，行与行之间无交互。'
         },
         {
-          title: '再次残差 + Norm',
+          title: '再次残差 + 层归一化',
+          terms: '本步术语：<strong>第二次残差连接</strong>、<strong>层归一化</strong>、<strong>子层输出 x<sub>out</sub></strong>',
           plain: 'FFN 后面再来一遍「加回输入 + 归一化」。',
           analogy: '和 Attention 后一样：改稿 + 合并 + 统一格式。两层保护，确保信息不丢失。',
-          body: '模式和 Attention 后完全一样：FFN 输出加回残差支路上的中间结果，再 LayerNorm。这样一层积木就收尾了。',
+          body: '模式和 Attention 后完全一样：FFN 输出加回残差支路上的中间结果，再 LayerNorm。这样编码器层就收尾了。',
           bullets: ['结构对称：Attention 后有残差，FFN 后也有', '两次残差让信息高速公路贯穿全层', '出口形状仍 <span class="dim-tag">seq×d</span>'],
           dims: 'x<sub>out</sub>：<span class="dim-tag">seq×d</span>',
           la: 'x<sub>out</sub> = LayerNorm(y + FFN(y))，y 是 Attention 后的中间结果。'
         },
         {
           title: 'x<sub>out</sub> 送下一层',
-          plain: '同一套积木复制 N 遍，就是完整 Transformer。',
-          analogy: '像叠乐高：同一款积木块（Encoder Layer）复制 6 次（GPT-3 有 96 层！），越往上理解越深。',
+          terms: '本步术语：<strong>层堆叠（Stacked Layers）</strong>、<strong>深层网络</strong>、<strong>隐层状态传递</strong>',
+          plain: '同一编码器层结构堆叠 N 遍，就是完整 Transformer。',
+          analogy: '同一款编码器层（Encoder Layer）复制 6 次（GPT-3 有 96 层！），越往上语义抽象越深。',
           body: 'x<sub>out</sub> 作为下一层的 x<sub>in</sub>，重复 Attention → 残差 → FFN → 残差。GPT 等生成模型本质上就是很多层这个结构（去掉 Encoder 部分）。',
           bullets: ['深层 = 同一矩阵尺寸反复变换', '越深层，语义抽象程度越高', '参数主要在 W 矩阵里'],
           dims: '每层：<span class="dim-tag">seq×d</span> → <span class="dim-tag">seq×d</span>，重复 N 次',
@@ -4019,7 +4064,8 @@
       ],
       'panel-kv': [
         {
-          title: '为什么需要 Cache？',
+          title: '为什么需要 KV Cache？',
+          terms: '本步术语：<strong>键值缓存（KV Cache）</strong>、<strong>推理加速</strong>、<strong>避免重复计算</strong>',
           plain: '生成时老词的 K、V 不变，没必要每步重算。',
           analogy: '像考试开卷：第一遍把参考资料（K/V）整理好放桌上（Cache），后面每写一个字直接翻，不用重新整理。',
           body: '大模型生成是一个词一个词往外吐。每吐一个新词，Attention 都要用<strong>全句所有词</strong>的 K、V。但历史词的 K、V 在生成过程中不会变——重复算浪费算力。',
@@ -4028,7 +4074,8 @@
           la: '缓存的是矩阵 K、V，不是原始 token。复用 = 少做矩阵乘。'
         },
         {
-          title: 'Prefill：prompt 整段算一次',
+          title: '预填充阶段（Prefill）',
+          terms: '本步术语：<strong>预填充（Prefill）</strong>、<strong>提示词 prompt</strong>、<strong>键矩阵 K</strong>、<strong>TTFT（首 token 延迟）</strong>',
           plain: '用户输入的 prompt 一次性算完 K。',
           analogy: '像一口气读完题目（prompt），把所有关键信息（K）先提取出来，存进笔记本（Cache）。',
           body: 'prompt 有 N 个词，组成 N×d 矩阵。左乘 W<sub>K</sub> 得到 K（N×d<sub>k</sub>）。这一步只在做 Prefill 时算一次，结果准备写入 Cache。',
@@ -4037,7 +4084,8 @@
           la: 'Prefill 阶段：K = prompt · W<sub>K</sub>，整段 prompt 矩阵一次左乘。'
         },
         {
-          title: 'K、V 一起存入 Cache',
+          title: 'K、V 写入 KV Cache',
+          terms: '本步术语：<strong>KV Cache 写入</strong>、<strong>键缓存 K<sup>cache</sup></strong>、<strong>值缓存 V<sup>cache</sup></strong>',
           plain: 'K 和 V 都算好后，放进绿色 Cache 框保存。',
           analogy: '笔记本分两栏：一栏存 K（门牌号），一栏存 V（内容）。以后每写一个字，直接翻笔记本。',
           body: '同理用 W<sub>V</sub> 算 V。K、V 一起写入 KV Cache。之后 Decode 每步只需读 Cache，不必再对 prompt 做矩阵乘法。',
@@ -4046,7 +4094,8 @@
           la: '存储 K<sup>cache</sup> ∈ ℝ<sup>N×d<sub>k</sub></sup>，V<sup>cache</sup> ∈ ℝ<sup>N×d<sub>v</sub></sup>。'
         },
         {
-          title: 'Decode：每次只来 1 个新词',
+          title: '解码阶段（Decode）',
+          terms: '本步术语：<strong>解码（Decoding / Decode）</strong>、<strong>自回归生成</strong>、<strong>查询向量 q</strong>',
           plain: '生成阶段每次只有一个新 token，矩阵只有 1 行。',
           analogy: '像写作文：每次只新增一个字，只需给这个字算 q、k、v，老字的信息从 Cache 读。',
           body: 'Decode 每步新来一个词，是 1×d 矩阵（一行）。只需算这个新词的 q、k<sub>new</sub>、v<sub>new</sub>。k<sub>new</sub> 会<strong>追加</strong>到 Cache 里 K 的末尾（多一行）。',
@@ -4055,7 +4104,8 @@
           la: 'Decode 时 X 只有一行。K<sup>cache</sup> 按行追加：K<sup>cache</sup> ← stack(K<sup>cache</sup>, k<sub>new</sub>)。'
         },
         {
-          title: '追加 + 读 Cache，不重算历史',
+          title: '读 Cache + 追加，不重算历史',
+          terms: '本步术语：<strong>Cache 复用</strong>、<strong>Cache 追加（Append）</strong>、<strong>增量注意力（Incremental Attention）</strong>',
           plain: '用 q 乘完整 cached K<sup>T</sup>，再乘 cached V，得到下一个词。',
           analogy: '新字只算自己的 q，然后和笔记本里所有老字的 K/V 配对——不用重新整理老字的信息。',
           body: 'q 是 1×d<sub>k</sub>，cached K<sup>T</sup> 是 d<sub>k</sub>×(N+t)，乘得 1×(N+t) 的注意力权重，再乘 cached V 得 1×d<sub>v</sub> 的输出，最后预测下一个 token。历史 prompt 的 K、V 直接从 Cache 读，不重算。',
@@ -4711,6 +4761,7 @@
           '<span class="ecb-step">步骤 ' + (step + 1) + '/' + total + '</span></div>';
       }
       html += '<h3 class="explain-title">' + e.title + '</h3>';
+      if (e.terms) html += '<p class="explain-terms">' + e.terms + '</p>';
       if (e.plain) html += '<p class="explain-plain">' + e.plain + '</p>';
       if (e.analogy) html += '<p class="explain-analogy"><b>生活类比</b>' + e.analogy + '</p>';
       html += '<p class="explain-body">' + e.body + '</p>';
@@ -4979,9 +5030,9 @@
     var CHAPTER_META = {
       'panel-overview': { num: '⓪', label: '全局地图', theme: 'overview' },
       'panel-la': { num: '①', label: '矩阵入门', theme: 'la' },
-      'panel-embed': { num: '②', label: '词变数字', theme: 'embed' },
+      'panel-embed': { num: '②', label: '词嵌入', theme: 'embed' },
       'panel-attn': { num: '③', label: 'Attention', theme: 'attn' },
-      'panel-block': { num: '④', label: '一层积木', theme: 'block' },
+      'panel-block': { num: '④', label: '编码器层', theme: 'block' },
       'panel-kv': { num: '⑤', label: 'KV Cache', theme: 'kv' }
     };
     var CHAPTER_LABELS = {
@@ -5216,186 +5267,212 @@
     /* 术语速查 */
     var GLOSSARY = {
       matrix: {
-        title: 'Matrix · 矩阵',
+        title: '矩阵（Matrix）',
+        formalZh: '矩阵：按行、列排列的数值表；Transformer 中张量数据的基本组织形式。',
         chapter: '矩阵入门',
         panel: 'panel-la',
-        body: '把一串 Token 排成<strong>行 × 列</strong>的表格：每一行是一个词的向量，每一列是一个特征维度。Transformer 里几乎所有运算都是矩阵及其乘法。',
+        body: '把一串词元排成<strong>行 × 列</strong>的表格：每一行是一个词的向量，每一列是一个特征维度。Transformer 里几乎所有运算都是矩阵及其乘法。',
         example: '例：3 个词、每个 6 维 → 矩阵 X 的形状为 seq×d = 3×6'
       },
       seq: {
-        title: 'seq · 序列长度',
+        title: '序列长度（Sequence Length, seq）',
+        formalZh: '序列长度 seq：输入序列中词元（Token）的个数，对应矩阵的行数。',
         chapter: '矩阵入门',
         panel: 'panel-la',
-        body: '句子中 Token 的个数，即矩阵的<strong>行数</strong>。seq 越大，Attention 打分矩阵越大（seq×seq），计算量也上升。',
-        example: '「我 爱 学习」→ seq = 3；batch 里还可再叠 batch 维'
+        body: '句子越长，seq 越大，自注意力打分矩阵为 seq×seq，计算与显存开销随之上升。',
+        example: '「我 爱 学习」→ seq = 3；批处理时还可再叠 batch 维'
       },
       dim: {
-        title: 'd · 向量维度',
+        title: '模型维度（Model Dimension, d）',
+        formalZh: '模型维度 d（d_model / hidden size）：每个词元向量的特征维数，对应矩阵列数。',
         chapter: '矩阵入门',
         panel: 'panel-la',
-        body: '每个 Token 向量有多少个数字，即矩阵的<strong>列数</strong>。也叫 d_model / hidden size，决定模型「宽度」与参数量。',
-        example: '本教程示意 d = 6；真实模型常见 768、4096 等'
+        body: '决定模型「宽度」与参数量规模。嵌入层、注意力、前馈网络的隐藏维度通常与此一致或成固定倍数关系。',
+        example: '本教程示意 d = 6；GPT-3 等为 768、4096 等'
       },
       matmul: {
-        title: 'MatMul · 矩阵乘法',
+        title: '矩阵乘法（Matrix Multiplication, MatMul）',
+        formalZh: '矩阵乘法：线性代数基本运算；投影、注意力、前馈网络均由矩阵乘法实现。',
         chapter: '矩阵入门',
         panel: 'panel-la',
-        body: '左矩阵<strong>列数 = 右矩阵行数</strong>才能相乘；结果形状 = 左行 × 右列。Attention、FFN、投影层全是这一套。',
+        body: '左矩阵<strong>列数 = 右矩阵行数</strong>方可相乘；结果形状为「左行 × 右列」。形状不合法则无法计算。',
         example: '3×6 × 6×6 → 3×6；3×6 × 6×3 → 3×3（Q·Kᵀ）'
       },
       token: {
-        title: 'Token · 词片段',
-        chapter: '词变数字',
+        title: '词元（Token）',
+        formalZh: '词元：文本切分后的最小处理单元，可为字、词或子词（Subword）。',
+        chapter: '词嵌入',
         panel: 'panel-embed',
-        body: '模型不直接读汉字，先把句子切成<strong>最小处理单位</strong>。可以是字、词或子词（如 BPE）。每个 Token 有固定顺序，后续矩阵的<strong>一行 = 一个 Token</strong>。',
-        example: '例：「我爱学习」→ Token 序列 [我, 爱, 学习, 。]，seq = 4'
+        body: '模型不直接读汉字，先将句子切为词元序列并编号。每个词元有固定顺序，矩阵中<strong>一行对应一个词元</strong>。',
+        example: '例：「我爱学习」→ 词元序列 [我, 爱, 学习, 。]，seq = 4'
       },
       embedding: {
-        title: 'Embedding · 词向量',
-        chapter: '词变数字',
+        title: '词嵌入（Word Embedding）',
+        formalZh: '词嵌入（嵌入层 Embedding Layer）：将离散词元 id 映射为连续稠密向量的查表表示。',
+        chapter: '词嵌入',
         panel: 'panel-embed',
-        body: '每个 Token 通过<strong>查表（Embedding 矩阵）</strong>变成 d 维浮点数向量。语义相近的词，向量在空间里也更接近——这是模型理解「含义」的起点。',
-        example: '形状：seq 个 Token → 矩阵 X，大小 seq × d'
+        body: '每个词元通过查嵌入矩阵得到 d 维浮点向量。语义相近的词元，向量在空间中通常也更接近，是模型理解「含义」的起点。',
+        example: '形状：seq 个词元 → 矩阵 X，大小 seq × d'
       },
       q: {
-        title: 'Q · Query 查询向量',
+        title: '查询向量（Query, Q）',
+        formalZh: '查询向量 Q：由输入经 W<sub>Q</sub> 投影得到，表示「当前词元要查询什么信息」。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '由 X·W<sub>Q</sub> 得到。想象当前词举起「<strong>寻人启事</strong>」：我要和句子里哪些词相关？Q 就是这份查询，维度与每个词的 K 对齐后才能算相似度。',
-        example: '公式：Q = X · WQ，形状 seq × d_k'
+        body: '类比「寻人启事」：每个词元发出查询，与全句各词元的键向量 K 匹配，计算相关度分数。',
+        example: '公式：Q = X · W<sub>Q</sub>，形状 seq × d<sub>k</sub>'
       },
       k: {
-        title: 'K · Key 键向量',
+        title: '键向量（Key, K）',
+        formalZh: '键向量 K：由输入经 W<sub>K</sub> 投影得到，表示「可被匹配的索引特征」。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '由 X·W<sub>K</sub> 得到。每个词挂一块「<strong>门牌号</strong>」，供所有 Q 来匹配。Q 与 K 做点积 → 得到未归一化的<strong>相关分数</strong>（谁和谁更配）。',
-        example: '打分：S = Q · K^T，再 softmax 成行和为 1 的权重'
+        body: 'Q 与 K 做点积得到注意力分数（未归一化）。分数越高，表示两个词元越相关。',
+        example: '打分：S = Q · K<sup>T</sup>，再经 Softmax 得到权重矩阵 A'
       },
       v: {
-        title: 'V · Value 值向量',
+        title: '值向量（Value, V）',
+        formalZh: '值向量 V：由输入经 W<sub>V</sub> 投影得到，承载待聚合的语义内容。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '由 X·W<sub>V</sub> 得到。匹配完成后，真正被<strong>加权搬运</strong>的语义内容在 V 里。Attention 输出 = 权重 A × V，相当于按相关度混合各词的信息。',
-        example: '输出：Attention(X) = softmax(QK^T/√d) · V'
+        body: 'Q、K 负责「配对打分」，V 才是被加权混合的内容。注意力输出 = 权重 A × V。',
+        example: 'Attention(X) = Softmax(QK<sup>T</sup>/√d<sub>k</sub>) · V'
       },
       'self-attn': {
-        title: 'Self-Attention · 自注意力',
+        title: '自注意力机制（Self-Attention）',
+        formalZh: '自注意力：Q、K、V 均来自同一输入序列，词元与句内其他词元计算关联并融合上下文。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: 'Q、K、V 都来自<strong>同一句</strong>的 X——词只和本句其他词互相关注（不是跨句子）。每个词输出一个新向量，已融入全句上下文，这是 Transformer 理解语法与语义的核心步骤。',
-        example: '「爱」的输出会混入「我」「学习」等信息，权重由 A 决定'
+        body: '每个词元输出一个新向量，已融入全句信息。Transformer 理解语法、指代与长距离依赖的核心模块。',
+        example: '「爱」的输出会按权重混入「我」「学习」等词元的 V 向量'
       },
       residual: {
-        title: '残差连接 · Residual',
-        chapter: '一层积木',
+        title: '残差连接（Residual Connection）',
+        formalZh: '残差连接：子层输出与输入相加（y = Sublayer(x) + x），缓解深层网络梯度消失。',
+        chapter: '编码器层',
         panel: 'panel-block',
-        body: '子层输出与<strong>子层输入相加</strong>：y = Sublayer(x) + x。像给信息开抄近路——即使中间算子学偏了，原始信号仍能传下去，深层网络更好训练，梯度不易消失。',
-        example: 'Attention 块：x → Attention → +x → LayerNorm → …'
+        body: '为信息提供「抄近路」通道：即使子层变换学偏，原始信号仍可传递，深层堆叠更易训练。',
+        example: '典型：x → 自注意力 → +x（残差）→ 层归一化 → …'
       },
       layernorm: {
-        title: 'LayerNorm · 层归一化',
-        chapter: '一层积木',
+        title: '层归一化（Layer Normalization）',
+        formalZh: '层归一化：对每个词元向量独立做均值方差归一化并缩放平移，稳定各层数值分布。',
+        chapter: '编码器层',
         panel: 'panel-block',
-        body: '对<strong>每个 Token 的向量</strong>独立做归一化（减均值、除标准差），再缩放平移。让各层输入数值尺度稳定，训练更快、更不容易发散。',
-        example: '通常放在残差相加之后：Norm(x + Sublayer(x))'
+        body: '与批归一化不同，LayerNorm 在特征维上归一化、与 batch 大小无关，适合序列建模。',
+        example: '常见写法：LayerNorm(x + Sublayer(x))（Post-Norm）'
       },
       ffn: {
-        title: 'FFN · 前馈网络',
-        chapter: '一层积木',
+        title: '前馈神经网络（Feed-Forward Network, FFN）',
+        formalZh: '前馈网络 FFN：对每个词元向量独立的两层全连接变换，引入非线性特征组合。',
+        chapter: '编码器层',
         panel: 'panel-block',
-        body: '对每个 Token 向量<strong>独立</strong>做两次线性变换，中间加 ReLU/GELU。先扩维（如 d→4d）再压回，引入非线性，让模型能表达更复杂的特征组合。',
-        example: 'FFN(x) = W2 · σ(W1 · x + b1) + b2，逐行计算'
+        body: '通常先扩维（如 d→4d）再压回 d，中间用 ReLU/GELU 激活。与自注意力互补：注意力混合位置间信息，FFN 加工单点特征。',
+        example: 'FFN(x) = W<sub>2</sub> · σ(W<sub>1</sub> · x + b<sub>1</sub>) + b<sub>2</sub>'
       },
       'kv-cache': {
-        title: 'KV Cache · 推理缓存',
+        title: '键值缓存（KV Cache）',
+        formalZh: '键值缓存：推理时缓存已计算过的 K、V，避免对历史词元重复计算注意力。',
         chapter: 'KV Cache',
         panel: 'panel-kv',
-        body: '生成文本时，<strong>已生成词的 K、V 不会变</strong>。Prefill 阶段算完 prompt 的 K/V 后存入 Cache；Decode 每步只算新词的 q，与缓存的 K/V 做 Attention，避免重复矩阵乘法。',
-        example: '现象：ChatGPT 第一个字慢（Prefill），后面越出越快（Decode + Cache）'
+        body: '自回归生成中，历史词元的 K、V 不变。Prefill 写入缓存后，Decode 每步只算新词元的 Q，并与缓存 K/V 做注意力。',
+        example: '体感：首字慢（Prefill），后续逐词生成更快（Decode + Cache）'
       },
       softmax: {
-        title: 'softmax · 归一化',
+        title: 'Softmax 函数',
+        formalZh: 'Softmax 函数：将实数向量映射为概率分布（非负且和为 1）。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '把任意实数向量变成<strong>非负且和为 1</strong>的概率分布。Attention 里对 Q·K<sup>T</sup> 的得分做 softmax，得到「每个词该分多少注意力权重」。',
-        example: '若某行权重 [0.6, 0.3, 0.1]，表示当前词 60% 关注词 A、30% 关注词 B…'
+        body: '注意力中对 Q·K<sup>T</sup> 的每一行做 Softmax，得到注意力权重矩阵 A，表示「关注比例」。',
+        example: '某行权重 [0.6, 0.3, 0.1] → 60% 关注词 A、30% 关注词 B…'
       },
       logits: {
-        title: 'logits · 原始得分',
-        chapter: '词变数字',
+        title: 'Logits（未归一化对数几率）',
+        formalZh: 'Logits：模型对词表各词元的未归一化原始分数，经 Softmax 后方为下一词概率。',
+        chapter: '词嵌入',
         panel: 'panel-embed',
-        body: '模型最后一层（LM Head）输出的<strong>未归一化分数</strong>，词表每个 token 一个。经 softmax 后才变成「下一个词的概率」。',
-        example: 'logits 最大不一定总被选中——采样时还会用 temperature、top_p 等策略'
+        body: '由语言模型头（LM Head）输出。Logits 最大者不一定被采样选中——还可配合 temperature、top-p 等解码策略。',
+        example: '词表大小常为数万；每个词元位置输出一维 logits 向量'
       },
       'multi-head': {
-        title: 'Multi-Head · 多头注意力',
+        title: '多头注意力（Multi-Head Attention）',
+        formalZh: '多头注意力：将 Q/K/V 拆成 h 组头并行计算注意力，再拼接融合多视角关联。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '把 Q/K/V 拆成多组「头」，<strong>并行</strong>做 Attention 再拼接。每头可在不同子空间关注不同关系（语法、指代、远近等）。',
-        example: 'head 数 h；每头维度 d_k = d_model / h（需能整除）'
+        body: '每头在较低维子空间学习不同关系（语法、指代、远近等），拼接后经输出投影 W<sub>O</sub> 合并。',
+        example: '头数 h；每头维度 d<sub>k</sub> = d<sub>model</sub> / h（须能整除）'
       },
       rmsnorm: {
-        title: 'RMSNorm · 层归一化',
-        chapter: '一层积木',
+        title: 'RMS 归一化（RMSNorm）',
+        formalZh: '均方根归一化 RMSNorm：LayerNorm 的简化变体，用均方根缩放、不减均值。',
+        chapter: '编码器层',
         panel: 'panel-block',
-        body: 'LayerNorm 的简化版：用<strong>均方根</strong>缩放向量，不算均值。Llama、Qwen 等现代模型常用，计算更省、效果相当。',
-        example: 'Pre-Norm 结构：先 RMSNorm，再 Attention/FFN，最后残差相加'
+        body: 'Llama、Qwen 等现代大模型常用，计算更省、效果与 LayerNorm 相当，多与 Pre-Norm 结构配合。',
+        example: 'Pre-Norm：先 RMSNorm，再自注意力/FFN，最后残差相加'
       },
       rope: {
-        title: 'RoPE · 旋转位置编码',
+        title: '旋转位置嵌入（RoPE）',
+        formalZh: '旋转位置嵌入 RoPE：用旋转变换将相对位置信息编码进 Q、K，支持一定长度外推。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: 'Rotary Position Embedding。用旋转矩阵把<strong>位置信息</strong>编进 Q、K，使模型知道 token 的先后顺序，且相对距离可外推。',
-        example: '相对位置 i−j 影响 Q·K 内积，因此「第 3 个词看第 1 个词」与绝对位置无关'
+        body: 'Rotary Position Embedding。相对距离影响 Q·K 内积，使模型感知词元先后顺序，且不完全依赖绝对位置编号。',
+        example: '相对位置 i−j 进入内积计算，故「第 3 词看第 1 词」与绝对下标无关'
       },
       'causal-mask': {
-        title: 'Causal Mask · 因果掩码',
+        title: '因果掩码（Causal Mask）',
+        formalZh: '因果掩码：禁止当前位置 attend 到未来词元，保证自回归生成的因果性。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '上三角掩码：位置 t 只能 attend 到 ≤t 的 token，<strong>禁止偷看未来</strong>。这是 GPT 类自回归模型的硬性约束。',
-        example: '被 mask 的位置在 softmax 前设为 −∞，权重变为 0'
+        body: '对注意力分数矩阵上三角置为 −∞（或极大负值），Softmax 后未来位置权重为 0，模型不能「偷看」后续词。',
+        example: 'GPT 等解码器模型的标准约束；Encoder 双向注意力则不用此掩码'
       },
       prefill: {
-        title: 'Prefill · 预填充',
+        title: '预填充阶段（Prefill）',
+        formalZh: '预填充 Prefill：将用户 prompt 一次性并行前向，计算并缓存全部历史 K/V。',
         chapter: 'KV Cache',
         panel: 'panel-kv',
-        body: '用户 prompt 一次性并行送入模型，<strong>算完所有 token 的 K/V 并写入 Cache</strong>，同时得到第一个待生成 token 的 logits。通常较慢（TTFT 主要耗在这里）。',
-        example: '长 system prompt 的 RAG 场景，Prefill 越长，首字越慢'
+        body: '同时得到第一个待生成词元的 Logits。耗时主要体现在 TTFT（首 token 延迟），长 prompt 时尤其明显。',
+        example: 'RAG 长 system prompt 场景：Prefill 越长，首字越慢'
       },
       decode: {
-        title: 'Decode · 逐词生成',
+        title: '解码阶段（Decoding / Decode）',
+        formalZh: '解码 Decode：自回归逐词元生成，每步只输入最新一个词元并复用 KV Cache。',
         chapter: 'KV Cache',
         panel: 'panel-kv',
-        body: '每步只输入<strong>新生成的一个 token</strong>，复用 Cache 里历史 K/V，只算新 token 的 Q/K/V。循环直到 EOS 或达到 max_tokens。',
-        example: '有 Cache 后单步计算量 ≈ O(序列长度)，而非 O(长度²)'
+        body: '每步仅计算新词元的 Q/K/V（K/V 追加进缓存），与历史缓存做注意力，预测下一词元，直至 EOS 或达到长度上限。',
+        example: '有 Cache 后单步复杂度约 O(序列长度)，而非 O(长度²)'
       },
       tokenizer: {
-        title: 'Tokenizer · 分词器',
-        chapter: '词变数字',
+        title: '分词器（Tokenizer）',
+        formalZh: '分词器：将原始文本切分为词元并映射为整数 id 的前处理组件。',
+        chapter: '词嵌入',
         panel: 'panel-embed',
-        body: '把文本切成 token 并映射为<strong>整数 id</strong>。不同模型必须用配套 Tokenizer，否则乱码或性能骤降。',
-        example: '「学习」可能被切成 1～2 个 token；英文常按 BPE 子词切分'
+        body: '须与模型训练时使用的分词规则一致（如 BPE、SentencePiece）。不匹配会导致乱码或性能骤降。',
+        example: '「学习」可能为 1～2 个词元；英文常按子词（Subword）切分'
       },
       'lm-head': {
-        title: 'LM Head · 词表输出层',
-        chapter: '词变数字',
+        title: '语言模型头（LM Head）',
+        formalZh: '语言模型输出头：将隐层状态线性投影到词表维度，产生下一词元的 Logits。',
+        chapter: '词嵌入',
         panel: 'panel-embed',
-        body: '最后的线性层：hidden states [d_model] → logits [词表大小]。<strong>不负责理解语义</strong>，只负责「下一个 token 选谁」。',
-        example: '与 Embedding 矩阵常互为转置关系（权重 tying）以省参数'
+        body: '不负责深层语义理解，只完成「从向量到词表分数」的最后一步。常与嵌入矩阵权重共享（Weight Tying）以省参数。',
+        example: 'hidden [d<sub>model</sub>] → logits [词表大小]'
       },
       'hidden-states': {
-        title: 'hidden states · 隐状态',
-        chapter: '一层积木',
+        title: '隐层状态（Hidden States）',
+        formalZh: '隐层状态：网络各层输出的词元向量表示，逐层编码上下文语义。',
+        chapter: '编码器层',
         panel: 'panel-block',
-        body: '每层输出的 token 向量表示，形状 seq × d_model。可理解为「<strong>已融入上下文语义的词向量</strong>」，层层传递、不断改写。',
-        example: '输入 Embedding 是第 0 层 hidden；经过 N 个 Decoder 块后送 LM Head'
+        body: '形状通常为 seq × d<sub>model</sub>。嵌入输出可视为第 0 层隐状态，经 N 个 Transformer 层后送入 LM Head。',
+        example: '每层自注意力 + 前馈 + 残差后，隐状态被不断改写'
       },
       'w-proj': {
-        title: 'W<sub>Q</sub> / W<sub>K</sub> / W<sub>V</sub> · 投影矩阵',
+        title: 'Q/K/V 投影矩阵（W<sub>Q</sub> W<sub>K</sub> W<sub>V</sub>）',
+        formalZh: '查询/键/值投影矩阵：可学习线性变换，将同一隐状态映射为 Q、K、V 三种角色向量。',
         chapter: 'Attention',
         panel: 'panel-attn',
-        body: '三个可学习的线性层权重，把同一 hidden states X 投影成 Q、K、V 三种不同用途的向量。<strong>训练学的就是这些矩阵里的参数</strong>（外加 FFN 等）。',
-        example: 'Q=X·W<sub>Q</sub>，K=X·W<sub>K</sub>，V=X·W<sub>V</sub>；形状需满足矩阵乘法规则'
+        body: '训练所学习的核心参数之一（另有 FFN、嵌入等）。同一输入 X 经不同 W 投影，承担查询、匹配、聚合三种功能。',
+        example: 'Q=X·W<sub>Q</sub>，K=X·W<sub>K</sub>，V=X·W<sub>V</sub>；须满足矩阵乘法维度约束'
       }
     };
 
@@ -5553,6 +5630,7 @@
           '<h4 class="gd-title">' + item.title + '</h4>' +
           chapBtn +
         '</div>' +
+        (item.formalZh ? '<p class="gd-formal-term">' + item.formalZh + '</p>' : '') +
         '<p class="gd-body">' + item.body + '</p>' +
         '<p class="gd-example">' + item.example + '</p>';
       var gotoBtn = detail.querySelector('[data-goto-panel]');
